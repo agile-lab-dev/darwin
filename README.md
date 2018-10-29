@@ -83,7 +83,7 @@ In systems where objects encoded using Avro are stored, a problem arises when th
 of those objects. In these cases, Avro is not capable of reading the old data using the schema extracted from the 
 actual version of the object: in this scenario each avro-encoded object must be stored along with its schema. 
 To address this problem Avro defined the [Single-Object Encoding specification](https://avro.apache.org/docs/1.8.2/spec.html#single_object_encoding_spec):
->###Single-object encoding
+>### Single-object encoding
 >In some situations a single Avro serialized object is to be stored for a longer period of time.
 >In the period after a schema change this persistance system will contain records that have been written with 
 different schemas. So the need arises to know which schema was used to write a record to support schema evolution correctly.
@@ -94,7 +94,7 @@ Darwin is compliant to this specification and provides utility methods that can 
 
 Architecture
 -------------
-###Darwin architecture schema
+### Darwin architecture schema
 Darwin loads all schemas once from the selected storage and fills with them an internal cache that is used for all 
 the subsequent queries. The only other access to the storage is due to the invocation of the `registerAll` method which
  updates both the cache and the storage with the new schemas.
@@ -102,7 +102,7 @@ Once the cache is loaded, all the `getId` and `getSchema` method invocations wil
 
 ![Darwin schema](docs/img/darwin_schema.jpg)
 
-###Darwin interaction
+### Darwin interaction
 Darwin can be used to easily read and write data encoded in Avro Single-Object using the
  `generateAvroSingleObjectEncoded` and `retrieveSchemaAndAvroPayload` methods (they rely on the `getId` and 
  `getSchema` methods discussed before). These methods allow your application to convert and encoded avro byte array 
@@ -176,7 +176,7 @@ hbase {
   "hbaseSite": "/etc/hadoop/conf/hbase-site.xml",
 }
 ```
-###HBase Connector dependencies
+### HBase Connector dependencies
 Darwin HBase Connector does not provide HBase dependencies in a transitive manner since that would lead to hard to 
 manage classpath and class versions conflicts (see Maven hell). Therefore it is mandatory to include also HBase 
 dependencies into your project. 
