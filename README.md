@@ -26,8 +26,7 @@ desired connector.
 
 Artifacts
 --------------
-Darwin artifacts are published only for scala 2.11. It is our intention to publish also 2.10 and 2.12 artifacts but 
-they are not ready yet.
+Darwin artifacts are published for scala 2.10 and 2.11.
  
 In order to access to Darwin core functionalities add the core dependency to you project:
 
