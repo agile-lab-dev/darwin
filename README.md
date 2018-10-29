@@ -1,4 +1,4 @@
-#Darwin
+# Darwin
 
 Table of contents
 -------------
@@ -31,13 +31,13 @@ they are not ready yet.
  
 In order to access to Darwin core functionalities add the core dependency to you project:
 
-###core
+### core
 
-####sbt
+#### sbt
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.0"
 ``` 
-####maven
+#### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
@@ -46,13 +46,13 @@ libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.0"
 </dependency>
 ```
 
-###HBase connector
+### HBase connector
 
-####sbt
+#### sbt
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.0"
 ``` 
-####maven
+#### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
@@ -61,14 +61,14 @@ libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.0"
 </dependency>
 ```
 
-###Postgresql connector
+### Postgresql connector
 
-###sbt
+### sbt
 
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.0"
 ``` 
-####maven
+#### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
