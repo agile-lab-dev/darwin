@@ -15,7 +15,9 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
 
   val TABLE_NAME: String = if (config.hasPath(ConfigurationKeys.TABLE)) {
     config.getString(ConfigurationKeys.TABLE)
-  } else DEFAULT_TABLENAME
+  } else {
+    DEFAULT_TABLENAME
+  }
 
   setConnectionConfig(config)
 
@@ -25,10 +27,10 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
     val statement = connection.createStatement()
     val resultSet: ResultSet = statement.executeQuery(s"select * from $TABLE_NAME")
 
-    while ( resultSet.next() ) {
+    while (resultSet.next()) {
       val id = resultSet.getLong("id")
       val schema = parser.parse(resultSet.getString("schema"))
-      schemas = schemas :+ (id,schema)
+      schemas = schemas :+ (id -> schema)
     }
     connection.close
     schemas
@@ -38,8 +40,8 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
     val connection = getConnection
     try {
       connection.setAutoCommit(false)
-      schemas.foreach { case(id, schema) =>
-        var insertSchemaPS = connection.prepareStatement(s"INSERT INTO $TABLE_NAME (id,schema) VALUES (?,?)")
+      schemas.foreach { case (id, schema) =>
+        val insertSchemaPS = connection.prepareStatement(s"INSERT INTO $TABLE_NAME (id,schema) VALUES (?,?)")
         insertSchemaPS.setLong(1, id)
         insertSchemaPS.setString(2, schema.toString)
         insertSchemaPS.executeUpdate()

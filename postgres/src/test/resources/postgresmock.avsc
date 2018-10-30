@@ -1,0 +1,28 @@
+{
+  "type" : "record",
+  "name" : "PostgresMock",
+  "namespace" : "it.agilelab.darwin.connector.postgres",
+  "fields" : [ {
+    "name" : "one",
+    "type" : "int"
+  }, {
+    "name" : "two",
+    "type" : "string"
+  }, {
+    "name" : "three",
+    "type" : "long"
+  }, {
+    "name" : "four",
+    "type" : {
+      "type" : "record",
+      "name" : "Postgres2Mock",
+      "fields" : [ {
+        "name" : "one",
+        "type" : "boolean"
+      }, {
+        "name" : "two",
+        "type" : "long"
+      } ]
+    }
+  } ]
+}
