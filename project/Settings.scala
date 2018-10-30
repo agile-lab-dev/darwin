@@ -7,10 +7,30 @@ import sbt._
   */
 object Settings {
 
+  def scalacOptionsVersion(scalaVersion: String) = {
+    Seq(
+      "-deprecation",
+      "-feature",
+      "-unchecked",
+      "-Ywarn-dead-code",
+      "-Ywarn-inaccessible",
+      "-Xlint",
+      "-target:jvm-1.8",
+      "-encoding", "UTF-8"
+    ) ++ {
+      CrossVersion.partialVersion(scalaVersion) match {
+        case Some((2, scalaMajor)) if scalaMajor == 10 => Nil
+        case _ => Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any")
+      }
+    }
+  }
+
+
   lazy val projectSettings = Seq(
     organization := "it.agilelab",
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
-    homepage := Some(url("https://github.com/agile-lab-dev/darwin"))
+    homepage := Some(url("https://github.com/agile-lab-dev/darwin")),
+    scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
@@ -27,7 +47,7 @@ object Settings {
   lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings
 
   lazy val notPublishSettings = Seq(skip in publish := true)
-  
+
   lazy val myCredentials = Credentials(
     "Bintray API Realm",
     "api.bintray.com",
@@ -41,19 +61,19 @@ object Settings {
     publishMavenStyle := true,
     updateOptions := updateOptions.value.withGigahorse(false),
     pomExtra := <scm>
-    <connection>
-      scm:git:git://github.com/agile-lab-dev/darwin.git
-    </connection>
-    <url>
-      https://github.com/agile-lab-dev/darwin
-    </url>
-  </scm>
-  <developers>
-    <developer>
-      <id>amurgia</id>
-      <name>Antonio Murgia</name>
-      <email>antonio.murgia@agilelab.it</email>
-    </developer>
-  </developers>)
+      <connection>
+        scm:git:git://github.com/agile-lab-dev/darwin.git
+      </connection>
+      <url>
+        https://github.com/agile-lab-dev/darwin
+      </url>
+    </scm>
+      <developers>
+        <developer>
+          <id>amurgia</id>
+          <name>Antonio Murgia</name>
+          <email>antonio.murgia@agilelab.it</email>
+        </developer>
+      </developers>)
 
 }

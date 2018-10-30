@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicReference
 
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
-import it.agilelab.darwin.manager.AvroSchemaManager.log
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.Schema
 
