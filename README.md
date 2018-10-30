@@ -31,7 +31,7 @@ Darwin artifacts are published for scala 2.10, 2.11 and 2.12 on Bintray. To acce
 #### sbt
 
 ```scala
-resolvers += Resolver.bintrayRepo("agile-lab-dev", "WASP")
+resolvers += Resolver.bintrayRepo("agile-lab-dev", "Darwin")
 ```
 
 #### maven
