@@ -10,7 +10,7 @@ Table of contents
   - [Architecture](#architecture)
 - [Installation](#installation)
 - [Usage](#usage)
-- Configuration
+- [Configuration](#configuration)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
 ---
@@ -171,8 +171,11 @@ that can be used to encode/decode a byte array in Single-Object Encoding:
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte])
 ```
 
-HBase
+Configuration
 -------------
+
+## HBase
+
 The configuration keys managed by the `HBaseConnector` are:
 - **namespace** (optional): namespace of the table used by Darwin to store the schema repository (if it isn't set, 
 the default value "AVRO" is used)
@@ -201,8 +204,8 @@ Darwin HBase Connector does not provide HBase dependencies in a transitive manne
 manage classpath and class versions conflicts (see Maven hell). Therefore it is mandatory to include also HBase 
 dependencies into your project. 
 
-Postgresql
--------------
+## Postgresql
+
 The configuration keys managed by the `PostgresConnector` are:
 - **table** (optional): name of the table used by Darwin to store the schema repository (if it isn't set, the default
  value "SCHEMA_REPOSITORY" is used)
