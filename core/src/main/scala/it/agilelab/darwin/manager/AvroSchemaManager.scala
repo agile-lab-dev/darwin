@@ -20,7 +20,7 @@ object AvroSchemaManager extends Logging {
 
   def instance(config: Config): AvroSchemaManager = {
     synchronized {
-      if(_instance == null) {
+      if (_instance == null) {
         log.debug("creating instance of AvroSchemaManager")
         _instance = AvroSchemaManager(config)
         log.debug("AvroSchemaManager instance created")
@@ -35,11 +35,11 @@ object AvroSchemaManager extends Logging {
       "loaded"))
 
   /**
-  * Extracts the ID from a [[Schema]].
-  *
-  * @param schema a [[Schema]] with unknown ID
+    * Extracts the ID from a [[Schema]].
+    *
+    * @param schema a [[Schema]] with unknown ID
     * @return the ID associated with the input schema
-  */
+    */
   def getId(schema: Schema): Long = cache.getId(schema)
 
   /**
@@ -86,9 +86,10 @@ object AvroSchemaManager extends Logging {
       getSchema(avroSingleObjectEncoded.slice(V1_HEADER.length, HEADER_LENGTH).byteArrayToLong) ->
         avroSingleObjectEncoded.drop(HEADER_LENGTH)
     }
-    else
+    else {
       throw new ParserException(s"Byte array is not in correct format. First ${V1_HEADER.length} bytes are not equal" +
         s" to $V1_HEADER")
+    }
   }
 
   /** Checks if a byte array is Avro Single-Object encoded (
@@ -120,6 +121,7 @@ object AvroSchemaManager extends Logging {
       */
     def byteArrayToLong: Long = ByteBuffer.wrap(a).getLong
   }
+
 }
 
 /**

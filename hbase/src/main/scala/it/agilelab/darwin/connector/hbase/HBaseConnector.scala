@@ -23,7 +23,7 @@ object HBaseConnector extends Logging {
   def instance(hbaseConfig: Config): HBaseConnector = {
     synchronized {
       if (_instance == null) {
-        log.debug("initialization of HBase connector")
+        log.debug("Initialization of HBase connector")
         _instance = HBaseConnector(hbaseConfig)
         log.debug("HBase connector initialized")
       }
@@ -39,11 +39,15 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
 
   val TABLE_NAME_STRING: String = if (config.hasPath(ConfigurationKeys.TABLE)) {
     config.getString(ConfigurationKeys.TABLE)
-  } else DEFAULT_TABLENAME
+  } else {
+    DEFAULT_TABLENAME
+  }
 
   val NAMESPACE_STRING: String = if (config.hasPath(ConfigurationKeys.NAMESPACE)) {
     config.getString(ConfigurationKeys.NAMESPACE)
-  } else DEFAULT_NAMESPACE
+  } else {
+    DEFAULT_NAMESPACE
+  }
 
   lazy val TABLE_NAME: TableName = TableName.valueOf(Bytes.toBytes(NAMESPACE_STRING), Bytes.toBytes(TABLE_NAME_STRING))
 
@@ -52,14 +56,19 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
 
   log.debug("Creating default HBaseConfiguration")
   val configuration: Configuration = HBaseConfiguration.create()
-
   log.debug("Created default HBaseConfiguration")
 
   if (config.hasPath(ConfigurationKeys.CORE_SITE) && config.hasPath(ConfigurationKeys.HBASE_SITE)) {
-    log.debug(s"Adding resource: ${config.getString(ConfigurationKeys.CORE_SITE)}")
+    log.debug(addResourceMessage(config.getString(ConfigurationKeys.CORE_SITE)))
     configuration.addResource(new Path(config.getString(ConfigurationKeys.CORE_SITE)))
-    log.debug(s"Adding resource: ${config.getString(ConfigurationKeys.HBASE_SITE)}")
+    log.debug(addResourceMessage(config.getString(ConfigurationKeys.HBASE_SITE)))
     configuration.addResource(new Path(config.getString(ConfigurationKeys.HBASE_SITE)))
+  }
+
+
+  private def addResourceMessage(s: String) = {
+    val ADDING_RESOURCE = "Adding resource: "
+    ADDING_RESOURCE + s
   }
 
   val connection: Connection = if (config.getBoolean(ConfigurationKeys.IS_SECURE)) {
@@ -73,11 +82,11 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
     )
     UserGroupInformation.setLoginUser(ugi)
     val user = User.create(ugi)
-    log.debug(s"initialization of HBase connection with configuration:\n " +
+    log.trace(s"initialization of HBase connection with configuration:\n " +
       s"${configuration.iterator().asScala.map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
     ConnectionFactory.createConnection(configuration, user)
   } else {
-    log.debug(s"initialization of HBase connection with configuration:\n " +
+    log.trace(s"initialization of HBase connection with configuration:\n " +
       s"${configuration.iterator().asScala.map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
     ConnectionFactory.createConnection(configuration)
   }
@@ -89,7 +98,7 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
   }
 
   //TODO this must be a def (a new Parser is created each time) because if the same Parser is used, it fails if you
-  //TODO parse a class A and after it a class B that has a filed of type A => ERROR: Can't redefine tye A.
+  //TODO parse a class A and after it a class B that has a field of type A => ERROR: Can't redefine type A.
   //TODO Sadly the Schema.parse() method that would solve this problem is now deprecated
   private def parser: Parser = new Parser()
 

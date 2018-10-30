@@ -15,7 +15,9 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
 
   val TABLE_NAME: String = if (config.hasPath(ConfigurationKeys.TABLE)) {
     config.getString(ConfigurationKeys.TABLE)
-  } else DEFAULT_TABLENAME
+  } else {
+    DEFAULT_TABLENAME
+  }
 
   setConnectionConfig(config)
 
