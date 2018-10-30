@@ -20,7 +20,7 @@ object Settings {
     ) ++ {
       CrossVersion.partialVersion(scalaVersion) match {
         case Some((2, scalaMajor)) if scalaMajor == 10 => Nil
-        case _ => Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any")
+        case _ => Seq("-Ywarn-unused-import", "-Ywarn-infer-any")
       }
     }
   }
