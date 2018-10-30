@@ -5,12 +5,12 @@ Table of contents
 
 - General
   - [Overview](#overview)
-  - [Artifacts](#Artifacts)
+  - [Artifacts](#artifacts)
   - [Background](#background)
   - [Architecture](#architecture)
 - [Installation](#installation)
 - [Usage](#usage)
-- Configuration
+- [Configuration](#configuration)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
 ---
@@ -26,8 +26,29 @@ desired connector.
 
 Artifacts
 --------------
-Darwin artifacts are published for scala 2.10 and 2.11.
- 
+Darwin artifacts are published for scala 2.10, 2.11 and 2.12 on Bintray. To access them add the Bintray Darwin repository to your project's one:
+
+#### sbt
+
+```scala
+resolvers += Resolver.bintrayRepo("agile-lab-dev", "Darwin")
+```
+
+#### maven
+
+```xml
+<repositories>
+  <repository>
+    <snapshots>
+      <enabled>false</enabled>
+    </snapshots>
+    <id>bintray-agile-lab-dev-Darwin</id>
+    <name>bintray</name>
+    <url>https://dl.bintray.com/agile-lab-dev/Darwin</url>
+  </repository>
+</repositories>
+```
+
 In order to access to Darwin core functionalities add the core dependency to you project:
 
 ### core
@@ -150,8 +171,11 @@ that can be used to encode/decode a byte array in Single-Object Encoding:
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte])
 ```
 
-HBase
+Configuration
 -------------
+
+## HBase
+
 The configuration keys managed by the `HBaseConnector` are:
 - **namespace** (optional): namespace of the table used by Darwin to store the schema repository (if it isn't set, 
 the default value "AVRO" is used)
@@ -180,14 +204,14 @@ Darwin HBase Connector does not provide HBase dependencies in a transitive manne
 manage classpath and class versions conflicts (see Maven hell). Therefore it is mandatory to include also HBase 
 dependencies into your project. 
 
-Postgresql
--------------
+## Postgresql
+
 The configuration keys managed by the `PostgresConnector` are:
 - **table** (optional): name of the table used by Darwin to store the schema repository (if it isn't set, the default
  value "SCHEMA_REPOSITORY" is used)
 - **host**: the host of the PostgreSql database
 - **db**: the name of the database where the table will be looked for
-- **user**: the user to connect to PostgreSql
+- **username**: the user to connect to PostgreSql
 - **password**: the password of the user to connect to PostgreSql
 
 Example of configuration for the `PostgresConnector`:
@@ -195,7 +219,7 @@ Example of configuration for the `PostgresConnector`:
 postgres {
   "host": "localhost:5432"
   "db": "srdb"
-  "user": "postgres"
+  "username": "postgres"
   "password": "srpsql"
   "table": "schema_registry"
 }
