@@ -187,7 +187,7 @@ The configuration keys managed by the `PostgresConnector` are:
  value "SCHEMA_REPOSITORY" is used)
 - **host**: the host of the PostgreSql database
 - **db**: the name of the database where the table will be looked for
-- **user**: the user to connect to PostgreSql
+- **username**: the user to connect to PostgreSql
 - **password**: the password of the user to connect to PostgreSql
 
 Example of configuration for the `PostgresConnector`:
@@ -195,7 +195,7 @@ Example of configuration for the `PostgresConnector`:
 postgres {
   "host": "localhost:5432"
   "db": "srdb"
-  "user": "postgres"
+  "username": "postgres"
   "password": "srpsql"
   "table": "schema_registry"
 }
