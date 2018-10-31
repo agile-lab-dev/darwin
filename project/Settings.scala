@@ -7,7 +7,11 @@ import sbt._
   */
 object Settings {
 
-  def scalacOptionsVersion(scalaVersion: String) = {
+  val SCALA_210 = Some((2L, 10L))
+  val SCALA_211 = Some((2L, 11L))
+  val SCALA_212 = Some((2L, 12L))
+
+  def scalacOptionsVersion(scalaVersion: String): Seq[String] = {
     Seq(
       "-deprecation",
       "-feature",
@@ -19,8 +23,24 @@ object Settings {
       "-encoding", "UTF-8"
     ) ++ {
       CrossVersion.partialVersion(scalaVersion) match {
-        case Some((2, scalaMajor)) if scalaMajor == 10 => Nil
-        case _ => Seq("-Ywarn-unused-import", "-Ywarn-infer-any")
+        case SCALA_210 =>
+          Nil
+        case SCALA_211 =>
+          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any")
+        case SCALA_212 =>
+          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any")
+        case version: Option[(Long, Long)] =>
+          throw new Exception(s"Unknown scala version: $version")
+      }
+    }
+  }
+
+  def scalaDocOptionsVersion(scalaVersion: String): Seq[String] = {
+    scalacOptionsVersion(scalaVersion) ++ {
+      CrossVersion.partialVersion(scalaVersion) match {
+        case SCALA_210 | SCALA_211 => Nil
+        case SCALA_212 => Seq("-no-java-comments")
+        case version: Option[(Long, Long)] => throw new Exception(s"Unknown scala version: $version")
       }
     }
   }
@@ -30,7 +50,9 @@ object Settings {
     organization := "it.agilelab",
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
     homepage := Some(url("https://github.com/agile-lab-dev/darwin")),
-    scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
+    description := "Avro Schema Evolution made easy",
+    scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
+    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value)
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"

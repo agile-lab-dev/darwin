@@ -35,18 +35,18 @@ object AvroSchemaManager extends Logging {
       "loaded"))
 
   /**
-    * Extracts the ID from a [[Schema]].
+    * Extracts the ID from a Schema.
     *
-    * @param schema a [[Schema]] with unknown ID
+    * @param schema a Schema with unknown ID
     * @return the ID associated with the input schema
     */
   def getId(schema: Schema): Long = cache.getId(schema)
 
   /**
-    * Extracts the [[Schema]] from its ID.
+    * Extracts the Schema from its ID.
     *
-    * @param id a [[Long]] representing an ID
-    * @return the [[Schema]] associated to the input ID
+    * @param id a Long representing an ID
+    * @return the Schema associated to the input ID
     */
   def getSchema(id: Long): Schema = cache.getSchema(id)
 
@@ -76,10 +76,10 @@ object AvroSchemaManager extends Logging {
     V1_HEADER ++ getId(schema).longToByteArray ++ avroPayload
   }
 
-  /** Extracts a [[Tuple2]] that contains the [[Schema]] and the Avro-encoded payload
+  /** Extracts a Tuple2 that contains the Schema and the Avro-encoded payload
     *
     * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
-    * @return a pair containing the [[Schema]] and the payload of the input array
+    * @return a pair containing the Schema and the payload of the input array
     */
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) = {
     if (isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
@@ -117,7 +117,7 @@ object AvroSchemaManager extends Logging {
   implicit class EnrichedByteArray(a: Array[Byte]) {
 
     /** Converts Array[Byte] to Long.
-      * throws [[java.nio.BufferUnderflowException]] if array size isn't 8. (Long require 64 bit)
+      * throws java.nio.BufferUnderflowException if array size isn't 8. (Long require 64 bit)
       */
     def byteArrayToLong: Long = ByteBuffer.wrap(a).getLong
   }
@@ -142,10 +142,10 @@ case class AvroSchemaManager(config: Config) extends Logging {
   initialize()
 
   /**
-    * Checks if all the input [[Schema]] elements are already in the cache. Then, it performs an insert on the
+    * Checks if all the input Schema elements are already in the cache. Then, it performs an insert on the
     * storage for all the elements not found on the cache, and then returns each input schema paired with its ID.
     *
-    * @param schemas all the [[Schema]] that should be registered
+    * @param schemas all the Schema that should be registered
     * @return a sequence of pairs of the input schemas associated with their IDs
     */
   def registerAll(schemas: Seq[Schema]): Seq[(Long, Schema)] = {
