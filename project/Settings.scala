@@ -1,7 +1,7 @@
 import sbt.Def
 import sbt.Keys._
 import sbt._
-
+import com.typesafe.sbt.pgp.PgpKeys.pgpPassphrase
 /**
   * @author andreaL
   */
@@ -52,7 +52,7 @@ object Settings {
     homepage := Some(url("https://github.com/agile-lab-dev/darwin")),
     description := "Avro Schema Evolution made easy",
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
-    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value)
+    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value),
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
@@ -76,6 +76,8 @@ object Settings {
     System.getenv().get("BINTRAY_USERNAME"),
     System.getenv().get("BINTRAY_API_KEY")
   )
+
+  lazy val pgpPass = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
 
   lazy val publishSettings = Seq(
     publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),
