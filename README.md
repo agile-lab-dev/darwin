@@ -55,14 +55,14 @@ In order to access to Darwin core functionalities add the core dependency to you
 
 #### sbt
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.0"
+libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.2"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-core_2.11</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
@@ -70,14 +70,14 @@ libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.0"
 
 #### sbt
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.0"
+libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.2"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-hbase-connector_2.11</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
@@ -86,14 +86,14 @@ libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.0"
 ### sbt
 
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.0"
+libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.2"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-postgres-connector_2.11</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
