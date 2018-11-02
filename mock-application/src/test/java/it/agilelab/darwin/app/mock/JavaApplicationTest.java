@@ -21,7 +21,7 @@ class JavaApplicationTest {
         schemas.add(s);
         AvroSchemaManager.getSchema(0L);
 
-        AvroSchemaManager.instance(ConfigFactory.empty()).registerAll(JavaConversions.asScalaBuffer(schemas));
+        AvroSchemaManager.getInstance(ConfigFactory.empty()).registerAll(JavaConversions.asScalaBuffer(schemas));
 
         long id = AvroSchemaManager.getId(schemas.get(0));
         assert (schemas.get(0) == AvroSchemaManager.getSchema(id));

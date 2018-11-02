@@ -128,7 +128,7 @@ configuration is then passed to the underlying storage level (please check how t
 created in the Configuration section of the storage you chose):
 ```
   val schemas: Seq[Schema] = //obtain all the schemas
-  val registered: Seq[(Long, Schema)] = AvroSchemaManager.instance(config).registerAll(schemas)
+  val registered: Seq[(Long, Schema)] = AvroSchemaManager.getInstance(config).registerAll(schemas)
 ```
 To generate the Avro schema for your classes there are various ways, if you are using standard Java pojos:
 ```

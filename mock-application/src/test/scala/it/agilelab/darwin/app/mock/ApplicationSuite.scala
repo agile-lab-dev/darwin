@@ -1,12 +1,13 @@
 package it.agilelab.darwin.app.mock
 
 import java.lang.reflect.Modifier
+import java.security.InvalidKeyException
 
 import com.typesafe.config.ConfigFactory
 import it.agilelab.darwin.annotations.AvroSerde
-import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, OneField}
+import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, NewClass, OneField}
 import it.agilelab.darwin.manager.AvroSchemaManager
-import org.apache.avro.Schema
+import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.avro.reflect.ReflectData
 import org.reflections.Reflections
 import org.scalatest.{FlatSpec, Matchers}
@@ -17,14 +18,14 @@ class ApplicationSuite extends FlatSpec with Matchers {
 
   "AvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
-    assert(AvroSchemaManager.instance(ConfigFactory.empty).registerAll(schemas).size == 1)
+    assert(AvroSchemaManager.getInstance(ConfigFactory.empty).registerAll(schemas).size == 1)
   }
 
   it should "load all existing schemas and register a new one" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
     AvroSchemaManager.getSchema(0L)
 
-    AvroSchemaManager.instance(ConfigFactory.empty).registerAll(schemas)
+    AvroSchemaManager.getInstance(ConfigFactory.empty).registerAll(schemas)
 
     val id = AvroSchemaManager.getId(schemas.head)
     assert(schemas.head == AvroSchemaManager.getSchema(id))
@@ -47,11 +48,24 @@ class ApplicationSuite extends FlatSpec with Matchers {
     val myClassSchema = ReflectData.get().getSchema(classOf[MyClass]).toString
 
     val annotationClass: Class[AvroSerde] = classOf[AvroSerde]
-    val classes = reflections.getTypesAnnotatedWith(annotationClass).asScala.toSeq.filter(c => !c.isInterface && !Modifier.isAbstract(c.getModifiers))
+    val classes = reflections.getTypesAnnotatedWith(annotationClass).asScala.toSeq
+      .filter(c => !c.isInterface && !Modifier.isAbstract(c.getModifiers))
     classes.foreach(println)
     val schemas = classes.map(c => ReflectData.get().getSchema(Class.forName(c.getName)).toString)
     schemas.foreach(println)
     Seq(oneFieldSchema, myClassSchema, myNestedSchema) should contain theSameElementsAs schemas
+  }
+
+  it should "reload all schemas from the connector" in {
+    val newSchema = ReflectData.get().getSchema(classOf[NewClass])
+    val newId = SchemaNormalization.parsingFingerprint64(newSchema)
+    assertThrows[InvalidKeyException](AvroSchemaManager.getSchema(newId))
+
+    AvroSchemaManager.getInstance(ConfigFactory.load).connector.insert(Seq(newId -> newSchema))
+    assertThrows[InvalidKeyException](AvroSchemaManager.getSchema(newId))
+
+    AvroSchemaManager.reload()
+    assert(AvroSchemaManager.getSchema(newId) == newSchema)
   }
 
 }
