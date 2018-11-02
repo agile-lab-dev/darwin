@@ -77,7 +77,7 @@ object Settings {
     System.getenv().get("BINTRAY_API_KEY")
   )
 
-  lazy val pgpPass = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
+  lazy val pgpPass: Option[Array[Char]] = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
 
   lazy val publishSettings = Seq(
     publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),
@@ -98,6 +98,35 @@ object Settings {
           <name>Antonio Murgia</name>
           <email>antonio.murgia@agilelab.it</email>
         </developer>
+        <developer>
+          <id>lpirazzini</id>
+          <name>Lorenzo Pirazzini</name>
+          <email>lorenzo.pirazzini@agilelab.it</email>
+        </developer>
+        <developer>
+          <id>rcoluccio</id>
+          <name>Roberto Coluccio</name>
+          <email>roberto.coluccio@agilelab.it</email>
+        </developer>
+        <developer>
+          <id>alatella</id>
+          <name>Andrea Latella</name>
+          <email>andrea.latella@agilelab.it</email>
+        </developer>
+        <developer>
+          <id>cventrella</id>
+          <name>Carlo Ventrella</name>
+          <email>carlo.ventrella@agilelab.it</email>
+        </developer>
+        <developer>
+          <id>dicardi</id>
+          <name>Davide Icardi</name>
+          <email>davide.icardi@agilelab.it</email>
+        </developer>
+        <developer>
+          <id>nbidotti</id>
+          <name>Nicolò Bidotti</name>
+          <email>nicolo.bidotti@agilelab.it</email>
+        </developer>
       </developers>)
-
 }
