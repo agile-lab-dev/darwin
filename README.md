@@ -154,6 +154,14 @@ that can be used to encode/decode a byte array in Single-Object Encoding:
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte])
 ```
 
+If new schemas are added to the storage and the application must reload all the data from it (in order to manage also
+ objects encoded with the new schemas), the `reload` method can be used:
+ ```
+ AvroSchemaManager.reload()
+ ```
+ Please note that this method must be used to reload all the schemas, while the initialization fo the data must 
+ always be performed using the `getInstance` method.
+
 Configuration
 -------------
 
