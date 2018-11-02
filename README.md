@@ -26,28 +26,7 @@ desired connector.
 
 Artifacts
 --------------
-Darwin artifacts are published for scala 2.10, 2.11 and 2.12 on Bintray. To access them add the Bintray Darwin repository to your project's one:
-
-#### sbt
-
-```scala
-resolvers += Resolver.bintrayRepo("agile-lab-dev", "Darwin")
-```
-
-#### maven
-
-```xml
-<repositories>
-  <repository>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-    <id>bintray-agile-lab-dev-Darwin</id>
-    <name>bintray</name>
-    <url>https://dl.bintray.com/agile-lab-dev/Darwin</url>
-  </repository>
-</repositories>
-```
+Darwin artifacts are published for scala 2.10, 2.11 and 2.12. From version 1.0.2 Darwin is available from maven central so there is no need to configure additional repositories in your project.
 
 In order to access to Darwin core functionalities add the core dependency to you project:
 
@@ -68,6 +47,8 @@ libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.2"
 
 ### HBase connector
 
+Then add the connector of your choice, either HBase:
+
 #### sbt
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.2"
@@ -82,6 +63,8 @@ libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.2"
 ```
 
 ### Postgresql connector
+
+Or PostgreSql:
 
 ### sbt
 
