@@ -18,10 +18,12 @@ object Dependencies {
   val spark_core = "org.apache.spark" %% "spark-core" % "2.3.0" % "provided"
   val spark_sql = "org.apache.spark" %% "spark-sql" % "2.3.0" % "provided"
   val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
+  val mysql_conn = "org.mariadb.jdbc" % "mariadb-java-client" % "2.3.0"
 
   val core_deps = Seq(scalatest, avro, typesafe_config)
   val mock_app_dep = core_deps ++ Seq(avro4s, reflections)
   val hbase_conn_dep = core_deps ++ Seq(hbase_common, hbase_server, hadoop_common)
   val postgres_conn_dep = core_deps :+ postgres_conn
   val spark_app = mock_app_dep ++ Seq(spark_core, spark_sql, hbase_common)
+  val mysql_conn_dep = core_deps :+ mysql_conn
 }
