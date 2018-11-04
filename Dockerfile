@@ -33,7 +33,7 @@ RUN apt-get update && \
     apt-get install -y git && \
     apt-get clean;
 
-RUN git clone https://github.com/pier485/darwin.git
+RUN git clone -b mysqlconnector https://github.com/pier485/darwin.git
 
 WORKDIR /darwin
 
