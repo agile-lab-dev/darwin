@@ -7,7 +7,7 @@ import sbt._
   */
 object Dependencies {
 
-  val scalatest = "org.scalatest" %% "scalatest" % "3.0.4"
+  val scalatest = "org.scalatest" %% "scalatest" % "3.0.4" % "test"
   val avro = "org.apache.avro" % "avro" % "1.8.2"
   val typesafe_config = "com.typesafe" % "config" % "1.3.1"
   val avro4s = "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.3"
