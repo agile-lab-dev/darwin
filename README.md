@@ -26,28 +26,7 @@ desired connector.
 
 Artifacts
 --------------
-Darwin artifacts are published for scala 2.10, 2.11 and 2.12 on Bintray. To access them add the Bintray Darwin repository to your project's one:
-
-#### sbt
-
-```scala
-resolvers += Resolver.bintrayRepo("agile-lab-dev", "Darwin")
-```
-
-#### maven
-
-```xml
-<repositories>
-  <repository>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-    <id>bintray-agile-lab-dev-Darwin</id>
-    <name>bintray</name>
-    <url>https://dl.bintray.com/agile-lab-dev/Darwin</url>
-  </repository>
-</repositories>
-```
+Darwin artifacts are published for scala 2.10, 2.11 and 2.12. From version 1.0.2 Darwin is available from maven central so there is no need to configure additional repositories in your project.
 
 In order to access to Darwin core functionalities add the core dependency to you project:
 
@@ -68,6 +47,8 @@ libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.2"
 
 ### HBase connector
 
+Then add the connector of your choice, either HBase:
+
 #### sbt
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.2"
@@ -82,6 +63,8 @@ libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.2"
 ```
 
 ### Postgresql connector
+
+Or PostgreSql:
 
 ### sbt
 
@@ -145,7 +128,7 @@ configuration is then passed to the underlying storage level (please check how t
 created in the Configuration section of the storage you chose):
 ```
   val schemas: Seq[Schema] = //obtain all the schemas
-  val registered: Seq[(Long, Schema)] = AvroSchemaManager.instance(config).registerAll(schemas)
+  val registered: Seq[(Long, Schema)] = AvroSchemaManager.getInstance(config).registerAll(schemas)
 ```
 To generate the Avro schema for your classes there are various ways, if you are using standard Java pojos:
 ```
@@ -170,6 +153,14 @@ that can be used to encode/decode a byte array in Single-Object Encoding:
 
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte])
 ```
+
+If new schemas are added to the storage and the application must reload all the data from it (in order to manage also
+ objects encoded with the new schemas), the `reload` method can be used:
+ ```
+ AvroSchemaManager.reload()
+ ```
+ Please note that this method must be used to reload all the schemas, while the initialization fo the data must 
+ always be performed using the `getInstance` method.
 
 Configuration
 -------------

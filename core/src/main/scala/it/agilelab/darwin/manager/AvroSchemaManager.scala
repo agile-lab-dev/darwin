@@ -18,7 +18,12 @@ object AvroSchemaManager extends Logging {
   private var _instance: AvroSchemaManager = _
   private val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
 
-  def instance(config: Config): AvroSchemaManager = {
+  /**
+    * Returns an instance of AvroSchemaManager that can be used to register schemas.
+    * @param config the Config that is passed to the connector
+    * @return an instance of AvroSchemaManager
+    */
+  def getInstance(config: Config): AvroSchemaManager = {
     synchronized {
       if (_instance == null) {
         log.debug("creating instance of AvroSchemaManager")
@@ -29,6 +34,14 @@ object AvroSchemaManager extends Logging {
     _instance
   }
 
+  /**
+    * Reloads all the schemas from the previously configured storage.
+    * Throws an exception if the cache wasn't already loaded (the getInstance method must always be used to
+    * initialize the cache using the required configuration).
+    */
+  def reload(): Unit = {
+    _instance.reload()
+  }
 
   def cache: AvroSchemaCache = _cache.get
     .getOrElse(throw new IllegalAccessException("Cache not loaded: accesses are allowed only if the cache has been " +
@@ -131,12 +144,18 @@ object AvroSchemaManager extends Logging {
   */
 case class AvroSchemaManager(config: Config) extends Logging {
 
-  private val connector: Connector = ConnectorFactory.creators().head.create(config)
+  private[darwin] val connector: Connector = ConnectorFactory.creators().head.create(config)
 
   private def initialize(): Unit = {
-    log.debug("initialization of cache")
+    log.debug("cache initialization...")
     AvroSchemaManager._cache.compareAndSet(None, Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
     log.debug("cache initialized")
+  }
+
+  private def reload(): Unit = {
+    log.debug("reloading cache...")
+    AvroSchemaManager._cache.set(Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
+    log.debug("cache reloaded")
   }
 
   initialize()
@@ -149,7 +168,7 @@ case class AvroSchemaManager(config: Config) extends Logging {
     * @return a sequence of pairs of the input schemas associated with their IDs
     */
   def registerAll(schemas: Seq[Schema]): Seq[(Long, Schema)] = {
-    log.debug(s"registering ${schemas.size} schemas")
+    log.debug(s"registering ${schemas.size} schemas...")
     val (alreadyInCache, notInCache) = schemas.map(s => (AvroSchemaManager.cache.contains(s), s)).partition(_._1._1)
     val inserted = notInCache.map(e => e._1._2 -> e._2)
     connector.insert(inserted)
@@ -158,5 +177,4 @@ case class AvroSchemaManager(config: Config) extends Logging {
     log.debug(s"${allSchemas.size} schemas registered")
     allSchemas
   }
-
 }

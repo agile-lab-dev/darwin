@@ -10,7 +10,9 @@ import org.apache.avro.Schema
 abstract class Connector(config: Config) extends Serializable {
 
   /**
-    * Loads all schemas found on the storage
+    * Loads all schemas found on the storage.
+    * This method can be invoked multiple times: to initialize the initial values or to update the existing ones with
+    * the new data found on the storage.
     * @return a sequence of all the pairs (ID, schema) found on the storage
     */
   def fullLoad(): Seq[(Long, Schema)]

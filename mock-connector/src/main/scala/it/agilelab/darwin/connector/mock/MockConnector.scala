@@ -8,17 +8,17 @@ import scala.collection.mutable
 
 class MockConnector(config: Config) extends Connector(config) {
 
-  val _table: mutable.Map[Long, Schema] = {
+  val table: mutable.Map[Long, Schema] = {
     val alone = parseResource("test/MockClassAlone.avsc")
     val parent = parseResource("test/MockClassParent.avsc")
     mutable.Map(0L -> alone, 1L -> parent)
   }
 
-  override def fullLoad(): Seq[(Long, Schema)] = _table.toSeq
+  override def fullLoad(): Seq[(Long, Schema)] = table.toSeq
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
     schemas.foreach { case(id, schema) =>
-      _table(id) = schema
+      table(id) = schema
     }
   }
 
