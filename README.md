@@ -80,6 +80,24 @@ libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.4"
 </dependency>
 ```
 
+### Mock connector
+
+Or Mock (only for test scenarios):
+
+### sbt
+
+```scala
+libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.0.4"
+``` 
+#### maven
+```xml
+<dependency>
+  <groupId>it.agilelab</groupId>
+  <artifactId>darwin-mock-connector_2.11</artifactId>
+  <version>1.0.4</version>
+</dependency>
+```
+
 Background
 -------------
 In systems where objects encoded using Avro are stored, a problem arises when there is an evolution of the structure 
