@@ -20,7 +20,7 @@ object Dependencies {
   val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
 
   val core_deps = Seq(scalatest, avro, typesafe_config)
-  val mock_app_dep = core_deps ++ Seq(avro4s, reflections)
+  val mock_app_dep = core_deps ++ Seq(reflections)
   val hbase_conn_dep = core_deps ++ Seq(hbase_common, hbase_server, hadoop_common)
   val postgres_conn_dep = core_deps :+ postgres_conn
   val spark_app = mock_app_dep ++ Seq(spark_core, spark_sql, hbase_common)

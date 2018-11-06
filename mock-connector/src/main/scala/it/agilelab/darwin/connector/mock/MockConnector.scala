@@ -2,7 +2,6 @@ package it.agilelab.darwin.connector.mock
 
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.Connector
-import it.agilelab.darwin.connector.mock.testclasses.{MockClassAlone, MockClassParent}
 import org.apache.avro.Schema
 
 import scala.collection.mutable
@@ -10,8 +9,8 @@ import scala.collection.mutable
 class MockConnector(config: Config) extends Connector(config) {
 
   val _table: mutable.Map[Long, Schema] = {
-    val alone = new SchemaGenerator[MockClassAlone].schema
-    val parent = new SchemaGenerator[MockClassParent].schema
+    val alone = parseResource("test/MockClassAlone.avsc")
+    val parent = parseResource("test/MockClassParent.avsc")
     mutable.Map(0L -> alone, 1L -> parent)
   }
 
@@ -23,4 +22,8 @@ class MockConnector(config: Config) extends Connector(config) {
     }
   }
 
+  protected def parseResource(path: String): Schema = {
+    val p = new Schema.Parser()
+    p.parse(getClass.getClassLoader.getResourceAsStream(path))
+  }
 }

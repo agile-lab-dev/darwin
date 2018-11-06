@@ -1,0 +1,1 @@
+{"type":"record","name":"MockClassAlone","namespace":"it.agilelab.darwin.connector.mock.testclasses","fields":[{"name":"fry","type":"string"},{"name":"bender","type":"long"},{"name":"leela","type":"int"},{"name":"zoidberg","type":"boolean"}]}
