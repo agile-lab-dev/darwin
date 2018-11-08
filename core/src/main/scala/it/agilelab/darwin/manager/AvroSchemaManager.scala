@@ -8,7 +8,7 @@ import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.Schema
-
+import scala.collection.JavaConverters._
 
 object AvroSchemaManager extends Logging {
 
@@ -181,5 +181,17 @@ case class AvroSchemaManager(config: Config) extends Logging {
     AvroSchemaManager._cache.set(Some(AvroSchemaManager.cache.insert(inserted))) //TODO review
     log.debug(s"${allSchemas.size} schemas registered")
     allSchemas
+  }
+
+  /**
+    *
+    * JAVA API: Checks if all the input Schema elements are already in the cache. Then, it performs an insert on the
+    * storage for all the elements not found on the cache, and then returns each input schema paired with its ID.
+    *
+    * @param schemas all the Schema that should be registered
+    * @return a sequence of pairs of the input schemas associated with their IDs
+    */
+  def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
+    registerAll(schemas.asScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.asJava
   }
 }
