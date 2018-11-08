@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
+import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.Schema
 
@@ -20,9 +21,11 @@ object AvroSchemaManager extends Logging {
 
   /**
     * Returns an instance of AvroSchemaManager that can be used to register schemas.
+    *
     * @param config the Config that is passed to the connector
     * @return an instance of AvroSchemaManager
     */
+  @throws[ConnectorNotFoundException]
   def getInstance(config: Config): AvroSchemaManager = {
     synchronized {
       if (_instance == null) {
@@ -144,7 +147,9 @@ object AvroSchemaManager extends Logging {
   */
 case class AvroSchemaManager(config: Config) extends Logging {
 
-  private[darwin] val connector: Connector = ConnectorFactory.creators().head.create(config)
+  private[darwin] val connector: Connector =
+    ConnectorFactory.creators().headOption.map(_.create(config))
+      .getOrElse(throw new ConnectorNotFoundException(config))
 
   private def initialize(): Unit = {
     log.debug("cache initialization...")
