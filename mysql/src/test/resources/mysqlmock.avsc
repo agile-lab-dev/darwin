@@ -1,0 +1,28 @@
+{
+  "type" : "record",
+  "name" : "MySQLMock",
+  "namespace" : "it.agilelab.darwin.connector.mysql",
+  "fields" : [ {
+    "name" : "one",
+    "type" : "int"
+  }, {
+    "name" : "two",
+    "type" : "string"
+  }, {
+    "name" : "three",
+    "type" : "long"
+  }, {
+    "name" : "four",
+    "type" : {
+      "type" : "record",
+      "name" : "MySQL2Mock",
+      "fields" : [ {
+        "name" : "one",
+        "type" : "boolean"
+      }, {
+        "name" : "two",
+        "type" : "long"
+      } ]
+    }
+  } ]
+}
