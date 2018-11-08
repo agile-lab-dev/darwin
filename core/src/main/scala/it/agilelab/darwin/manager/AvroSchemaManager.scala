@@ -5,9 +5,10 @@ import java.util.concurrent.atomic.AtomicReference
 
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
+import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.Schema
-
+import scala.collection.JavaConverters._
 
 object AvroSchemaManager extends Logging {
 
@@ -20,9 +21,11 @@ object AvroSchemaManager extends Logging {
 
   /**
     * Returns an instance of AvroSchemaManager that can be used to register schemas.
+    *
     * @param config the Config that is passed to the connector
     * @return an instance of AvroSchemaManager
     */
+  @throws[ConnectorNotFoundException]
   def getInstance(config: Config): AvroSchemaManager = {
     synchronized {
       if (_instance == null) {
@@ -74,7 +77,7 @@ object AvroSchemaManager extends Logging {
     */
 
   def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long): Array[Byte] = {
-    V1_HEADER ++ schemaId.longToByteArray ++ avroPayload
+    Array.concat(V1_HEADER, schemaId.longToByteArray, avroPayload)
   }
 
   /** Create an array that creates a Single-Object encoded byte array.
@@ -86,7 +89,7 @@ object AvroSchemaManager extends Logging {
     * @return a Single-Object encoded byte array
     */
   def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema): Array[Byte] = {
-    V1_HEADER ++ getId(schema).longToByteArray ++ avroPayload
+    generateAvroSingleObjectEncoded(avroPayload, getId(schema))
   }
 
   /** Extracts a Tuple2 that contains the Schema and the Avro-encoded payload
@@ -103,6 +106,16 @@ object AvroSchemaManager extends Logging {
       throw new ParserException(s"Byte array is not in correct format. First ${V1_HEADER.length} bytes are not equal" +
         s" to $V1_HEADER")
     }
+  }
+
+  /** Extracts a [[SchemaPayloadPair]] that contains the Schema and the Avro-encoded payload
+    *
+    * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
+    * @return a [[SchemaPayloadPair]] containing the Schema and the payload of the input array
+    */
+  def retrieveSchemaAndPayload(avroSingleObjectEncoded: Array[Byte]): SchemaPayloadPair = {
+    val (schema, payload) = retrieveSchemaAndAvroPayload(avroSingleObjectEncoded)
+    SchemaPayloadPair.create(schema, payload)
   }
 
   /** Checks if a byte array is Avro Single-Object encoded (
@@ -144,7 +157,9 @@ object AvroSchemaManager extends Logging {
   */
 case class AvroSchemaManager(config: Config) extends Logging {
 
-  private[darwin] val connector: Connector = ConnectorFactory.creators().head.create(config)
+  private[darwin] val connector: Connector =
+    ConnectorFactory.creators().headOption.map(_.create(config))
+      .getOrElse(throw new ConnectorNotFoundException(config))
 
   private def initialize(): Unit = {
     log.debug("cache initialization...")
@@ -176,5 +191,17 @@ case class AvroSchemaManager(config: Config) extends Logging {
     AvroSchemaManager._cache.set(Some(AvroSchemaManager.cache.insert(inserted))) //TODO review
     log.debug(s"${allSchemas.size} schemas registered")
     allSchemas
+  }
+
+  /**
+    *
+    * JAVA API: Checks if all the input Schema elements are already in the cache. Then, it performs an insert on the
+    * storage for all the elements not found on the cache, and then returns each input schema paired with its ID.
+    *
+    * @param schemas all the Schema that should be registered
+    * @return a sequence of pairs of the input schemas associated with their IDs
+    */
+  def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
+    registerAll(schemas.asScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.asJava
   }
 }
