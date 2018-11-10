@@ -1,21 +1,12 @@
 package it.agilelab.darwin.manager
 
 import java.util.concurrent.atomic.AtomicReference
-
-import com.typesafe.config.Config
-import it.agilelab.darwin.common.Logging
+import scala.collection.JavaConverters._
 import org.apache.avro.Schema
 
-import scala.collection.JavaConverters._
-
-/**
-  * The main entry point to this library.
-  * N.B.: each method all on this object must always be AFTER the initialization, performed invoking the initialize
-  * method.
-  */
-case class EagerAvroSchemaManager(override val config: Config) extends AvroSchemaManager with Logging {
-
+trait CachedAvroSchemaManager extends AvroSchemaManager {
   private val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
+
   def cache: AvroSchemaCache = _cache.get
     .getOrElse(throw new IllegalAccessException("Cache not loaded: accesses are allowed only if the cache has been " +
       "loaded"))
@@ -54,8 +45,4 @@ case class EagerAvroSchemaManager(override val config: Config) extends AvroSchem
   override def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
     registerAll(schemas.asScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.asJava
   }
-
-  override def getId(schema: Schema): Long = cache.getId(schema)
-
-  override def getSchema(id: Long): Schema = cache.getSchema(id)
 }

@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 
 class ApplicationSuite extends FlatSpec with Matchers {
 
-  val manager: AvroSchemaManager = AvroSchemaManagerFactory.getInstance(ConfigFactory.empty)
+  val manager: AvroSchemaManager = AvroSchemaManagerFactory.getInstance(ConfigFactory.load())
 
   "AvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)

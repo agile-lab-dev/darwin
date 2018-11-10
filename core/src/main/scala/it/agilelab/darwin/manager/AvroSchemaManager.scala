@@ -1,23 +1,21 @@
 package it.agilelab.darwin.manager
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, ConnectorFactory}
+import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.Schema
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 
-trait AvroSchemaManager {
+trait AvroSchemaManager extends Logging {
   private val V1_HEADER = Array[Byte](0xC3.toByte, 0x01.toByte)
   private val ID_SIZE = 8
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
   protected def config: Config
 
-  protected[darwin] lazy val connector: Connector = {
-    val k = ConnectorFactory.creators().headOption
-    ConnectorFactory.creators().headOption.map(_.create(config)).getOrElse(throw new ConnectorNotFoundException(config))
-  }
+  protected[darwin] lazy val connector: Connector = ConnectorFactory.creators().headOption.map(_.create(config))
+      .getOrElse(throw new ConnectorNotFoundException(config))
 
   /**
     * Extracts the ID from a Schema.

@@ -25,17 +25,18 @@ object SchemaManagerSparkApp extends GenericMainClass with SparkManager {
     val schemas = Seq(ReflectData.get().getSchema(classOf[Menu]), ReflectData.get().getSchema(classOf[MenuItem]),
       ReflectData.get().getSchema(classOf[Food]), ReflectData.get().getSchema(classOf[Order]),
       ReflectData.get().getSchema(classOf[Price]))
-    val registeredIDs: Seq[Long] = AvroSchemaManagerFactory(ConfigFactory.load()).registerAll(schemas).map(_._1)
-    ds.foreach(_ => AvroSchemaManagerFactory(ConfigFactory.load()))
+    val manager = AvroSchemaManagerFactory.getInstance(ConfigFactory.load())
+    val registeredIDs: Seq[Long] = manager.registerAll(schemas).map(_._1)
+    ds.foreach(_ => AvroSchemaManagerFactory.getInstance(ConfigFactory.load()))
     mainLogger.info("Schemas registered")
 
     mainLogger.info("Getting ID for a schema")
-    AvroSchemaManagerFactory.getId(ReflectData.get().getSchema(classOf[Menu]))
+    manager.getId(ReflectData.get().getSchema(classOf[Menu]))
     mainLogger.info("ID retrieved for the schema")
 
     mainLogger.info("Get Schema from ID")
     val d2 = ds.map { x =>
-      AvroSchemaManagerFactory.getSchema(registeredIDs(x % registeredIDs.size))
+      AvroSchemaManagerFactory.getInstance.getSchema(registeredIDs(x % registeredIDs.size))
       x
     }
     d2.count()
