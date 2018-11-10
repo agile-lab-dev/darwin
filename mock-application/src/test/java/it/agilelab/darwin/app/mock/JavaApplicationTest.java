@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory;
 import it.agilelab.darwin.app.mock.classes.OneField;
 import it.agilelab.darwin.annotations.AvroSerde;
 import it.agilelab.darwin.manager.AvroSchemaManager;
+import it.agilelab.darwin.manager.AvroSchemaManagerFactory;
 import org.apache.avro.Schema;
 import org.apache.avro.reflect.ReflectData;
 import org.reflections.Reflections;
@@ -15,16 +16,18 @@ import java.util.Set;
 
 class JavaApplicationTest {
 
+    AvroSchemaManager manager = AvroSchemaManagerFactory.getInstance(ConfigFactory.empty());
+
     void mainTest() {
         List<Schema> schemas = new ArrayList<>();
         Schema s = ReflectData.get().getSchema(OneField.class);
         schemas.add(s);
-        AvroSchemaManager.getSchema(0L);
+        manager.getSchema(0L);
 
-        AvroSchemaManager.getInstance(ConfigFactory.empty()).registerAll(JavaConversions.asScalaBuffer(schemas));
+        AvroSchemaManagerFactory.getInstance(ConfigFactory.empty()).registerAll(JavaConversions.asScalaBuffer(schemas));
 
-        long id = AvroSchemaManager.getId(schemas.get(0));
-        assert (schemas.get(0) == AvroSchemaManager.getSchema(id));
+        long id = manager.getId(schemas.get(0));
+        assert (schemas.get(0) == manager.getSchema(id));
     }
 
     void reflectionTest() {

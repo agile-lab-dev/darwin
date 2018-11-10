@@ -6,7 +6,7 @@ import java.security.InvalidKeyException
 import com.typesafe.config.ConfigFactory
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, NewClass, OneField}
-import it.agilelab.darwin.manager.AvroSchemaManager
+import it.agilelab.darwin.manager.{AvroSchemaManager, AvroSchemaManagerFactory}
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.avro.reflect.ReflectData
 import org.reflections.Reflections
@@ -16,25 +16,27 @@ import scala.collection.JavaConverters._
 
 class ApplicationSuite extends FlatSpec with Matchers {
 
+  val manager: AvroSchemaManager = AvroSchemaManagerFactory.getInstance(ConfigFactory.empty)
+
   "AvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
-    assert(AvroSchemaManager.getInstance(ConfigFactory.empty).registerAll(schemas).size == 1)
+    assert(manager.registerAll(schemas).size == 1)
   }
 
   it should "load all existing schemas and register a new one" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
-    AvroSchemaManager.getSchema(0L)
+    manager.getSchema(0L)
 
-    AvroSchemaManager.getInstance(ConfigFactory.empty).registerAll(schemas)
+    manager.registerAll(schemas)
 
-    val id = AvroSchemaManager.getId(schemas.head)
-    assert(schemas.head == AvroSchemaManager.getSchema(id))
+    val id = manager.getId(schemas.head)
+    assert(schemas.head == manager.getSchema(id))
   }
 
   it should "get all previously registered schemas" in {
     val schema: Schema = new SchemaGenerator[MyNestedClass].schema
-    val schema0 = AvroSchemaManager.getSchema(0L)
-    val schema1 = AvroSchemaManager.getSchema(1L)
+    val schema0 = manager.getSchema(0L)
+    val schema1 = manager.getSchema(1L)
     assert(schema0 != schema1)
     assert(schema != schema0)
     assert(schema != schema1)
@@ -59,13 +61,13 @@ class ApplicationSuite extends FlatSpec with Matchers {
   it should "reload all schemas from the connector" in {
     val newSchema = ReflectData.get().getSchema(classOf[NewClass])
     val newId = SchemaNormalization.parsingFingerprint64(newSchema)
-    assertThrows[InvalidKeyException](AvroSchemaManager.getSchema(newId))
+    assertThrows[InvalidKeyException](manager.getSchema(newId))
 
-    AvroSchemaManager.getInstance(ConfigFactory.load).connector.insert(Seq(newId -> newSchema))
-    assertThrows[InvalidKeyException](AvroSchemaManager.getSchema(newId))
+    manager.connector.insert(Seq(newId -> newSchema))
+    assertThrows[InvalidKeyException](manager.getSchema(newId))
 
-    AvroSchemaManager.reload()
-    assert(AvroSchemaManager.getSchema(newId) == newSchema)
+    manager.reload()
+    assert(manager.getSchema(newId) == newSchema)
   }
 
 }

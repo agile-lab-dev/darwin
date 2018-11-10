@@ -2,7 +2,7 @@ package it.agilelab.darwin.app.spark
 
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.app.spark.classes._
-import it.agilelab.darwin.manager.AvroSchemaManager
+import it.agilelab.darwin.manager.AvroSchemaManagerFactory
 import org.apache.avro.reflect.ReflectData
 import org.apache.hadoop.fs.FileSystem
 import org.apache.spark.sql.SparkSession
@@ -25,17 +25,17 @@ object SchemaManagerSparkApp extends GenericMainClass with SparkManager {
     val schemas = Seq(ReflectData.get().getSchema(classOf[Menu]), ReflectData.get().getSchema(classOf[MenuItem]),
       ReflectData.get().getSchema(classOf[Food]), ReflectData.get().getSchema(classOf[Order]),
       ReflectData.get().getSchema(classOf[Price]))
-    val registeredIDs: Seq[Long] = AvroSchemaManager(ConfigFactory.load()).registerAll(schemas).map(_._1)
-    ds.foreach(_ => AvroSchemaManager(ConfigFactory.load()))
+    val registeredIDs: Seq[Long] = AvroSchemaManagerFactory(ConfigFactory.load()).registerAll(schemas).map(_._1)
+    ds.foreach(_ => AvroSchemaManagerFactory(ConfigFactory.load()))
     mainLogger.info("Schemas registered")
 
     mainLogger.info("Getting ID for a schema")
-    AvroSchemaManager.getId(ReflectData.get().getSchema(classOf[Menu]))
+    AvroSchemaManagerFactory.getId(ReflectData.get().getSchema(classOf[Menu]))
     mainLogger.info("ID retrieved for the schema")
 
     mainLogger.info("Get Schema from ID")
     val d2 = ds.map { x =>
-      AvroSchemaManager.getSchema(registeredIDs(x % registeredIDs.size))
+      AvroSchemaManagerFactory.getSchema(registeredIDs(x % registeredIDs.size))
       x
     }
     d2.count()
