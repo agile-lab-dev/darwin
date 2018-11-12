@@ -8,4 +8,6 @@ class IgniteConnector(config: Config) extends Connector(config) {
   override def fullLoad(): Seq[(Long, Schema)] = ???
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = ???
+
+  override def findSchema(id: Long): Option[Schema] = ???
 }

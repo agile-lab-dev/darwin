@@ -1,7 +1,5 @@
 package it.agilelab.darwin.manager
 
-import java.security.InvalidKeyException
-
 import it.agilelab.darwin.common.Logging
 import org.apache.avro.{Schema, SchemaNormalization}
 
@@ -15,10 +13,7 @@ case class AvroSchemaCacheFingerprint(schemas: Seq[(Long, Schema)]) extends Avro
   private val _table: Map[Long, Schema] = schemas.toMap
   log.debug("cache initialized")
 
-  override def getId(schema: Schema): Long = SchemaNormalization.parsingFingerprint64(schema)
-
-  override def getSchema(id: Long): Schema = _table.getOrElse(id,
-    throw new InvalidKeyException(s"No schema registered in cache for id $id"))
+  override def getSchema(id: Long): Option[Schema] = _table.get(id)
 
   override def contains(schema: Schema): (Boolean, Long) = {
     val id = SchemaNormalization.parsingFingerprint64(schema)

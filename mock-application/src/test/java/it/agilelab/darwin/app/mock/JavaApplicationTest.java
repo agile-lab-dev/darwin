@@ -27,7 +27,8 @@ class JavaApplicationTest {
         AvroSchemaManagerFactory.getInstance(ConfigFactory.empty()).registerAll(JavaConversions.asScalaBuffer(schemas));
 
         long id = manager.getId(schemas.get(0));
-        assert (schemas.get(0) == manager.getSchema(id));
+        assert(manager.getSchema(id).isDefined());
+        assert (schemas.get(0) == manager.getSchema(id).get());
     }
 
     void reflectionTest() {

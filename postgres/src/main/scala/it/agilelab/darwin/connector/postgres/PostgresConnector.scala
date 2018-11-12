@@ -58,4 +58,6 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
       connection.close
     }
   }
+
+  override def findSchema(id: Long): Option[Schema] = ???
 }

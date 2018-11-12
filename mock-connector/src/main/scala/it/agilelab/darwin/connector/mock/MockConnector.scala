@@ -26,4 +26,6 @@ class MockConnector(config: Config) extends Connector(config) {
     val p = new Schema.Parser()
     p.parse(getClass.getClassLoader.getResourceAsStream(path))
   }
+
+  override def findSchema(id: Long): Option[Schema] = table.get(id)
 }

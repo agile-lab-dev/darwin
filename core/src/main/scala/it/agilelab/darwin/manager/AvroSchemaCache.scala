@@ -9,20 +9,12 @@ import org.apache.avro.Schema
 abstract class AvroSchemaCache(schemas: Seq[(Long, Schema)]) {
 
   /**
-    * Retrieves the ID of a registered schema.
-    *
-    * @param schema the Schema for which an ID is required
-    * @return the ID associated to the input schema
-    */
-  def getId(schema: Schema): Long
-
-  /**
     * Retrieves a registered schema for the input ID.
     *
     * @param id the Long ID of the schema
     * @return the Schema associated to the input ID
     */
-  def getSchema(id: Long): Schema
+  def getSchema(id: Long): Option[Schema]
 
   /**
     * Tests if the input schema is contained inside the cache.

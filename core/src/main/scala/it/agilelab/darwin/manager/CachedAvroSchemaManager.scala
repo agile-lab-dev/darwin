@@ -1,11 +1,10 @@
 package it.agilelab.darwin.manager
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.JavaConverters._
 import org.apache.avro.Schema
 
 trait CachedAvroSchemaManager extends AvroSchemaManager {
-  private val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
+  protected val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
 
   def cache: AvroSchemaCache = _cache.get
     .getOrElse(throw new IllegalAccessException("Cache not loaded: accesses are allowed only if the cache has been " +
@@ -40,9 +39,5 @@ trait CachedAvroSchemaManager extends AvroSchemaManager {
     _cache.set(Some(cache.insert(inserted))) //TODO review
     log.debug(s"${allSchemas.size} schemas registered")
     allSchemas
-  }
-
-  override def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
-    registerAll(schemas.asScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.asJava
   }
 }

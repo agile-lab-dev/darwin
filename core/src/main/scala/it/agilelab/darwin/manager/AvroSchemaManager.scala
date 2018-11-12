@@ -4,8 +4,9 @@ import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import jdk.nashorn.internal.runtime.ParserException
-import org.apache.avro.Schema
+import org.apache.avro.{Schema, SchemaNormalization}
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
+import scala.collection.JavaConverters._
 
 trait AvroSchemaManager extends Logging {
   private val V1_HEADER = Array[Byte](0xC3.toByte, 0x01.toByte)
@@ -23,7 +24,7 @@ trait AvroSchemaManager extends Logging {
     * @param schema a Schema with unknown ID
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema): Long
+  def getId(schema: Schema): Long = SchemaNormalization.parsingFingerprint64(schema)
 
   /**
     * Extracts the Schema from its ID.
@@ -31,7 +32,7 @@ trait AvroSchemaManager extends Logging {
     * @param id a Long representing an ID
     * @return the Schema associated to the input ID
     */
-  def getSchema(id: Long): Schema
+  def getSchema(id: Long): Option[Schema]
 
   /**
     * Checks if all the input Schema elements are already in the cache. Then, it performs an insert on the
@@ -49,7 +50,9 @@ trait AvroSchemaManager extends Logging {
     * @param schemas all the Schema that should be registered
     * @return a sequence of pairs of the input schemas associated with their IDs
     */
-  def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair]
+  def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
+    registerAll(schemas.asScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.asJava
+  }
 
   /** Create an array that creates a Single-Object encoded byte array.
     * By specifications the encoded array is obtained concatenating the V1_HEADER, the schema id and the avro-encoded
@@ -83,7 +86,7 @@ trait AvroSchemaManager extends Logging {
     */
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) = {
     if (isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      getSchema(avroSingleObjectEncoded.slice(V1_HEADER.length, HEADER_LENGTH).byteArrayToLong) ->
+      getSchema(avroSingleObjectEncoded.slice(V1_HEADER.length, HEADER_LENGTH).byteArrayToLong).get ->
         avroSingleObjectEncoded.drop(HEADER_LENGTH)
     }
     else {

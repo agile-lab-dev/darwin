@@ -10,7 +10,5 @@ import org.apache.avro.Schema
   */
 case class CachedEagerAvroSchemaManager(override val config: Config) extends CachedAvroSchemaManager {
 
-  override def getId(schema: Schema): Long = cache.getId(schema)
-
-  override def getSchema(id: Long): Schema = cache.getSchema(id)
+  override def getSchema(id: Long): Option[Schema] = cache.getSchema(id)
 }

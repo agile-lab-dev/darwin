@@ -26,4 +26,6 @@ abstract class Connector(config: Config) extends Serializable {
     * @param schemas a sequence of pairs (ID, schema) Schema entities to insert in the storage.
     */
   def insert(schemas: Seq[(Long, Schema)]): Unit
+
+  def findSchema(id: Long): Option[Schema]
 }

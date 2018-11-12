@@ -125,6 +125,8 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
     mutator.flush()
     log.debug(s"insertion of schemas into $NAMESPACE_STRING:$TABLE_NAME_STRING successful")
   }
+
+  override def findSchema(id: Long): Option[Schema] = ???
 }
 
 
