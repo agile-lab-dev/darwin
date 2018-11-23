@@ -21,6 +21,11 @@ class HBaseConnectorSuite extends FlatSpec with Matchers {
     val loaded: Seq[(Long, Schema)] = connector.fullLoad()
     assert(loaded.size == schemas.size)
     assert(loaded.forall(schemas.contains))
+    val schema = connector.findSchema(loaded.head._1)
+    assert(schema.isDefined)
+    assert(schema.get == loaded.head._2)
+    val noSchema = connector.findSchema(-1L)
+    assert(noSchema.isEmpty)
   }
 
 }

@@ -27,5 +27,11 @@ abstract class Connector(config: Config) extends Serializable {
     */
   def insert(schemas: Seq[(Long, Schema)]): Unit
 
+  /**
+    * Retrieves a single schema using its ID from the storage.
+    *
+    * @param id the ID of the schema
+    * @return an option that is empty if no schema was found for the ID or defined if a schema was found
+    */
   def findSchema(id: Long): Option[Schema]
 }

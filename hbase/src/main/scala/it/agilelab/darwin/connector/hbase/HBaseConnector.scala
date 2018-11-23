@@ -7,7 +7,7 @@ import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Put, Result}
+import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, Result}
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
@@ -126,8 +126,14 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
     log.debug(s"insertion of schemas into $NAMESPACE_STRING:$TABLE_NAME_STRING successful")
   }
 
-  override def findSchema(id: Long): Option[Schema] = ???
+  override def findSchema(id: Long): Option[Schema] = {
+    log.debug(s"loading a schema with id = $id from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
+    val get: Get = new Get(Bytes.toBytes(id))
+    get.addColumn(CF, QUALIFIER)
+    val result: Result = connection.getTable(TABLE_NAME).get(get)
+    val value: Option[Array[Byte]] = Option(result.getValue(CF, QUALIFIER))
+    val schema: Option[Schema] = value.map(v => parser.parse(Bytes.toString(v)))
+    log.debug(s"$schema loaded from HBase for id = $id")
+    schema
+  }
 }
-
-
-

@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 class LazyApplicationSuite extends FlatSpec with Matchers {
 
   val config: Config = ConfigFactory.parseMap(Map("type" -> "lazy").asJava)
-  val manager: AvroSchemaManager = AvroSchemaManagerFactory.getInstance(config)
+  val manager: AvroSchemaManager = AvroSchemaManagerFactory.initialize(config)
 
   "LazyAvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)

@@ -7,11 +7,14 @@ import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
+import scala.collection.JavaConverters._
+
 class ManagerUtilsSuite extends FlatSpec with Matchers {
 
   "AvroSchemaManager utilities" should "create a Single-Object encoded byte array" in {
     val originalSchema = new SchemaGenerator[OneField].schema
-    val manager = AvroSchemaManagerFactory.getInstance(ConfigFactory.empty)
+    val config = ConfigFactory.parseMap(Map("type" -> "cached_eager").asJava)
+    val manager = AvroSchemaManagerFactory.initialize(config)
     manager.registerAll(Seq(originalSchema))
     val originalPayload = new Array[Byte](10)
     Random.nextBytes(originalPayload)

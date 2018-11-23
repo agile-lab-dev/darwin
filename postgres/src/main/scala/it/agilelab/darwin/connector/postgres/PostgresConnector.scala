@@ -32,7 +32,7 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
       val schema = parser.parse(resultSet.getString("schema"))
       schemas = schemas :+ (id -> schema)
     }
-    connection.close
+    connection.close()
     schemas
   }
 
@@ -47,17 +47,29 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
         insertSchemaPS.executeUpdate()
         insertSchemaPS.close()
       }
-      connection.commit
+      connection.commit()
     } catch {
-      case e: Exception => {
-        connection.rollback
+      case e: Exception =>
+        connection.rollback()
         // e.printStackTrace
         throw e // should re-throw?
-      }
     } finally {
-      connection.close
+      connection.close()
     }
   }
 
-  override def findSchema(id: Long): Option[Schema] = ???
+  override def findSchema(id: Long): Option[Schema] = {
+    val connection = getConnection
+    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where id = ?")
+    statement.setLong(1, id)
+    val resultSet: ResultSet = statement.executeQuery()
+
+    val schema = if(resultSet.next()) {
+      Option(resultSet.getString("schema")).map(v => parser.parse(v))
+    } else {
+      None
+    }
+    connection.close()
+    schema
+  }
 }

@@ -3,6 +3,10 @@ package it.agilelab.darwin.manager
 import java.util.concurrent.atomic.AtomicReference
 import org.apache.avro.Schema
 
+/**
+  * Implementation of AvroSchemaManager that defines a cache where the storage data is loaded, in order to reduce the
+  * number of accesses to the storage.
+  */
 trait CachedAvroSchemaManager extends AvroSchemaManager {
   protected val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
 
@@ -23,7 +27,7 @@ trait CachedAvroSchemaManager extends AvroSchemaManager {
     * Throws an exception if the cache wasn't already loaded (the getInstance method must always be used to
     * initialize the cache using the required configuration).
     */
-  def reload(): AvroSchemaManager = {
+  override def reload(): AvroSchemaManager = {
     log.debug("reloading cache...")
     _cache.set(Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
     log.debug("cache reloaded")

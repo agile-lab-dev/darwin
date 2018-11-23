@@ -4,11 +4,10 @@ import com.typesafe.config.Config
 import org.apache.avro.Schema
 
 /**
-  * The main entry point to this library.
-  * N.B.: each method all on this object must always be AFTER the initialization, performed invoking the initialize
-  * method.
+  * Implementation of CachedAvroSchemaManager that loads all the schemas into the cache at startup and doesn't
+  * perform any other accesses to the storage: each retrieve is performed onto the cache.
   */
-case class CachedEagerAvroSchemaManager(override val config: Config) extends CachedAvroSchemaManager {
+case class CachedEagerAvroSchemaManager private[darwin](override val config: Config) extends CachedAvroSchemaManager {
 
   override def getSchema(id: Long): Option[Schema] = cache.getSchema(id)
 }

@@ -8,6 +8,11 @@ import org.apache.avro.{Schema, SchemaNormalization}
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import scala.collection.JavaConverters._
 
+/**
+  * The main entry point of the Darwin library.
+  * An instance of AvroSchemaManager should ALWAYS be obtained through the AvroSchemaManagerFactory.
+  * The manager is responsible for schemas registration, retrieval and updates.
+  */
 trait AvroSchemaManager extends Logging {
   private val V1_HEADER = Array[Byte](0xC3.toByte, 0x01.toByte)
   private val ID_SIZE = 8
