@@ -2,11 +2,11 @@ package it.agilelab.darwin.connector.hbase
 
 import com.typesafe.config.ConfigFactory
 import it.agilelab.darwin.common.Connector
-import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.avro.reflect.ReflectData
-import org.scalatest.{FlatSpec, Matchers}
+import org.apache.avro.{Schema, SchemaNormalization}
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-class HBaseConnectorSuite extends FlatSpec with Matchers {
+class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   val connector: Connector = new HBaseConnectorCreator().create(ConfigFactory.load())
 
@@ -23,4 +23,19 @@ class HBaseConnectorSuite extends FlatSpec with Matchers {
     assert(loaded.forall(schemas.contains))
   }
 
+  "connector.tableCreationHint" should "print the correct hint for table creation" in {
+    connector.tableCreationHint() should be(
+      """To create namespace and table from an HBase shell issue:
+        |  create_namespace 'AVRO'
+        |  create 'AVRO:SCHEMA_REPOSITORY', '0'""".stripMargin)
+  }
+
+  "connector.tableExists" should "return true with existent table" in {
+    connector.tableExists() should be(true)
+  }
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    connector.createTable()
+  }
 }

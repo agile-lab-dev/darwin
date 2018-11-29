@@ -26,4 +26,10 @@ class MockConnector(config: Config) extends Connector(config) {
     val p = new Schema.Parser()
     p.parse(getClass.getClassLoader.getResourceAsStream(path))
   }
+
+  override def createTable(): Unit = Unit
+
+  override def tableExists(): Boolean = true
+
+  override def tableCreationHint(): String = ""
 }

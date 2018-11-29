@@ -1,7 +1,7 @@
 package it.agilelab.darwin.connector.hbase
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, Logging}
+import it.agilelab.darwin.common.{Connector, Logging, using}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Put, Result}
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase._
 import org.apache.hadoop.security.UserGroupInformation
 
 import scala.collection.JavaConverters._
@@ -51,8 +51,8 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
 
   lazy val TABLE_NAME: TableName = TableName.valueOf(Bytes.toBytes(NAMESPACE_STRING), Bytes.toBytes(TABLE_NAME_STRING))
 
-  lazy val CF: Array[Byte] = Bytes.toBytes("0")
-  lazy val QUALIFIER: Array[Byte] = Bytes.toBytes("schema")
+  val CF: Array[Byte] = Bytes.toBytes("0")
+  val QUALIFIER: Array[Byte] = Bytes.toBytes("schema")
 
   log.debug("Creating default HBaseConfiguration")
   val configuration: Configuration = HBaseConfiguration.create()
@@ -124,6 +124,31 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
     }.foreach(mutator.mutate)
     mutator.flush()
     log.debug(s"insertion of schemas into $NAMESPACE_STRING:$TABLE_NAME_STRING successful")
+  }
+
+  override def createTable(): Unit = {
+    using(connection.getAdmin) { admin =>
+      if (!admin.listNamespaceDescriptors().exists(_.getName == NAMESPACE_STRING)) {
+        log.info(s"Namespace $NAMESPACE_STRING does not exists, creating it")
+        admin.createNamespace(NamespaceDescriptor.create(NAMESPACE_STRING).build())
+      }
+      if (!tableExists()) {
+        log.info(s"Table $TABLE_NAME does not exists, creating it")
+        admin.createTable(new HTableDescriptor(TABLE_NAME).addFamily(new HColumnDescriptor(CF)))
+      }
+    }
+  }
+
+  override def tableExists(): Boolean = {
+    using(connection.getAdmin) { admin =>
+      admin.tableExists(TABLE_NAME)
+    }
+  }
+
+  override def tableCreationHint(): String = {
+    s"""To create namespace and table from an HBase shell issue:
+       |  create_namespace '$NAMESPACE_STRING'
+       |  create '$NAMESPACE_STRING:$TABLE_NAME_STRING', '0'""".stripMargin
   }
 }
 

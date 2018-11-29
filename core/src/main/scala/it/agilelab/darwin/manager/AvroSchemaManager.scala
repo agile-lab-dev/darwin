@@ -6,8 +6,10 @@ import java.util.concurrent.atomic.AtomicReference
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
+import it.agilelab.darwin.manager.util.ConfigurationKeys
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.Schema
+
 import scala.collection.JavaConverters._
 
 object AvroSchemaManager extends Logging {
@@ -162,6 +164,12 @@ case class AvroSchemaManager(config: Config) extends Logging {
       .getOrElse(throw new ConnectorNotFoundException(config))
 
   private def initialize(): Unit = {
+    if (config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
+      connector.createTable()
+    } else if (!connector.tableExists()) {
+      log.warn(s"Darwin table does not exists and has not been created (${ConfigurationKeys.CREATE_TABLE} was false)")
+      log.warn(connector.tableCreationHint())
+    }
     log.debug("cache initialization...")
     AvroSchemaManager._cache.compareAndSet(None, Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
     log.debug("cache initialized")
