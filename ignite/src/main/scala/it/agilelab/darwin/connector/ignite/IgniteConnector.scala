@@ -10,4 +10,10 @@ class IgniteConnector(config: Config) extends Connector(config) {
   override def insert(schemas: Seq[(Long, Schema)]): Unit = ???
 
   override def findSchema(id: Long): Option[Schema] = ???
+
+  override def createTable(): Unit = ???
+
+  override def tableExists(): Boolean = ???
+
+  override def tableCreationHint(): String = ???
 }

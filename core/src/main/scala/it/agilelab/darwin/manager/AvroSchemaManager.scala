@@ -3,6 +3,7 @@ package it.agilelab.darwin.manager
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
+import it.agilelab.darwin.manager.util.ConfigurationKeys
 import jdk.nashorn.internal.runtime.ParserException
 import org.apache.avro.{Schema, SchemaNormalization}
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
@@ -20,8 +21,19 @@ trait AvroSchemaManager extends Logging {
 
   protected def config: Config
 
-  protected[darwin] lazy val connector: Connector = ConnectorFactory.creators().headOption.map(_.create(config))
+  protected[darwin] lazy val connector: Connector = {
+    val cnt = ConnectorFactory.creators().headOption.map(_.create(config))
       .getOrElse(throw new ConnectorNotFoundException(config))
+
+    if (config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
+      cnt.createTable()
+    } else if (!cnt.tableExists()) {
+      log.warn(s"Darwin table does not exists and has not been created (${ConfigurationKeys.CREATE_TABLE} was false)")
+      log.warn(cnt.tableCreationHint())
+    }
+    cnt
+  }
+
 
   /**
     * Extracts the ID from a Schema.

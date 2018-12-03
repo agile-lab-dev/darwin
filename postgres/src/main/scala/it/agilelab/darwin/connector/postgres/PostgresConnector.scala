@@ -3,7 +3,7 @@ package it.agilelab.darwin.connector.postgres
 import java.sql.ResultSet
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.Connector
+import it.agilelab.darwin.common.{Connector, using}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 
@@ -20,6 +20,12 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
   }
 
   setConnectionConfig(config)
+
+  private val CREATE_TABLE_STMT =
+    s"""CREATE TABLE IF NOT EXISTS $TABLE_NAME (
+       |id bigint NOT NULL PRIMARY KEY,
+       |schema text NOT NULL
+       |)""".stripMargin
 
   override def fullLoad(): Seq[(Long, Schema)] = {
     val connection = getConnection
@@ -71,5 +77,19 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
     }
     connection.close()
     schema
+  }
+
+  override def createTable(): Unit = {
+    using(getConnection) { conn =>
+      conn.createStatement().executeUpdate(CREATE_TABLE_STMT)
+    }
+  }
+
+  override def tableExists(): Boolean = false // FIX IT PLS
+
+  override def tableCreationHint(): String = {
+    s"""To create table perform the following sql query:
+       |$CREATE_TABLE_STMT
+     """.stripMargin
   }
 }

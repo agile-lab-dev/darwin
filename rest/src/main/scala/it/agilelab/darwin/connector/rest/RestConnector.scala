@@ -9,5 +9,11 @@ class RestConnector(config: Config) extends Connector(config) {
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = ???
 
+  override def createTable(): Unit = ???
+
+  override def tableExists(): Boolean = ???
+
+  override def tableCreationHint(): String = ???
+
   override def findSchema(id: Long): Option[Schema] = ???
 }

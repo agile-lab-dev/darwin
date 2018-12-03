@@ -10,9 +10,26 @@ import org.apache.avro.Schema
 abstract class Connector(config: Config) extends Serializable {
 
   /**
+    * Creates the configured table, if the table already exists, does nothing
+    */
+  def createTable(): Unit
+
+  /**
+    * Returns whether or not the configured table exists
+    */
+  def tableExists(): Boolean
+
+  /**
+    *
+    * @return a message indicating the user what he/she should do to create the table him/herself
+    */
+  def tableCreationHint(): String
+
+  /**
     * Loads all schemas found on the storage.
     * This method can be invoked multiple times: to initialize the initial values or to update the existing ones with
     * the new data found on the storage.
+    *
     * @return a sequence of all the pairs (ID, schema) found on the storage
     */
   def fullLoad(): Seq[(Long, Schema)]
