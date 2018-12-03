@@ -1,2 +1,2 @@
 #!/bin/bash
-sbt clean scalastyle +compile +test:compile +doc
+sbt clean scalastyle +publishLocal +test:compile +doc
