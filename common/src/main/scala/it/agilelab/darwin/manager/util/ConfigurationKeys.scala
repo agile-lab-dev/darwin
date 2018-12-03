@@ -4,4 +4,6 @@ object ConfigurationKeys {
 
   val CREATE_TABLE = "createTable"
 
+  val CONNECTOR = "connector"
+
 }

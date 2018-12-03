@@ -10,4 +10,9 @@ class HBaseConnectorCreator extends ConnectorCreator with Logging {
     log.debug("HBase connector created")
     connector
   }
+
+  /**
+    * @return the name of the Connector
+    */
+  override def name(): String = "hbase"
 }

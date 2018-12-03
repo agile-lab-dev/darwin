@@ -22,7 +22,7 @@ trait AvroSchemaManager extends Logging {
   protected def config: Config
 
   protected[darwin] lazy val connector: Connector = {
-    val cnt = ConnectorFactory.creators().headOption.map(_.create(config))
+    val cnt = ConnectorFactory.creator(config).map(_.create(config))
       .getOrElse(throw new ConnectorNotFoundException(config))
 
     if (config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
