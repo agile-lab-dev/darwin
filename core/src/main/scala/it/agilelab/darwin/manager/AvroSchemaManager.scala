@@ -3,10 +3,9 @@ package it.agilelab.darwin.manager
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
-import it.agilelab.darwin.manager.util.ConfigurationKeys
-import jdk.nashorn.internal.runtime.ParserException
+import it.agilelab.darwin.manager.util.{AvroSingleObjectEncodingUtils, ConfigurationKeys}
 import org.apache.avro.{Schema, SchemaNormalization}
-import it.agilelab.darwin.manager.util.ByteArrayUtils._
+
 import scala.collection.JavaConverters._
 
 /**
@@ -15,9 +14,6 @@ import scala.collection.JavaConverters._
   * The manager is responsible for schemas registration, retrieval and updates.
   */
 trait AvroSchemaManager extends Logging {
-  private val V1_HEADER = Array[Byte](0xC3.toByte, 0x01.toByte)
-  private val ID_SIZE = 8
-  private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
   protected def config: Config
 
@@ -33,7 +29,6 @@ trait AvroSchemaManager extends Logging {
     }
     cnt
   }
-
 
   /**
     * Extracts the ID from a Schema.
@@ -76,24 +71,11 @@ trait AvroSchemaManager extends Logging {
     * payload.
     *
     * @param avroPayload avro-serialized payload
-    * @param schemaId    id of the schema used to encode the payload
-    * @return a Single-Object encoded byte array
-    */
-
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long): Array[Byte] = {
-    Array.concat(V1_HEADER, schemaId.longToByteArray, avroPayload)
-  }
-
-  /** Create an array that creates a Single-Object encoded byte array.
-    * By specifications the encoded array is obtained concatenating the V1_HEADER, the schema id and the avro-encoded
-    * payload.
-    *
-    * @param avroPayload avro-serialized payload
     * @param schema      the schema used to encode the payload
     * @return a Single-Object encoded byte array
     */
   def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema): Array[Byte] = {
-    generateAvroSingleObjectEncoded(avroPayload, getId(schema))
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(avroPayload, getId(schema))
   }
 
   /** Extracts a Tuple2 that contains the Schema and the Avro-encoded payload
@@ -102,14 +84,11 @@ trait AvroSchemaManager extends Logging {
     * @return a pair containing the Schema and the payload of the input array
     */
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) = {
-    if (isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      getSchema(avroSingleObjectEncoded.slice(V1_HEADER.length, HEADER_LENGTH).byteArrayToLong).get ->
-        avroSingleObjectEncoded.drop(HEADER_LENGTH)
+    if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
+      getSchema(AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)).get ->
+        AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
     }
-    else {
-      throw new ParserException(s"Byte array is not in correct format. First ${V1_HEADER.length} bytes are not equal" +
-        s" to $V1_HEADER")
-    }
+    else { throw AvroSingleObjectEncodingUtils.parseException }
   }
 
   /** Extracts a [[SchemaPayloadPair]] that contains the Schema and the Avro-encoded payload
@@ -120,19 +99,6 @@ trait AvroSchemaManager extends Logging {
   def retrieveSchemaAndPayload(avroSingleObjectEncoded: Array[Byte]): SchemaPayloadPair = {
     val (schema, payload) = retrieveSchemaAndAvroPayload(avroSingleObjectEncoded)
     SchemaPayloadPair.create(schema, payload)
-  }
-
-  /** Checks if a byte array is Avro Single-Object encoded (
-    * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
-    * Documentation</a>)
-    *
-    * @param data a byte array
-    * @return true if the input byte array is Single-Object encoded
-    */
-  def isAvroSingleObjectEncoded(data: Array[Byte]): Boolean = {
-    if (data.length < V1_HEADER.length) throw new IllegalArgumentException(s"At least ${V1_HEADER.length} bytes " +
-      s"required to store the Single-Object Encoder header")
-    data.take(V1_HEADER.length).sameElements(V1_HEADER)
   }
 
   /**

@@ -3,10 +3,11 @@ package it.agilelab.darwin.app.mock
 import com.typesafe.config.ConfigFactory
 import it.agilelab.darwin.app.mock.classes.OneField
 import it.agilelab.darwin.manager.AvroSchemaManagerFactory
+import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import org.scalatest.{FlatSpec, Matchers}
-import scala.util.Random
 
+import scala.util.Random
 import scala.collection.JavaConverters._
 
 class ManagerUtilsSuite extends FlatSpec with Matchers {
@@ -19,7 +20,7 @@ class ManagerUtilsSuite extends FlatSpec with Matchers {
     val originalPayload = new Array[Byte](10)
     Random.nextBytes(originalPayload)
     val data: Array[Byte] = manager.generateAvroSingleObjectEncoded(originalPayload, originalSchema)
-    assert(manager.isAvroSingleObjectEncoded(data))
+    assert(AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(data))
     val (schema, payload) = manager.retrieveSchemaAndAvroPayload(data)
     assert(schema == originalSchema)
     assert(originalPayload sameElements payload)
