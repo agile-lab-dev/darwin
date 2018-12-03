@@ -15,6 +15,7 @@ class ManagerUtilsSuite extends FlatSpec with Matchers {
   "AvroSchemaManager utilities" should "create a Single-Object encoded byte array" in {
     val originalSchema = new SchemaGenerator[OneField].schema
     val config = ConfigFactory.parseMap(Map("type" -> "cached_eager").asJava)
+      .withFallback(ConfigFactory.load()).resolve()
     val manager = AvroSchemaManagerFactory.initialize(config)
     manager.registerAll(Seq(originalSchema))
     val originalPayload = new Array[Byte](10)

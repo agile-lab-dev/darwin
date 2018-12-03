@@ -16,6 +16,7 @@ import scala.collection.JavaConverters._
 class CachedLazyApplicationSuite extends FlatSpec with Matchers {
 
   val config: Config = ConfigFactory.parseMap(Map("type" -> "cached_lazy").asJava)
+    .withFallback(ConfigFactory.load()).resolve()
   val manager: AvroSchemaManager = AvroSchemaManagerFactory.initialize(config)
 
   "CachedLazyAvroSchemaManager" should "not fail after the initialization" in {

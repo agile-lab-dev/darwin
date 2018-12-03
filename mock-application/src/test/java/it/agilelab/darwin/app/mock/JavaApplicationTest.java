@@ -20,7 +20,8 @@ class JavaApplicationTest {
     void mainTest() {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put("type", "cached_eager");
-        AvroSchemaManager manager = AvroSchemaManagerFactory.initialize(ConfigFactory.parseMap(configMap));
+        AvroSchemaManager manager = AvroSchemaManagerFactory
+                .initialize(ConfigFactory.parseMap(configMap).withFallback(ConfigFactory.load()).resolve());
 
         List<Schema> schemas = new ArrayList<>();
         Schema s = ReflectData.get().getSchema(OneField.class);
