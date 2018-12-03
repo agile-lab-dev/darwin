@@ -3,6 +3,7 @@ package it.agilelab.darwin.common
 import java.util.ServiceLoader
 
 import com.typesafe.config.Config
+import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import it.agilelab.darwin.manager.util.ConfigurationKeys
 
 import scala.collection.JavaConverters._
@@ -45,6 +46,18 @@ object ConnectorFactory extends Logging {
     } else {
       creator()
     }
+  }
+
+  def connector(config: Config): Connector = {
+    val cnt = ConnectorFactory.creator(config).map(_.create(config))
+      .getOrElse(throw new ConnectorNotFoundException(config))
+    if (config.hasPath(ConfigurationKeys.CREATE_TABLE) && config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
+      cnt.createTable()
+    } else if (!cnt.tableExists()) {
+      log.warn(s"Darwin table does not exists and has not been created (${ConfigurationKeys.CREATE_TABLE} was false)")
+      log.warn(cnt.tableCreationHint())
+    }
+    cnt
   }
 
 

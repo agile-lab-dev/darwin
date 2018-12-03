@@ -1,6 +1,6 @@
 package it.agilelab.darwin.manager.util
 
-import it.agilelab.darwin.common.DarwinException
+import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 
 object AvroSingleObjectEncodingUtils {

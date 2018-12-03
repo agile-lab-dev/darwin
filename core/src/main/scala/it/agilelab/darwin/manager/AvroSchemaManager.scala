@@ -1,9 +1,7 @@
 package it.agilelab.darwin.manager
 
-import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, ConnectorFactory, Logging}
-import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
-import it.agilelab.darwin.manager.util.{AvroSingleObjectEncodingUtils, ConfigurationKeys}
+import it.agilelab.darwin.common.{Connector, Logging}
+import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import org.apache.avro.{Schema, SchemaNormalization}
 
 import scala.collection.JavaConverters._
@@ -13,22 +11,7 @@ import scala.collection.JavaConverters._
   * An instance of AvroSchemaManager should ALWAYS be obtained through the AvroSchemaManagerFactory.
   * The manager is responsible for schemas registration, retrieval and updates.
   */
-trait AvroSchemaManager extends Logging {
-
-  protected def config: Config
-
-  protected[darwin] lazy val connector: Connector = {
-    val cnt = ConnectorFactory.creator(config).map(_.create(config))
-      .getOrElse(throw new ConnectorNotFoundException(config))
-
-    if (config.hasPath(ConfigurationKeys.CREATE_TABLE) && config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
-      cnt.createTable()
-    } else if (!cnt.tableExists()) {
-      log.warn(s"Darwin table does not exists and has not been created (${ConfigurationKeys.CREATE_TABLE} was false)")
-      log.warn(cnt.tableCreationHint())
-    }
-    cnt
-  }
+abstract class AvroSchemaManager(val connector: Connector) extends Logging {
 
   /**
     * Extracts the ID from a Schema.
@@ -88,7 +71,9 @@ trait AvroSchemaManager extends Logging {
       getSchema(AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)).get ->
         AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
     }
-    else { throw AvroSingleObjectEncodingUtils.parseException }
+    else {
+      throw AvroSingleObjectEncodingUtils.parseException
+    }
   }
 
   /** Extracts a [[SchemaPayloadPair]] that contains the Schema and the Avro-encoded payload

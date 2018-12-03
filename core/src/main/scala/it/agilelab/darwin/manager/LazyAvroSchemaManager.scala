@@ -1,13 +1,13 @@
 package it.agilelab.darwin.manager
 
-import com.typesafe.config.Config
+import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 
 /**
   * Implementation of AvroSchemaManager that performs all the operations directly on the storage (retrievals and
   * insertions).
   */
-case class LazyAvroSchemaManager private[darwin](override val config: Config) extends AvroSchemaManager {
+class LazyAvroSchemaManager (connector: Connector) extends AvroSchemaManager(connector) {
 
   override def getSchema(id: Long): Option[Schema] = connector.findSchema(id)
 
