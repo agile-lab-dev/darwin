@@ -8,6 +8,11 @@ import com.typesafe.config.Config
 trait ConnectorCreator {
 
   /**
+    * @return the name of the Connector
+    */
+  def name(): String
+
+  /**
     * This method should be overridden in each connector module returning its implementation.
     *
     * @param config configuration that will be used to create the correct implementation of [[Connector]]

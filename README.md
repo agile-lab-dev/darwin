@@ -200,13 +200,11 @@ classpath)
 
 Example of configuration for the `HBaseConnector`:
 ```
-hbase {
-  "isSecure": false,
-  "namespace": "DARWIN",
-  "table": "REPOSITORY",
-  "coreSite": "/etc/hadoop/conf/core-site.xml",
-  "hbaseSite": "/etc/hadoop/conf/hbase-site.xml",
-}
+"isSecure": false,
+"namespace": "DARWIN",
+"table": "REPOSITORY",
+"coreSite": "/etc/hadoop/conf/core-site.xml",
+"hbaseSite": "/etc/hadoop/conf/hbase-site.xml",
 ```
 ### HBase Connector dependencies
 Darwin HBase Connector does not provide HBase dependencies in a transitive manner since that would lead to hard to 
@@ -225,11 +223,9 @@ The configuration keys managed by the `PostgresConnector` are:
 
 Example of configuration for the `PostgresConnector`:
 ```
-postgres {
-  "host": "localhost:5432"
-  "db": "srdb"
-  "username": "postgres"
-  "password": "srpsql"
-  "table": "schema_registry"
-}
+"host": "localhost:5432"
+"db": "srdb"
+"username": "postgres"
+"password": "srpsql"
+"table": "schema_registry"
 ```

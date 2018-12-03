@@ -18,10 +18,10 @@ trait AvroSchemaManager extends Logging {
   protected def config: Config
 
   protected[darwin] lazy val connector: Connector = {
-    val cnt = ConnectorFactory.creators().headOption.map(_.create(config))
+    val cnt = ConnectorFactory.creator(config).map(_.create(config))
       .getOrElse(throw new ConnectorNotFoundException(config))
 
-    if (config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
+    if (config.hasPath(ConfigurationKeys.CREATE_TABLE) && config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
       cnt.createTable()
     } else if (!cnt.tableExists()) {
       log.warn(s"Darwin table does not exists and has not been created (${ConfigurationKeys.CREATE_TABLE} was false)")
