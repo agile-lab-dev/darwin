@@ -119,7 +119,7 @@ Architecture
 ### Darwin architecture schema
 Darwin maintains a repository of all the known schemas in the configured storage, and can access these data in three 
 configurable ways:
-1. #####Eager Cached
+1. ##### Eager Cached
     Darwin loads all schemas once from the selected storage and fills with them an internal cache that is used for 
     all the subsequent queries. The only other access to the storage is due to the invocation of the `registerAll` 
     method which updates both the cache and the storage with the new schemas. Once the cache is loaded, all the 
@@ -127,7 +127,7 @@ configurable ways:
 
     ![Darwin schema](docs/img/darwin_eager_cached_schema.jpg)
 
-2. #####Lazy Cached
+2. ##### Lazy Cached
     Darwin behaves like the Eager Cached scenario, but each cache miss is then attempted also into the storage. If 
     the data is found on the storage, the cache is then updated with the fetched data.
     
