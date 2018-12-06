@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
   * An instance of AvroSchemaManager should ALWAYS be obtained through the AvroSchemaManagerFactory.
   * The manager is responsible for schemas registration, retrieval and updates.
   */
-abstract class AvroSchemaManager(val connector: Connector) extends Logging {
+abstract class AvroSchemaManager(connector: Connector) extends Logging {
 
   /**
     * Extracts the ID from a Schema.

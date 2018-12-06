@@ -11,6 +11,7 @@ Table of contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Configuration](#configuration)
+  - [General](#general)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
 ---
@@ -116,37 +117,70 @@ Darwin is compliant to this specification and provides utility methods that can 
 Architecture
 -------------
 ### Darwin architecture schema
-Darwin loads all schemas once from the selected storage and fills with them an internal cache that is used for all 
-the subsequent queries. The only other access to the storage is due to the invocation of the `registerAll` method which
- updates both the cache and the storage with the new schemas.
-Once the cache is loaded, all the `getId` and `getSchema` method invocations will perform lookups only in the cache:
+Darwin maintains a repository of all the known schemas in the configured storage, and can access these data in three 
+configurable ways:
+1. #####Eager Cached
+    Darwin loads all schemas once from the selected storage and fills with them an internal cache that is used for 
+    all the subsequent queries. The only other access to the storage is due to the invocation of the `registerAll` 
+    method which updates both the cache and the storage with the new schemas. Once the cache is loaded, all the 
+    `getId` and `getSchema` method invocations will perform lookups only in the cache.
 
-![Darwin schema](docs/img/darwin_schema.jpg)
+    ![Darwin schema](docs/img/darwin_eager_cached_schema.jpg)
+
+2. #####Lazy Cached
+    Darwin behaves like the Eager Cached scenario, but each cache miss is then attempted also into the storage. If 
+    the data is found on the storage, the cache is then updated with the fetched data.
+    
+    ![Darwin schema](docs/img/darwin_lazy_cached_schema.jpg)
+    
+3. ##### Lazy
+    Darwin performs all lookups directly on the storage: there is no applicative cache.
+    
+    ![Darwin schema](docs/img/darwin_lazy_schema.jpg)
 
 ### Darwin interaction
-Darwin can be used to easily read and write data encoded in Avro Single-Object using the
- `generateAvroSingleObjectEncoded` and `retrieveSchemaAndAvroPayload` methods (they rely on the `getId` and 
- `getSchema` methods discussed before). These methods allow your application to convert and encoded avro byte array 
- into a Single-Object encoded one, and to extract the schema and payload from a Single-Object encoded record that was
-  written.
+Darwin can be used to easily read and write data encoded in Avro Single-Object using the 
+`generateAvroSingleObjectEncoded` and `retrieveSchemaAndAvroPayload` methods of a `AvroSchemaManager` instance (they 
+rely on the `getId` and `getSchema` methods discussed before). These methods allow your application to convert and 
+encoded avro byte array into a single-object encoded one, and to extract the schema and payload from a single-object 
+encoded record that was written.
+If there is the need to use single-object encoding utilities without creating an `AvroSchemaManager` instance, the 
+utilities object `AvroSingleObjectEncodingUtils` exposes some generic purpose functionality, such as:
+- check if a byte array is single-object encoded
+- create a single-object encoded byte array from payload and schema ID
+- extract the schema ID from a single-object encoded byte array
+- remove the header (schema ID included) of a single-object encoded byte array
 
 ![Darwin interaction](docs/img/darwin_interaction.jpg)
 
 Installation
 -------------
 To use Darwin in your application, simply add it as dependency along with one of the available connectors.
-Darwin will automatically load the defined connector, and it can be used directly to register and to retrieve 
+Darwin can automatically load the defined connector, and it can be used directly to register and to retrieve 
 Avro schemas.
 
 Usage
 -------------
-First of all the application must register all its known Avro schemas invoking the `registerAll` method. To invoke 
-such method, the library should be initialized passing a Typesafe configuration to the `instance` method; this 
-configuration is then passed to the underlying storage level (please check how the configuration file should be 
-created in the Configuration section of the storage you chose):
+Darwin main functionality are exposed by the `AvroSchemaManager`, which can be used to store and retrieve the known 
+avro schemas.
+To get an instance of `AvroSchemaManager` there are two main ways:
+1. You can create an instance of `AvroSchemaManager` directly, passing a `Connector` as constructor argument; the 
+available implementations of `AvroSchemaManager` are the ones introduced in te chapter [Architecture](#architecture):
+ `CachedEagerAvroSchemaManager`, `CachedLazyAvroSchemaManager` and `LazyAvroSchemaManager`.
+2. You can obtain an instance of `AvroSchemaManager` using the `AvroSchemaManagerFactory`: for each configuration 
+passed as input of the `initialize` method, a new instance is created. The instance can be retrieved later using the 
+`getInstance` method.
+
+To get more insight on how the Typesafe configuration must be defined to create an `AvroSchemaManager` instance (or 
+directly a `Connector` instance), please check how the configuration file should be created in the Configuration 
+section of the storage you chose.
+
+Once you created an instance of `AvroSchemaManager`, first of all an application should register all its known Avro
+ schemas invoking the `registerAll` method:
 ```
+  val manager: AvroSchemaManager = AvroSchemaManagerFactory.initialize(config)
   val schemas: Seq[Schema] = //obtain all the schemas
-  val registered: Seq[(Long, Schema)] = AvroSchemaManager.getInstance(config).registerAll(schemas)
+  val registered: Seq[(Long, Schema)] = manager.registerAll(schemas)
 ```
 To generate the Avro schema for your classes there are various ways, if you are using standard Java pojos:
 ```
@@ -158,14 +192,14 @@ implicitly generated by _avro4s_, e.g.:
   val schema: Schema = new AvroSchema[MyClass]
 ```
 Once you have registered all the schemas used by your application, you can use them directly invoking the 
-`AvroSchemaManager` object: it exposes functionalities to retrieve the schema from an ID and vice-versa.
+`AvroSchemaManager` object: it exposes functionality to retrieve the schema from an ID and vice-versa.
 ```
   val id: Long = AvroSchemaManager.getId(schema)
   val schema: Schema = AvroSchemaManager.getSchema(id)
 ```
 
 As said previously, in addition to the basic methods, the `AvroSchemaManager` object exposes also some utility methods 
-that can be used to encode/decode a byte array in Single-Object Encoding:
+that can be used to encode/decode a byte array in single-object encoding:
 ```
   def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema): Array[Byte]
 
@@ -175,13 +209,25 @@ that can be used to encode/decode a byte array in Single-Object Encoding:
 If new schemas are added to the storage and the application must reload all the data from it (in order to manage also
  objects encoded with the new schemas), the `reload` method can be used:
  ```
- AvroSchemaManager.reload()
+ manager.reload()
  ```
- Please note that this method must be used to reload all the schemas, while the initialization fo the data must 
- always be performed using the `getInstance` method.
+ Please note that this method can be used to reload all the schemas in cached scenarios (this method does nothing if 
+ you are using a `LazyAvroSchemaManager` instance, because all the find are performed directly on the storage).
 
 Configuration
 -------------
+
+## General
+
+The general configuration keys are:
+
+- **type**: tells the factory which instance of `AvroSchemaManager` must be created. Allowed values are: 
+"cached_eager", "cached_lazy" and "lazy".
+- **connector** (optional): used to choose the connector if there are multiple instances of connectors found at 
+runtime. If multiple instances are found and this key is not configured, the first connector is taken. All available 
+connectors names are suitable for this value (e.g. "hbase", "postgresql", etc)
+- **createTable** (optional): if true, tells the chosen Connector to create the repository table if not already 
+present in the storage.
 
 ## HBase
 

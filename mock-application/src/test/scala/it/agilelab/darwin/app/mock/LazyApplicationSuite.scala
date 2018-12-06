@@ -5,7 +5,8 @@ import java.lang.reflect.Modifier
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, NewClass, OneField}
-import it.agilelab.darwin.manager.{AvroSchemaManager, AvroSchemaManagerFactory}
+import it.agilelab.darwin.common.{Connector, ConnectorFactory}
+import it.agilelab.darwin.manager.{AvroSchemaManager, LazyAvroSchemaManager}
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.avro.reflect.ReflectData
 import org.reflections.Reflections
@@ -15,9 +16,9 @@ import scala.collection.JavaConverters._
 
 class LazyApplicationSuite extends FlatSpec with Matchers {
 
-  val config: Config = ConfigFactory.parseMap(Map("type" -> "lazy").asJava)
-    .withFallback(ConfigFactory.load()).resolve()
-  val manager: AvroSchemaManager = AvroSchemaManagerFactory.initialize(config)
+  val config: Config = ConfigFactory.load()
+  val connector: Connector = ConnectorFactory.connector(config)
+  val manager: AvroSchemaManager = new LazyAvroSchemaManager(connector)
 
   "LazyAvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
@@ -67,7 +68,7 @@ class LazyApplicationSuite extends FlatSpec with Matchers {
     val newId = SchemaNormalization.parsingFingerprint64(newSchema)
     assert(manager.getSchema(newId).isEmpty)
 
-    manager.connector.insert(Seq(newId -> newSchema))
+    connector.insert(Seq(newId -> newSchema))
     assert(manager.getSchema(newId).isDefined)
     assert(manager.getSchema(newId).get == newSchema)
   }

@@ -49,7 +49,7 @@ object ConnectorFactory extends Logging {
   }
 
   def connector(config: Config): Connector = {
-    val cnt = ConnectorFactory.creator(config).map(_.create(config))
+    val cnt = creator(config).map(_.create(config))
       .getOrElse(throw new ConnectorNotFoundException(config))
     if (config.hasPath(ConfigurationKeys.CREATE_TABLE) && config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
       cnt.createTable()
