@@ -19,8 +19,7 @@ object Dependencies {
   val spark_sql = "org.apache.spark" %% "spark-sql" % "2.3.0" % "provided"
   val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
   val junit = "org.junit.jupiter" % "junit-jupiter-api" % "5.3.2" % Test
-
-
+  
   val core_deps = Seq(scalatest, avro, typesafe_config, junit)
   val mock_app_dep = core_deps ++ Seq(reflections, avro4s, hbase_common)
   val mock_conn = core_deps ++ Seq(reflections)

@@ -1,5 +1,6 @@
 package it.agilelab.darwin.app.mock;
 
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import it.agilelab.darwin.app.mock.classes.OneField;
 import it.agilelab.darwin.annotations.AvroSerde;
@@ -20,17 +21,17 @@ class JavaApplicationTest {
     void mainTest() {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put("type", "cached_eager");
-        AvroSchemaManager manager = AvroSchemaManagerFactory
-                .initialize(ConfigFactory.parseMap(configMap).withFallback(ConfigFactory.load()).resolve());
+        Config conf = ConfigFactory.parseMap(configMap).withFallback(ConfigFactory.load()).resolve();
+        AvroSchemaManager manager = AvroSchemaManagerFactory.initialize(conf);
 
         List<Schema> schemas = new ArrayList<>();
         Schema s = ReflectData.get().getSchema(OneField.class);
         schemas.add(s);
         manager.getSchema(0L);
-        AvroSchemaManagerFactory.getInstance().registerAll(JavaConversions.asScalaBuffer(schemas));
+        AvroSchemaManagerFactory.getInstance(conf).registerAll(JavaConversions.asScalaBuffer(schemas));
 
         long id = manager.getId(schemas.get(0));
-        assert(manager.getSchema(id).isDefined());
+        assert (manager.getSchema(id).isDefined());
         assert (schemas.get(0) == manager.getSchema(id).get());
     }
 

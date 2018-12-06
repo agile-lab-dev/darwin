@@ -6,4 +6,8 @@ object ConfigurationKeys {
 
   val CONNECTOR = "connector"
 
+  val MANAGER_TYPE: String = "type"
+  val CACHED_EAGER: String = "cached_eager"
+  val CACHED_LAZY: String = "cached_lazy"
+  val LAZY: String = "lazy"
 }

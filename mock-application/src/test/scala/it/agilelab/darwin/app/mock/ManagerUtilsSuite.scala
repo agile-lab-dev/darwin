@@ -13,12 +13,13 @@ import scala.collection.JavaConverters._
 class ManagerUtilsSuite extends FlatSpec with Matchers {
 
   "AvroSchemaManager utilities" should "create a Single-Object encoded byte array" in {
+    val ORIGINAL_LENGTH: Int = 10
     val originalSchema = new SchemaGenerator[OneField].schema
     val config = ConfigFactory.parseMap(Map("type" -> "cached_eager").asJava)
       .withFallback(ConfigFactory.load()).resolve()
     val manager = AvroSchemaManagerFactory.initialize(config)
     manager.registerAll(Seq(originalSchema))
-    val originalPayload = new Array[Byte](10)
+    val originalPayload = new Array[Byte](ORIGINAL_LENGTH)
     Random.nextBytes(originalPayload)
     val data: Array[Byte] = manager.generateAvroSingleObjectEncoded(originalPayload, originalSchema)
     assert(AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(data))
