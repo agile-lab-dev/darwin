@@ -87,6 +87,7 @@ lazy val mockApplication = Project("darwin-mock-application", file("mock-applica
   .dependsOn(core, mockConnector, postgresConnector, hbaseConnector)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.mock_app_dep)
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
 

@@ -1,4 +1,3 @@
-import Dependencies.avro4s
 import sbt._
 
 
@@ -10,7 +9,6 @@ object Dependencies {
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.4" % "test"
   val avro = "org.apache.avro" % "avro" % "1.8.2"
   val typesafe_config = "com.typesafe" % "config" % "1.3.1"
-  val avro4s = "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.3"
   val hbase_server = "org.apache.hbase" % "hbase-server" % "1.2.0" % "provided"
   val hbase_common = "org.apache.hbase" % "hbase-common" % "1.2.0" % "provided"
   val hadoop_common = "org.apache.hadoop" % "hadoop-common" % "2.6.0" % "provided"
@@ -21,7 +19,7 @@ object Dependencies {
   val junit = "org.junit.jupiter" % "junit-jupiter-api" % "5.3.2" % Test
   
   val core_deps = Seq(scalatest, avro, typesafe_config, junit)
-  val mock_app_dep = core_deps ++ Seq(reflections, avro4s, hbase_common)
+  val mock_app_dep = core_deps ++ Seq(reflections, hbase_common)
   val mock_conn = core_deps ++ Seq(reflections)
   val hbase_conn_dep = core_deps ++ Seq(hbase_common, hbase_server, hadoop_common)
   val postgres_conn_dep = core_deps :+ postgres_conn

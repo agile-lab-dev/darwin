@@ -1,4 +1,6 @@
 #!/bin/bash
-sbt clean scalastyle +publishLocal +test:compile +doc
-#sbt "project darwin-hbase-connector" test && sbt "project darwin-postgres-connector" test && sbt "project
-# darwin-mock-application" test
+sbt -mem 2048 scalastyle && \
+sbt -mem 2048 ++2.10.7 clean test && \
+sbt -mem 2048 ++2.11.12 clean test && \
+sbt -mem 2048 ++2.12.7 clean test && \
+sbt -mem 2048 +doc

@@ -1,0 +1,1 @@
+{"type":"record","name":"MyNestedClass","namespace":"it.agilelab.darwin.app.mock.classes","fields":[{"name":"id","type":"int"},{"name":"myClass","type":{"type":"record","name":"MyClass","fields":[{"name":"value","type":"int"},{"name":"otherVale","type":"long"}]}},{"name":"my2Class","type":{"type":"map","values":"MyClass"}}]}

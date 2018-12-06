@@ -22,9 +22,11 @@ source create-test-network.sh
 #y=$(tput setaf 3)
 #d=$(tput sgr0)
 
-IMAGE="hseeberger/scala-sbt"
-${DOCKER_CMD} pull $IMAGE
+SBT_IMAGE="hseeberger/scala-sbt:8u181_2.12.7_1.2.6"
 ${DOCKER_CMD} volume create sbt-vol
+
+#${DOCKER_CMD} stop postgres-darwin &
+#${DOCKER_CMD} stop hbase-darwin
 
 DOCKER_OPTS="-i -v $SCRIPT_DIR/../../:/darwin/:rw -v sbt-vol:/root/ --network=${NETWORK_NAME} --rm -w /darwin/"
 
@@ -35,9 +37,9 @@ ${DOCKER_CMD} run --network=${NETWORK_NAME} \
  #| sed "s/.*/$y hbase |$d &/" &
 
 ${DOCKER_CMD} run ${DOCKER_OPTS} --name sbt \
- ${IMAGE} ./make.sh 2>&1
+ ${SBT_IMAGE} ./make.sh 2>&1
 
  # | sed "s/.*/$r sbt |$d &/"
 
+${DOCKER_CMD} stop postgres-darwin &
 ${DOCKER_CMD} stop hbase-darwin
-${DOCKER_CMD} stop postgres-darwin

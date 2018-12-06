@@ -21,12 +21,12 @@ class LazyApplicationSuite extends FlatSpec with Matchers {
   val manager: AvroSchemaManager = new LazyAvroSchemaManager(connector)
 
   "LazyAvroSchemaManager" should "not fail after the initialization" in {
-    val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
+    val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))
     assert(manager.registerAll(schemas).size == 1)
   }
 
   it should "load all existing schemas and register a new one" in {
-    val schemas: Seq[Schema] = Seq(new SchemaGenerator[MyNestedClass].schema)
+    val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))
     manager.getSchema(0L)
 
     manager.registerAll(schemas)
@@ -37,7 +37,7 @@ class LazyApplicationSuite extends FlatSpec with Matchers {
   }
 
   it should "get all previously registered schemas" in {
-    val schema: Schema = new SchemaGenerator[MyNestedClass].schema
+    val schema: Schema = SchemaReader.readFromResources("MyNestedClass.avsc")
     val schema0 = manager.getSchema(0L)
     val schema1 = manager.getSchema(1L)
     assert(schema0.isDefined)
@@ -57,9 +57,7 @@ class LazyApplicationSuite extends FlatSpec with Matchers {
     val annotationClass: Class[AvroSerde] = classOf[AvroSerde]
     val classes = reflections.getTypesAnnotatedWith(annotationClass).asScala.toSeq
       .filter(c => !c.isInterface && !Modifier.isAbstract(c.getModifiers))
-    classes.foreach(println)
     val schemas = classes.map(c => ReflectData.get().getSchema(Class.forName(c.getName)).toString)
-    schemas.foreach(println)
     Seq(oneFieldSchema, myClassSchema, myNestedSchema) should contain theSameElementsAs schemas
   }
 
