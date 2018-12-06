@@ -1,8 +1,9 @@
-package it.agilelab.darwin.connector
+package it.agilelab.darwin.app.mock
 
 import com.typesafe.config.ConfigFactory
 import it.agilelab.darwin.common.ConnectorFactory
 import it.agilelab.darwin.connector.hbase.HBaseConnectorCreator
+import it.agilelab.darwin.connector.mock.MockConnectorCreator
 import it.agilelab.darwin.connector.postgres.PostgresConnectorCreator
 import it.agilelab.darwin.manager.util.ConfigurationKeys
 import org.scalatest.{FlatSpec, Matchers}
@@ -10,7 +11,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class TwoConnectorsSpec extends FlatSpec with Matchers {
   it should "have both HBase and Postgresql available" in {
     ConnectorFactory.creators().map(_.getClass) should contain theSameElementsAs (
-      classOf[HBaseConnectorCreator] :: classOf[PostgresConnectorCreator] :: Nil
+      classOf[HBaseConnectorCreator] :: classOf[PostgresConnectorCreator] :: classOf[MockConnectorCreator] :: Nil
       )
   }
 
