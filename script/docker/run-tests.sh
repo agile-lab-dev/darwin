@@ -17,29 +17,37 @@ cd ${SCRIPT_DIR}
 source get-docker-cmd.sh
 source create-test-network.sh
 
-#r=$(tput setaf 1)
-#g=$(tput setaf 2)
-#y=$(tput setaf 3)
-#d=$(tput sgr0)
-
 SBT_IMAGE="hseeberger/scala-sbt:8u181_2.12.7_1.2.6"
 ${DOCKER_CMD} volume create sbt-vol
 
-#${DOCKER_CMD} stop postgres-darwin &
-#${DOCKER_CMD} stop hbase-darwin
+PG_CONTAINER=$(docker ps | grep postgres-darwin | tr -d '[:space:]')
+HB_CONTAINER=$(docker ps | grep hbase-darwin | tr -d '[:space:]')
+
+if [ -z "$PG_CONTAINER" ]; then
+  echo "Spawning POSTGRES container postgres-darwin"
+  SPAWNED_PG_CONTAINER=$(${DOCKER_CMD} run --network=${NETWORK_NAME} --rm -d --name postgres-darwin postgres:9.3.25-alpine)
+else
+  echo "Not spawning POSTGRES container because it was already up with name postgres-darwin"
+fi
+
+if [ -z "$HB_CONTAINER" ]; then
+  echo "Spawning HBASE container hbase-darwin"
+  SPAWNED_HB_CONTAINER=$(${DOCKER_CMD} run --network=${NETWORK_NAME} --rm -d --name hbase-darwin hbase_cdh:5.12)
+else
+  echo "Not spawning HBASE container because it was already up with name hbase-darwin"
+fi
 
 DOCKER_OPTS="-i -v $SCRIPT_DIR/../../:/darwin/:rw -v sbt-vol:/root/ --network=${NETWORK_NAME} --rm -w /darwin/"
-
-${DOCKER_CMD} run --network=${NETWORK_NAME} \
- --rm -d --name hbase-darwin hbase_cdh:5.12
-${DOCKER_CMD} run --network=${NETWORK_NAME} \
- --rm -d --name postgres-darwin postgres:9.3.25-alpine
- #| sed "s/.*/$y hbase |$d &/" &
 
 ${DOCKER_CMD} run ${DOCKER_OPTS} --name sbt \
  ${SBT_IMAGE} ./make.sh 2>&1
 
- # | sed "s/.*/$r sbt |$d &/"
+if [[ ! -z "$SPAWNED_PG_CONTAINER" ]]; then
+  echo "Stopping POSTGRES container postgres-darwin"
+  ${DOCKER_CMD} stop postgres-darwin &
+fi
 
-${DOCKER_CMD} stop postgres-darwin &
-${DOCKER_CMD} stop hbase-darwin
+if [[ ! -z "$SPAWNED_HB_CONTAINER" ]]; then
+  echo "Stopping HBASE container hbase-darwin"
+  ${DOCKER_CMD} stop hbase-darwin
+fi
