@@ -1,4 +1,4 @@
-#![Darwin logo](docs/img/icon/darwin.png) Darwin
+![Darwin logo](docs/img/logo/darwin-icon.png) #Darwin
 
 Table of contents
 -------------
