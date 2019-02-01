@@ -16,4 +16,9 @@ class CachedLazyAvroSchemaManager (connector: Connector) extends CachedAvroSchem
       schema
     }
   }
+
+  override def getAll: Seq[(Long, Schema)] = {
+    _cache.set(Some(cache.insert(connector.fullLoad())))
+    cache.getAll
+  }
 }

@@ -21,4 +21,11 @@ case class AvroSchemaCacheFingerprint(schemas: Seq[(Long, Schema)]) extends Avro
   }
 
   override def insert(values: Seq[(Long, Schema)]): AvroSchemaCache = AvroSchemaCacheFingerprint(_table.toSeq ++ values)
+
+  /**
+    * Retrieves all registered schemas
+    *
+    * @return A Sequence of (ID, Schema)
+    */
+  override def getAll: Seq[(Long, Schema)] = _table.toSeq
 }

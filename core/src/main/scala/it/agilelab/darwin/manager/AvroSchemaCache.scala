@@ -32,4 +32,11 @@ abstract class AvroSchemaCache(schemas: Seq[(Long, Schema)]) {
     * @return a new instance of [[AvroSchemaCache]] containing the new values in addition to the original ones.
     */
   def insert(values: Seq[(Long, Schema)]): AvroSchemaCache
+
+  /**
+    * Retrieves all registered schemas
+    *
+    * @return A Sequence of (ID, Schema)
+    */
+  def getAll : Seq[(Long, Schema)]
 }
