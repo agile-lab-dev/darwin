@@ -6,15 +6,17 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.RouteConcatenation
 import akka.stream.ActorMaterializer
+import com.typesafe.config.Config
 import it.agilelab.darwin.common.Logging
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
 
-class HttpApp(services: Service*)(implicit system: ActorSystem, materializer: ActorMaterializer) extends Logging {
+class HttpApp(config: Config, services: Service*)
+             (implicit system: ActorSystem, materializer: ActorMaterializer) extends Logging {
   def run(): Unit = {
-    val interface = "0.0.0.0"
-    val port = 8080
+    val interface = config.getString("interface")
+    val port = config.getInt("port")
 
 
     val route = RouteConcatenation.concat(services.map(_.route): _*)
@@ -53,6 +55,6 @@ class HttpApp(services: Service*)(implicit system: ActorSystem, materializer: Ac
 }
 
 object HttpApp {
-  def apply(services: Service*)(implicit system: ActorSystem, materializer: ActorMaterializer): HttpApp =
-    new HttpApp(services: _*)
+  def apply(config:Config, services: Service*)(implicit system: ActorSystem, materializer: ActorMaterializer): HttpApp =
+    new HttpApp(config, services: _*)
 }

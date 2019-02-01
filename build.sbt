@@ -73,7 +73,7 @@ lazy val restServer = Project("darwin-rest-server", file("rest-server"))
     crossScalaVersions := Versions.crossScalaVersions
     crossScalaVersions -= Versions.scala_210
   }
-  .dependsOn(core)
+  .dependsOn(core, hbaseConnector, postgresConnector, mockConnector)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
 

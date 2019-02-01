@@ -13,9 +13,11 @@ object Main {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
 
     val config = ConfigFactory.load()
-    val schemaManager = AvroSchemaManagerFactory.initialize(config.getConfig("darwin"))
+    val schemaManagerConfig = config.getConfig("darwin")
+    val restConfig = config.getConfig("darwin-rest")
+    val schemaManager = AvroSchemaManagerFactory.initialize(schemaManagerConfig)
 
-    HttpApp(DarwinService(schemaManager)).run()
+    HttpApp(restConfig, DarwinService(schemaManager)).run()
 
   }
 }
