@@ -34,10 +34,4 @@ class MockConnector(config: Config) extends Connector {
   override def tableExists(): Boolean = true
 
   override def tableCreationHint(): String = ""
-
-  override def findSchemasByName(name: String): Seq[Schema] = Seq.empty
-
-  override def findSchemasByNamespace(namespace: String): Seq[Schema] = Seq.empty
-
-  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = Seq.empty
 }

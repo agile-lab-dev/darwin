@@ -7,10 +7,10 @@ import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, Result, ResultScanner, Scan}
+import org.apache.hadoop.hbase._
+import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, Result}
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase._
 import org.apache.hadoop.security.UserGroupInformation
 
 import scala.collection.JavaConverters._
@@ -165,22 +165,4 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     log.debug(s"$schema loaded from HBase for id = $id")
     schema
   }
-
-  override def findSchemasByName(name: String): Seq[Schema] = {
-    val s = new Scan()
-    s.addColumn(CF, QUALIFIER_NAME)
-    val scanner: ResultScanner = connection.getTable(TABLE_NAME).getScanner(s)
-    try {
-      scanner.iterator().asScala.flatMap{ result =>
-        val value: Option[Array[Byte]] = Option(result.getValue(CF, QUALIFIER_SCHEMA))
-        value.map(v => parser.parse(Bytes.toString(v)))
-      }.toSeq
-    } finally {
-      scanner.close()
-    }
-  }
-
-  override def findSchemasByNamespace(namespace: String): Seq[Schema] = ???
-
-  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = ???
 }

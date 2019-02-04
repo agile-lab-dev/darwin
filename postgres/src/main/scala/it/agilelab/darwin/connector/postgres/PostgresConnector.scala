@@ -101,44 +101,4 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
        |$CREATE_TABLE_STMT
      """.stripMargin
   }
-
-  override def findSchemasByName(name: String): Seq[Schema] = {
-    val connection = getConnection
-    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where name = ?")
-    statement.setString(1, name)
-    val resultSet: ResultSet = statement.executeQuery()
-
-    val schemas = Iterator.continually(resultSet).takeWhile(_.next()).flatMap{ rs =>
-      Option(rs.getString("schema")).map(v => parser.parse(v))
-    }.toSeq
-    connection.close()
-    schemas
-  }
-
-  override def findSchemasByNamespace(namespace: String): Seq[Schema] = {
-    val connection = getConnection
-    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where namespace = ?")
-    statement.setString(1, namespace)
-    val resultSet: ResultSet = statement.executeQuery()
-
-    val schemas = Iterator.continually(resultSet).takeWhile(_.next()).flatMap{ rs =>
-      Option(rs.getString("schema")).map(v => parser.parse(v))
-    }.toSeq
-    connection.close()
-    schemas
-  }
-
-  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = {
-    val connection = getConnection
-    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where name = ? and namespace = ?")
-    statement.setString(1, name)
-    statement.setString(2, namespace)
-    val resultSet: ResultSet = statement.executeQuery()
-
-    val schemas = Iterator.continually(resultSet).takeWhile(_.next()).flatMap{ rs =>
-      Option(rs.getString("schema")).map(v => parser.parse(v))
-    }.toSeq
-    connection.close()
-    schemas
-  }
 }

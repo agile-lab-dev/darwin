@@ -50,10 +50,4 @@ trait Connector extends Serializable {
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
   def findSchema(id: Long): Option[Schema]
-
-  def findSchemasByName(name: String): Seq[Schema]
-
-  def findSchemasByNamespace(namespace: String): Seq[Schema]
-
-  def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema]
 }

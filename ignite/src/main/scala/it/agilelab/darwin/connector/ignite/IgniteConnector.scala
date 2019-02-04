@@ -16,10 +16,4 @@ class IgniteConnector(config: Config) extends Connector {
   override def tableExists(): Boolean = ???
 
   override def tableCreationHint(): String = ???
-
-  override def findSchemasByName(name: String): Seq[Schema] = ???
-
-  override def findSchemasByNamespace(namespace: String): Seq[Schema] = ???
-
-  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = ???
 }

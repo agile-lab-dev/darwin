@@ -16,10 +16,4 @@ class MongoConnector(config: Config) extends Connector {
   override def tableCreationHint(): String = ???
 
   override def findSchema(id: Long): Option[Schema] = ???
-
-  override def findSchemasByName(name: String): Seq[Schema] = ???
-
-  override def findSchemasByNamespace(namespace: String): Seq[Schema] = ???
-
-  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = ???
 }
