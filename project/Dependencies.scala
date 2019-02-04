@@ -32,6 +32,12 @@ object Dependencies {
 
   lazy val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
+  lazy val httpClient = "org.scalaj" %% "scalaj-http" % "2.4.1"
+
+  lazy val wireMock = Seq("com.github.tomakehurst" % "wiremock-jre8" % "2.21.0" % Test,
+                          "xmlunit" % "xmlunit" % "1.6" % Test)
+
+
   lazy val restServer = core_deps ++ Seq(logback) ++ akka
   lazy val core_deps = Seq(scalatest, avro, typesafe_config, junit)
   lazy val mock_app_dep = core_deps ++ Seq(reflections, avro4s)

@@ -3,17 +3,41 @@ package it.agilelab.darwin.connector.rest
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
+import scalaj.http.Http
 
-class RestConnector(config: Config) extends Connector(config) {
-  override def fullLoad(): Seq[(Long, Schema)] = ???
+class RestConnector(options: RestConnectorOptions, config: Config) extends Connector(config) with JsonProtocol {
 
-  override def insert(schemas: Seq[(Long, Schema)]): Unit = ???
+  override def fullLoad(): Seq[(Long, Schema)] = {
+    Http(options.endpoint("schemas/")).execute(toSeqOfIdSchema).body
+  }
 
-  override def createTable(): Unit = ???
+  override def insert(schemas: Seq[(Long, Schema)]): Unit = {
 
-  override def tableExists(): Boolean = ???
+    val response = Http(options.endpoint("schemas/"))
+      .header("Content-Type", "application/json")
+      .postData(toJson(schemas))
+      .asString
 
-  override def tableCreationHint(): String = ???
+    if (response.isError) {
+      throw new Exception(response.body)
+    }
 
-  override def findSchema(id: Long): Option[Schema] = ???
+  }
+
+  override def createTable(): Unit = {}
+
+  override def tableExists(): Boolean = true
+
+  override def tableCreationHint(): String = ""
+
+  override def findSchema(id: Long): Option[Schema] = {
+
+    val response = Http(options.endpoint(s"schemas/$id")).execute(toSchema)
+
+    if (response.code == 404) {
+      None
+    } else {
+      Some(response.body)
+    }
+  }
 }
