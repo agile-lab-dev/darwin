@@ -14,6 +14,7 @@ Table of contents
   - [General](#general)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
+    [REST](#rest)
 ---
 
 Overview
@@ -314,4 +315,30 @@ Example of configuration for the `RestConnector`:
 "host": "localhost"
 "port": 8080
 "basePath": "/"
+```
+
+### REST Server
+
+A rest server is provided by module rest-server, just run main class
+
+`it.agilelab.darwin.server.rest.Main`
+
+### REST Server configuration
+
+The same configuration options of darwin as a library should be configured under the darwin key.
+
+The rest server also accepts a rest specific configuration under darwin-rest key.
+
+Example configuration for the `RestServer`:
+
+```
+darwin {
+  type = "lazy"
+  connector = "mock"
+}
+
+darwin-rest{
+  interface = "localhost"
+  port = 8080
+}
 ```
