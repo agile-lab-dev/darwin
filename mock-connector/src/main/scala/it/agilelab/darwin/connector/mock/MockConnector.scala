@@ -6,7 +6,7 @@ import org.apache.avro.Schema
 
 import scala.collection.mutable
 
-class MockConnector(config: Config) extends Connector(config) {
+class MockConnector(config: Config) extends Connector {
 
   val table: mutable.Map[Long, Schema] = {
     val alone = parseResource("test/MockClassAlone.avsc")
@@ -34,4 +34,10 @@ class MockConnector(config: Config) extends Connector(config) {
   override def tableExists(): Boolean = true
 
   override def tableCreationHint(): String = ""
+
+  override def findSchemasByName(name: String): Seq[Schema] = Seq.empty
+
+  override def findSchemasByNamespace(namespace: String): Seq[Schema] = Seq.empty
+
+  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = Seq.empty
 }

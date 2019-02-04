@@ -7,7 +7,7 @@ import it.agilelab.darwin.common.{Connector, using}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 
-class PostgresConnector(config: Config) extends Connector(config) with PostgresConnection {
+class PostgresConnector(config: Config) extends Connector with PostgresConnection {
 
   private def parser: Parser = new Parser()
 
@@ -24,7 +24,9 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
   private val CREATE_TABLE_STMT =
     s"""CREATE TABLE IF NOT EXISTS $TABLE_NAME (
        |id bigint NOT NULL PRIMARY KEY,
-       |schema text NOT NULL
+       |schema text NOT NULL,
+       |name text,
+       |namespace text
        |)""".stripMargin
 
   override def fullLoad(): Seq[(Long, Schema)] = {
@@ -44,12 +46,19 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
     val connection = getConnection
+    val ID: Int = 1
+    val SCHEMA: Int = 2
+    val NAME: Int = 3
+    val NAMESPACE: Int = 4
     try {
       connection.setAutoCommit(false)
       schemas.foreach { case (id, schema) =>
-        val insertSchemaPS = connection.prepareStatement(s"INSERT INTO $TABLE_NAME (id,schema) VALUES (?,?)")
-        insertSchemaPS.setLong(1, id)
-        insertSchemaPS.setString(2, schema.toString)
+        val insertSchemaPS = connection.prepareStatement(s"INSERT INTO $TABLE_NAME (id, schema, name, namespace)" +
+          s" VALUES (?,?,?,?)")
+        insertSchemaPS.setLong(ID, id)
+        insertSchemaPS.setString(SCHEMA, schema.toString)
+        insertSchemaPS.setString(NAME, schema.getName)
+        insertSchemaPS.setString(NAMESPACE, schema.getNamespace)
         insertSchemaPS.executeUpdate()
         insertSchemaPS.close()
       }
@@ -70,7 +79,7 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
     statement.setLong(1, id)
     val resultSet: ResultSet = statement.executeQuery()
 
-    val schema = if(resultSet.next()) {
+    val schema = if (resultSet.next()) {
       Option(resultSet.getString("schema")).map(v => parser.parse(v))
     } else {
       None
@@ -91,5 +100,45 @@ class PostgresConnector(config: Config) extends Connector(config) with PostgresC
     s"""To create table perform the following sql query:
        |$CREATE_TABLE_STMT
      """.stripMargin
+  }
+
+  override def findSchemasByName(name: String): Seq[Schema] = {
+    val connection = getConnection
+    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where name = ?")
+    statement.setString(1, name)
+    val resultSet: ResultSet = statement.executeQuery()
+
+    val schemas = Iterator.continually(resultSet).takeWhile(_.next()).flatMap{ rs =>
+      Option(rs.getString("schema")).map(v => parser.parse(v))
+    }.toSeq
+    connection.close()
+    schemas
+  }
+
+  override def findSchemasByNamespace(namespace: String): Seq[Schema] = {
+    val connection = getConnection
+    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where namespace = ?")
+    statement.setString(1, namespace)
+    val resultSet: ResultSet = statement.executeQuery()
+
+    val schemas = Iterator.continually(resultSet).takeWhile(_.next()).flatMap{ rs =>
+      Option(rs.getString("schema")).map(v => parser.parse(v))
+    }.toSeq
+    connection.close()
+    schemas
+  }
+
+  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = {
+    val connection = getConnection
+    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where name = ? and namespace = ?")
+    statement.setString(1, name)
+    statement.setString(2, namespace)
+    val resultSet: ResultSet = statement.executeQuery()
+
+    val schemas = Iterator.continually(resultSet).takeWhile(_.next()).flatMap{ rs =>
+      Option(rs.getString("schema")).map(v => parser.parse(v))
+    }.toSeq
+    connection.close()
+    schemas
   }
 }

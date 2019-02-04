@@ -4,7 +4,7 @@ import com.typesafe.config.Config
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 
-class MongoConnector(config: Config) extends Connector(config) {
+class MongoConnector(config: Config) extends Connector {
   override def fullLoad(): Seq[(Long, Schema)] = ???
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = ???
@@ -16,4 +16,10 @@ class MongoConnector(config: Config) extends Connector(config) {
   override def tableCreationHint(): String = ???
 
   override def findSchema(id: Long): Option[Schema] = ???
+
+  override def findSchemasByName(name: String): Seq[Schema] = ???
+
+  override def findSchemasByNamespace(namespace: String): Seq[Schema] = ???
+
+  override def findSchemaByNameAndNamespace(name: String, namespace: String): Seq[Schema] = ???
 }
