@@ -13,6 +13,13 @@ import scala.collection.JavaConverters._
   */
 abstract class AvroSchemaManager(connector: Connector) extends Logging {
 
+
+  /**
+    * Retrieves all registered schemas
+    *
+    * @return A Sequence of (ID, Schema)
+    */
+  def getAll: Seq[(Long, Schema)]
   /**
     * Extracts the ID from a Schema.
     *
