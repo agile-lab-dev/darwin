@@ -1,4 +1,3 @@
-import Dependencies.avro4s
 import sbt._
 
 
@@ -40,7 +39,7 @@ object Dependencies {
 
   lazy val restServer = core_deps ++ Seq(logback) ++ akka
   lazy val core_deps = Seq(scalatest, avro, typesafe_config, junit)
-  lazy val mock_app_dep = core_deps ++ Seq(reflections, avro4s)
+  lazy val mock_app_dep = core_deps ++ Seq(reflections, hbase_common)
   lazy val mock_conn = core_deps ++ Seq(reflections)
   lazy val hbase_conn_dep = core_deps ++ Seq(hbase_common, hbase_server, hadoop_common)
   lazy val postgres_conn_dep = core_deps :+ postgres_conn

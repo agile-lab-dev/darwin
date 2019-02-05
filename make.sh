@@ -1,2 +1,2 @@
 #!/bin/bash
-sbt clean scalastyle +publishLocal +test:compile +doc
+sbt -mem 2048 clean scalastyle +test +doc
