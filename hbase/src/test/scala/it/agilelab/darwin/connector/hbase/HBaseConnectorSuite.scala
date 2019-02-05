@@ -1,14 +1,16 @@
 package it.agilelab.darwin.connector.hbase
 
-import com.typesafe.config.ConfigFactory
+import java.nio.file.Files
+
+import com.typesafe.config.{ ConfigFactory, ConfigValueFactory}
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.reflect.ReflectData
 import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.hadoop.hbase.{HBaseTestingUtility, MiniHBaseCluster}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  val connector: Connector = new HBaseConnectorCreator().create(ConfigFactory.load())
 
   "HBaseConnector" should "load all existing schemas" in {
     connector.fullLoad()
@@ -39,8 +41,37 @@ class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll 
     connector.tableExists() should be(true)
   }
 
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
+
+  var connector: Connector = _
+
+  var util : HBaseTestingUtility = _
+  var minicluster: MiniHBaseCluster = _
+
+  override def beforeAll(): Unit = {
+    util = new HBaseTestingUtility()
+    minicluster = util.startMiniCluster()
+
+    //Hbase connector can only load configurations from a file path so we need to render the hadoop conf
+    val confFile = Files.createTempFile("prefix", "suffix")
+    val stream = Files.newOutputStream(confFile)
+    minicluster.getConfiguration.writeXml(stream)
+    stream.flush()
+    stream.close()
+    val hbaseConfigPath = ConfigValueFactory.fromAnyRef(confFile.toAbsolutePath.toString)
+
+    //HbaseConnector will only load conf if hbase-site and core-site are given,
+    //we give the same file to each.
+    val config = ConfigFactory.load()
+                              .withValue(ConfigurationKeys.HBASE_SITE, hbaseConfigPath)
+                              .withValue(ConfigurationKeys.CORE_SITE, hbaseConfigPath)
+
+    connector = new HBaseConnectorCreator().create(config)
+
     connector.createTable()
   }
+
+  override def afterAll(): Unit = {
+    minicluster.shutdown()
+  }
+
 }
