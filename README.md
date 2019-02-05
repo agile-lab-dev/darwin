@@ -16,6 +16,7 @@ Table of contents
   - [General](#general)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
+    [REST](#rest)
 ---
 
 Overview
@@ -82,6 +83,29 @@ libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.7"
   <version>1.0.7</version>
 </dependency>
 ```
+
+
+### Rest Connector
+
+Or Rest
+
+### sbt
+
+```scala
+libraryDependencies += "it.agilelab" %% "darwin-rest-connector" % "1.0.6"
+``` 
+#### maven
+```xml
+<dependency>
+  <groupId>it.agilelab</groupId>
+  <artifactId>darwin-rest-connector_2.11</artifactId>
+  <version>1.0.6</version>
+</dependency>
+```
+
+#### Rest server
+
+To use the rest connector implement the required endpoints or use the reference implementation provided by rest-server module
 
 ### Mock connector
 
@@ -276,4 +300,47 @@ Example of configuration for the `PostgresConnector`:
 "username": "postgres"
 "password": "srpsql"
 "table": "schema_registry"
+```
+
+## REST
+
+The configuration keys managed by the `RestConnector` are:
+- 
+- **protocol**: http or https
+- **host**: the hostname where rest-server (or an http proxy) is deployed
+- **port**: the port wwhere rest-server (or an http proxy) is listening
+- **basePath**: the path that should be prefixed to all requests (useful if rest-server is running behind a reverse proxy)
+
+Example of configuration for the `RestConnector`:
+```
+"protocol": "http"
+"host": "localhost"
+"port": 8080
+"basePath": "/"
+```
+
+### REST Server
+
+A rest server is provided by module rest-server, just run main class
+
+`it.agilelab.darwin.server.rest.Main`
+
+### REST Server configuration
+
+The same configuration options of darwin as a library should be configured under the darwin key.
+
+The rest server also accepts a rest specific configuration under darwin-rest key.
+
+Example configuration for the `RestServer`:
+
+```
+darwin {
+  type = "lazy"
+  connector = "mock"
+}
+
+darwin-rest{
+  interface = "localhost"
+  port = 8080
+}
 ```

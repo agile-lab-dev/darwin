@@ -59,9 +59,9 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)
   .settings(pgpPassphrase := Settings.pgpPass)
-  .settings(libraryDependencies ++= Dependencies.core_deps)
+  .settings(libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
+    Dependencies.httpClient)
   .settings(crossScalaVersions := Versions.crossScalaVersions)
-  .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
 
 lazy val restServer = Project("darwin-rest-server", file("rest-server"))
@@ -74,7 +74,6 @@ lazy val restServer = Project("darwin-rest-server", file("rest-server"))
     crossScalaVersions -= Versions.scala_210
   }
   .dependsOn(core, hbaseConnector, postgresConnector, mockConnector)
-  .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
 
 lazy val mongoConnector = Project("darwin-mongo-connector", file("mongo"))
