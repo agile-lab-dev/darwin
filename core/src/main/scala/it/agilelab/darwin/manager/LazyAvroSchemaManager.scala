@@ -18,4 +18,6 @@ class LazyAvroSchemaManager (connector: Connector) extends AvroSchemaManager(con
   }
 
   override def reload(): AvroSchemaManager = this
+
+  override def getAll: Seq[(Long, Schema)] = connector.fullLoad()
 }

@@ -46,4 +46,12 @@ abstract class CachedAvroSchemaManager(connector: Connector) extends AvroSchemaM
     log.debug(s"${allSchemas.size} schemas registered")
     allSchemas
   }
+
+
+  /**
+    * Retrieves all registered schemas
+    *
+    * @return A Sequence of (ID, Schema)
+    */
+  override def getAll: Seq[(Long, Schema)] = cache.getAll
 }

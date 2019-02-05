@@ -13,7 +13,7 @@ lazy val root = Project("darwin", file("."))
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
-  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication)
+  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication, restServer)
 
 lazy val core = Project("darwin-core", file("core"))
   .settings(Settings.commonSettings: _*)
@@ -61,6 +61,19 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.core_deps)
   .settings(crossScalaVersions := Versions.crossScalaVersions)
+  .settings(Settings.notPublishSettings)
+  .enablePlugins(JavaAppPackaging)
+
+lazy val restServer = Project("darwin-rest-server", file("rest-server"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon, mockConnector)
+  .settings(pgpPassphrase := Settings.pgpPass)
+  .settings(libraryDependencies ++= Dependencies.restServer)
+  .settings {
+    crossScalaVersions := Versions.crossScalaVersions
+    crossScalaVersions -= Versions.scala_210
+  }
+  .dependsOn(core, hbaseConnector, postgresConnector, mockConnector)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
 

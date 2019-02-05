@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "dcaadeb7-ecb8-4bc9-9d4d-47fe6a2857df",
+		"name": "darwinrest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get-all-schemas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/schemas/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"schemas",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-one-schema",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/schemas/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"schemas",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "post-a-schema",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\n\t\"type\": \"array\",\n\t\"items\": \"string\"\n}]"
+				},
+				"url": {
+					"raw": "localhost:8080/schemas/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"schemas",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
