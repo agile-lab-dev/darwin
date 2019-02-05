@@ -136,5 +136,10 @@ object Settings {
           <name>Nicolò Bidotti</name>
           <email>nicolo.bidotti@agilelab.it</email>
         </developer>
+        <developer>
+          <id>andrea-rockt</id>
+          <name>Andrea Fonti</name>
+          <email>andrea.fonti@agilelab.it</email>
+        </developer>
       </developers>)
 }

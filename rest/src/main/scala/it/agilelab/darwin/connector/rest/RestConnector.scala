@@ -5,7 +5,7 @@ import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 import scalaj.http.Http
 
-class RestConnector(options: RestConnectorOptions, config: Config) extends Connector(config) with JsonProtocol {
+class RestConnector(options: RestConnectorOptions, config: Config) extends Connector with JsonProtocol {
 
   override def fullLoad(): Seq[(Long, Schema)] = {
     Http(options.endpoint("schemas/")).execute(toSeqOfIdSchema).body

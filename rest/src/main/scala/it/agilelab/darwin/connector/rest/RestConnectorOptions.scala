@@ -5,8 +5,8 @@ import java.net.URI
 import com.typesafe.config.Config
 
 case class RestConnectorOptions(protocol: String, host: String, port: Int, basePath: String) {
-  def endpoint(path: String) : String =
-    URI.create( s"$protocol://$host:$port").resolve(basePath).resolve(path).toString
+  def endpoint(path: String): String =
+    URI.create(s"$protocol://$host:$port").resolve(basePath).resolve(path).toString
 }
 
 object RestConnectorOptions {
@@ -19,7 +19,7 @@ object RestConnectorOptions {
 
   def fromConfig(config: Config): RestConnectorOptions =
     RestConnectorOptions(config.getString(PROTOCOL),
-                         config.getString(HOST),
-                         config.getInt(PORT),
-                         config.getString(BASE_PATH))
+      config.getString(HOST),
+      config.getInt(PORT),
+      config.getString(BASE_PATH))
 }
