@@ -36,6 +36,7 @@ lazy val hbaseConnector = Project("darwin-hbase-connector", file("hbase"))
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.hbase_conn_dep)
   .settings(crossScalaVersions := Versions.crossScalaVersions)
+  .settings(Settings.hbaseTestSettings)
   .enablePlugins(JavaAppPackaging)
 
 lazy val postgresConnector = Project("darwin-postgres-connector", file("postgres"))
