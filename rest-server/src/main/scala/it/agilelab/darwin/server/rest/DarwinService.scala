@@ -14,7 +14,7 @@ trait DarwinService extends Service with Directives with DebuggingDirectives wit
 
   val manager: AvroSchemaManager
 
-  override def route: Route = logRequestResult("darwin", LogLevels.Debug) {
+  override def route: Route = logRequestResult(("darwin", LogLevels.Debug)) {
     get {
       path("schemas" / LongNumber.?) {
         case Some(id) => manager.getSchema(id) match {

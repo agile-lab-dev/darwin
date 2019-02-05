@@ -70,10 +70,7 @@ lazy val restServer = Project("darwin-rest-server", file("rest-server"))
   .dependsOn(coreCommon, mockConnector)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.restServer)
-  .settings {
-    crossScalaVersions := Versions.crossScalaVersions
-    crossScalaVersions -= Versions.scala_210
-  }
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
   .dependsOn(core, hbaseConnector, postgresConnector, mockConnector)
   .enablePlugins(JavaAppPackaging)
 
