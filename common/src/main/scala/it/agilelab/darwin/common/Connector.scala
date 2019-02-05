@@ -1,13 +1,12 @@
 package it.agilelab.darwin.common
 
-import com.typesafe.config.Config
 import org.apache.avro.Schema
 
 /**
   * Generic abstraction of a component capable of reading and writing Schema entities in an external storage.
   * The external storage should keep at least the ID (Long) and the schema (Schema) for each entry.
   */
-abstract class Connector(config: Config) extends Serializable {
+trait Connector extends Serializable {
 
   /**
     * Creates the configured table, if the table already exists, does nothing

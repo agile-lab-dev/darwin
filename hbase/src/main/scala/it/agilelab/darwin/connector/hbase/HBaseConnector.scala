@@ -1,16 +1,16 @@
 package it.agilelab.darwin.connector.hbase
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, Logging, using}
+import it.agilelab.darwin.common.{using, Connector, Logging}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.hbase._
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, Result}
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.hadoop.hbase._
 import org.apache.hadoop.security.UserGroupInformation
 
 import scala.collection.JavaConverters._
@@ -32,7 +32,7 @@ object HBaseConnector extends Logging {
   }
 }
 
-case class HBaseConnector(config: Config) extends Connector(config) with Logging {
+case class HBaseConnector(config: Config) extends Connector with Logging {
 
   val DEFAULT_NAMESPACE: String = "AVRO"
   val DEFAULT_TABLENAME: String = "SCHEMA_REPOSITORY"
@@ -52,7 +52,9 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
   lazy val TABLE_NAME: TableName = TableName.valueOf(Bytes.toBytes(NAMESPACE_STRING), Bytes.toBytes(TABLE_NAME_STRING))
 
   val CF: Array[Byte] = Bytes.toBytes("0")
-  val QUALIFIER: Array[Byte] = Bytes.toBytes("schema")
+  val QUALIFIER_SCHEMA: Array[Byte] = Bytes.toBytes("schema")
+  val QUALIFIER_NAME: Array[Byte] = Bytes.toBytes("name")
+  val QUALIFIER_NAMESPACE: Array[Byte] = Bytes.toBytes("namespace")
 
   log.debug("Creating default HBaseConfiguration")
   val configuration: Configuration = HBaseConfiguration.create()
@@ -104,10 +106,10 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
 
   override def fullLoad(): Seq[(Long, Schema)] = {
     log.debug(s"loading all schemas from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
-    val scanner: Iterable[Result] = connection.getTable(TABLE_NAME).getScanner(CF, QUALIFIER).asScala
+    val scanner: Iterable[Result] = connection.getTable(TABLE_NAME).getScanner(CF, QUALIFIER_SCHEMA).asScala
     val schemas = scanner.map { result =>
       val key = Bytes.toLong(result.getRow)
-      val value = Bytes.toString(result.getValue(CF, QUALIFIER))
+      val value = Bytes.toString(result.getValue(CF, QUALIFIER_SCHEMA))
       key -> parser.parse(value)
     }.toSeq
     log.debug(s"${schemas.size} loaded from HBase")
@@ -119,7 +121,9 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
     val mutator = connection.getBufferedMutator(TABLE_NAME)
     schemas.map { case (id, schema) =>
       val put = new Put(Bytes.toBytes(id))
-      put.addColumn(CF, QUALIFIER, Bytes.toBytes(schema.toString))
+      put.addColumn(CF, QUALIFIER_SCHEMA, Bytes.toBytes(schema.toString))
+      put.addColumn(CF, QUALIFIER_NAME, Bytes.toBytes(schema.getName))
+      put.addColumn(CF, QUALIFIER_NAMESPACE, Bytes.toBytes(schema.getNamespace))
       put
     }.foreach(mutator.mutate)
     mutator.flush()
@@ -154,9 +158,9 @@ case class HBaseConnector(config: Config) extends Connector(config) with Logging
   override def findSchema(id: Long): Option[Schema] = {
     log.debug(s"loading a schema with id = $id from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
     val get: Get = new Get(Bytes.toBytes(id))
-    get.addColumn(CF, QUALIFIER)
+    get.addColumn(CF, QUALIFIER_SCHEMA)
     val result: Result = connection.getTable(TABLE_NAME).get(get)
-    val value: Option[Array[Byte]] = Option(result.getValue(CF, QUALIFIER))
+    val value: Option[Array[Byte]] = Option(result.getValue(CF, QUALIFIER_SCHEMA))
     val schema: Option[Schema] = value.map(v => parser.parse(Bytes.toString(v)))
     log.debug(s"$schema loaded from HBase for id = $id")
     schema

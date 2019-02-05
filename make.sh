@@ -1,2 +1,2 @@
 #!/bin/bash
-sbt clean scalastyle +publishLocal +test:compile +doc
+sbt -mem 2048 clean scalastyle +test +doc ++2.11.12 "project darwin-rest-server" clean test doc ++2.12.7 "project darwin-rest-server" test doc

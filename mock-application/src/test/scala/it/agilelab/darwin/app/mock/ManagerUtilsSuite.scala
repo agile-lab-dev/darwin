@@ -1,20 +1,19 @@
 package it.agilelab.darwin.app.mock
 
 import com.typesafe.config.ConfigFactory
-import it.agilelab.darwin.app.mock.classes.OneField
 import it.agilelab.darwin.manager.AvroSchemaManagerFactory
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Random
 import scala.collection.JavaConverters._
+import scala.util.Random
 
 class ManagerUtilsSuite extends FlatSpec with Matchers {
 
   "AvroSchemaManager utilities" should "create a Single-Object encoded byte array" in {
     val ORIGINAL_LENGTH: Int = 10
-    val originalSchema = new SchemaGenerator[OneField].schema
+    val originalSchema = SchemaReader.readFromResources("OneField.avsc")
     val config = ConfigFactory.parseMap(Map("type" -> "cached_eager").asJava)
       .withFallback(ConfigFactory.load()).resolve()
     val manager = AvroSchemaManagerFactory.initialize(config)

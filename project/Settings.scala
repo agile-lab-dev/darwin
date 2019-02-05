@@ -68,6 +68,14 @@ object Settings {
 
   lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings
 
+
+  lazy val hbaseTestSettings: SettingsDefinition = {
+    //enable resolution of transitive dependencies of jars containing tests
+    //needed to run tests over hbase minicluster
+    transitiveClassifiers in Test := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
+    libraryDependencies  ++= Dependencies.hbaseTestDependencies
+  }
+
   lazy val notPublishSettings = Seq(skip in publish := true)
 
   lazy val myCredentials = Credentials(
@@ -127,6 +135,11 @@ object Settings {
           <id>nbidotti</id>
           <name>Nicolò Bidotti</name>
           <email>nicolo.bidotti@agilelab.it</email>
+        </developer>
+        <developer>
+          <id>andrea-rockt</id>
+          <name>Andrea Fonti</name>
+          <email>andrea.fonti@agilelab.it</email>
         </developer>
       </developers>)
 }
