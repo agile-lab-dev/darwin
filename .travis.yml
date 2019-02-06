@@ -1,8 +1,7 @@
 language: scala
 script:
-  - ./make.sh
+  - if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 
-jdk: oraclejdk8
 sudo: false # container based infrastructure
 cache:
   directories:
