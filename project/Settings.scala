@@ -1,6 +1,7 @@
 import sbt.Def
 import sbt.Keys._
 import sbt._
+import org.scalastyle.sbt.ScalastylePlugin.autoImport._
 import com.typesafe.sbt.pgp.PgpKeys.pgpPassphrase
 /**
   * @author andreaL
@@ -66,7 +67,8 @@ object Settings {
     scalaVersion := Versions.scala
   )
 
-  lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings
+  lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++ 
+    scalastyleSettings
 
 
   lazy val hbaseTestSettings: SettingsDefinition = {
@@ -86,6 +88,8 @@ object Settings {
   )
 
   lazy val pgpPass: Option[Array[Char]] = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
+  
+  lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
 
   lazy val publishSettings = Seq(
     publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),
