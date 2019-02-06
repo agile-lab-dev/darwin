@@ -1,6 +1,7 @@
 language: scala
 script:
-  - if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
+  ./make.sh
+  #- if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 sudo: false
 cache:
   directories:
@@ -19,3 +20,11 @@ before_install:
   - mkdir -p $HOME/.sbt/gpg/
   - tar xzvf rings.asc.tar
   - cp *.asc $HOME/.sbt/gpg/
+git:
+  depth: false
+branches:
+  only:
+    - master
+    - develop
+    - /^feature\/.*$/
+    - /^release\/.*$/
