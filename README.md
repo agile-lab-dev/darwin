@@ -16,7 +16,7 @@ Table of contents
   - [General](#general)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
-    [REST](#rest)
+  - [REST](#rest)
 ---
 
 Overview
@@ -308,7 +308,7 @@ The configuration keys managed by the `RestConnector` are:
 - 
 - **protocol**: http or https
 - **host**: the hostname where rest-server (or an http proxy) is deployed
-- **port**: the port wwhere rest-server (or an http proxy) is listening
+- **port**: the port where rest-server (or an http proxy) is listening
 - **basePath**: the path that should be prefixed to all requests (useful if rest-server is running behind a reverse proxy)
 
 Example of configuration for the `RestConnector`:
@@ -321,7 +321,7 @@ Example of configuration for the `RestConnector`:
 
 ### REST Server
 
-A rest server is provided by module rest-server, just run main class
+A rest server is provided by module rest-server (only for scala 2.11 and 2.12), just run main class
 
 `it.agilelab.darwin.server.rest.Main`
 
@@ -339,7 +339,7 @@ darwin {
   connector = "mock"
 }
 
-darwin-rest{
+darwin-rest {
   interface = "localhost"
   port = 8080
 }
