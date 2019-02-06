@@ -14,4 +14,5 @@ before_cache:
 before_install:
   - openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv
     -in secring.asc.enc -out secring.asc -d
+  - mkdir -p $HOME/.sbt/gpg/
   - cp secring.asc $HOME/.sbt/gpg/secring.asc
