@@ -2,7 +2,7 @@ package it.agilelab.darwin.manager
 
 import it.agilelab.darwin.common.{Connector, Logging}
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
-import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
 
