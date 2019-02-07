@@ -2,7 +2,7 @@ package it.agilelab.darwin.manager
 
 import it.agilelab.darwin.common.{Connector, Logging}
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
-import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
 
@@ -26,7 +26,7 @@ abstract class AvroSchemaManager(connector: Connector) extends Logging {
     * @param schema a Schema with unknown ID
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema): Long = SchemaNormalization.parsingFingerprint64(schema)
+  def getId(schema: Schema): Long = AvroSingleObjectEncodingUtils.getId(schema)
 
   /**
     * Extracts the Schema from its ID.
