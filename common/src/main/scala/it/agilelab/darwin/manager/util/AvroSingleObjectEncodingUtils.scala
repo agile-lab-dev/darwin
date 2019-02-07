@@ -2,6 +2,7 @@ package it.agilelab.darwin.manager.util
 
 import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
+import org.apache.avro.{Schema, SchemaNormalization}
 
 object AvroSingleObjectEncodingUtils {
   private val V1_HEADER = Array[Byte](0xC3.toByte, 0x01.toByte)
@@ -55,4 +56,12 @@ object AvroSingleObjectEncodingUtils {
   def dropHeader(avroSingleObjectEncoded: Array[Byte]): Array[Byte] = {
     avroSingleObjectEncoded.drop(HEADER_LENGTH)
   }
+
+  /**
+    * Extracts the ID from a Schema.
+    *
+    * @param schema a Schema with unknown ID
+    * @return the ID associated with the input schema
+    */
+  def getId(schema: Schema): Long = SchemaNormalization.parsingFingerprint64(schema)
 }
