@@ -12,7 +12,7 @@ object AvroSingleObjectEncodingUtils {
   /** Exception that can be thrown if the data is not single-object encoded
     */
   lazy val parseException = new DarwinException(s"Byte array is not in correct format." +
-    s" First ${V1_HEADER.length} bytes are not equal to $V1_HEADER")
+    s" First ${V1_HEADER.length} bytes are not equal to ${byteArray2HexString(V1_HEADER)}")
 
   /** Checks if a byte array is Avro Single-Object encoded (
     * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
@@ -64,4 +64,14 @@ object AvroSingleObjectEncodingUtils {
     * @return the ID associated with the input schema
     */
   def getId(schema: Schema): Long = SchemaNormalization.parsingFingerprint64(schema)
+
+  /** Converts a byte array into its hexadecimal string representation
+    * e.g. for the V1_HEADER => [C3 01]
+    *
+    * @param bytes a byte array
+    * @return the hexadecimal string representation of the input byte array
+    */
+  def byteArray2HexString(bytes: Array[Byte]): String = {
+    bytes.map("%02X".format(_)).mkString("["," ","]")
+  }
 }

@@ -1,6 +1,7 @@
 package it.agilelab.darwin.manager
 
 import it.agilelab.darwin.common.{Connector, Logging}
+import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import org.apache.avro.Schema
 
@@ -75,8 +76,13 @@ abstract class AvroSchemaManager(connector: Connector) extends Logging {
     */
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) = {
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      getSchema(AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)).get ->
-        AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
+      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)
+      getSchema(id) match {
+        case Some(schema) =>
+          schema -> AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
+        case _ =>
+          throw new DarwinException(s"No schema found for ID $id")
+      }
     }
     else {
       throw AvroSingleObjectEncodingUtils.parseException
