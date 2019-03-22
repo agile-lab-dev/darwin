@@ -9,4 +9,6 @@ package object common {
       closeable.close()
     }
   }
+
+  final val LONG_SIZE = 8
 }
