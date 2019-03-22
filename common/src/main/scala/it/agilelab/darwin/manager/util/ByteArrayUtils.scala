@@ -1,23 +1,30 @@
 package it.agilelab.darwin.manager.util
 
+import java.io.OutputStream
 import java.nio.ByteBuffer
-import java.util.concurrent.ConcurrentHashMap
 
 import it.agilelab.darwin.common.LONG_SIZE
 
-import java.util.function.{Function => JFunction}
 
 private[darwin] object ByteArrayUtils {
 
-  val longToBytes = new ConcurrentHashMap[Long, Array[Byte]]()
 
   implicit class EnrichedLong(val l: Long) extends AnyVal {
     /** Converts Long to Array[Byte].
       */
     def longToByteArray: Array[Byte] = {
-      longToBytes.computeIfAbsent(l, new JFunction[Long, Array[Byte]] {
-        override def apply(t: Long): Array[Byte] = ByteBuffer.allocate(LONG_SIZE).putLong(l).array()
-      })
+      ByteBuffer.allocate(LONG_SIZE).putLong(l).array()
+    }
+
+    def writeToStream(os: OutputStream): Unit = {
+      os.write((l >>> 56).asInstanceOf[Int])
+      os.write((l >>> 48).asInstanceOf[Int])
+      os.write((l >>> 40).asInstanceOf[Int])
+      os.write((l >>> 32).asInstanceOf[Int])
+      os.write((l >>> 24).asInstanceOf[Int])
+      os.write((l >>> 16).asInstanceOf[Int])
+      os.write((l >>> 8).asInstanceOf[Int])
+      os.write((l >>> 0).asInstanceOf[Int])
     }
   }
 

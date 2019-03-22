@@ -80,7 +80,7 @@ object AvroSingleObjectEncodingUtils {
   def writeHeaderToStream(byteStream: OutputStream,
                           schemaId: Long): OutputStream = {
     byteStream.write(V1_HEADER)
-    byteStream.write(schemaId.longToByteArray)
+    schemaId.writeToStream(byteStream)
     byteStream
   }
 
@@ -112,7 +112,7 @@ object AvroSingleObjectEncodingUtils {
                                       schemaId: Long)
                                      (avroWriter: OutputStream => OutputStream): OutputStream = {
     byteStream.write(V1_HEADER)
-    byteStream.write(schemaId.longToByteArray)
+    schemaId.writeToStream(byteStream)
     avroWriter(byteStream)
   }
 
