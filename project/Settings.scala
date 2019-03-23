@@ -2,7 +2,8 @@ import sbt.Def
 import sbt.Keys._
 import sbt._
 import org.scalastyle.sbt.ScalastylePlugin.autoImport._
-import com.typesafe.sbt.pgp.PgpKeys.pgpPassphrase
+import com.typesafe.sbt.SbtPgp.autoImport._
+
 /**
   * @author andreaL
   */
@@ -67,7 +68,7 @@ object Settings {
     scalaVersion := Versions.scala
   )
 
-  lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++ 
+  lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++
     scalastyleSettings
 
 
@@ -75,7 +76,7 @@ object Settings {
     //enable resolution of transitive dependencies of jars containing tests
     //needed to run tests over hbase minicluster
     transitiveClassifiers in Test := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
-    libraryDependencies  ++= Dependencies.hbaseTestDependencies
+    libraryDependencies ++= Dependencies.hbaseTestDependencies
   }
 
   lazy val notPublishSettings = Seq(skip in publish := true)
@@ -87,8 +88,17 @@ object Settings {
     System.getenv().get("BINTRAY_API_KEY")
   )
 
+  lazy val ciPublishSettings = {
+    if (System.getenv().containsKey("TRAVIS")) {
+      Seq(pgpSecretRing := file("./secring.asc"),
+        pgpPublicRing := file("./pubring.asc"))
+    } else {
+      Seq.empty
+    }
+  }
+
   lazy val pgpPass: Option[Array[Char]] = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
-  
+
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
 
   lazy val publishSettings = Seq(
@@ -96,6 +106,7 @@ object Settings {
     credentials += myCredentials,
     publishMavenStyle := true,
     updateOptions := updateOptions.value.withGigahorse(false),
+    useGpg := false,
     pomExtra := <scm>
       <connection>
         scm:git:git://github.com/agile-lab-dev/darwin.git
@@ -145,5 +156,6 @@ object Settings {
           <name>Andrea Fonti</name>
           <email>andrea.fonti@agilelab.it</email>
         </developer>
-      </developers>)
+      </developers>
+  ) ++ ciPublishSettings
 }
