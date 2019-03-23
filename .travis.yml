@@ -1,7 +1,6 @@
 language: scala
 script:
-  ./make.sh
-  - if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
+  if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 sudo: false
 cache:
   directories:
