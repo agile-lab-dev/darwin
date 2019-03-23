@@ -1,10 +1,15 @@
 package it.agilelab.darwin.manager
 
+import java.io.OutputStream
+import java.nio.ByteBuffer
+
 import it.agilelab.darwin.common.{Connector, Logging}
+import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
-import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
+import java.io.InputStream
 
 /**
   * The main entry point of the Darwin library.
@@ -20,13 +25,14 @@ abstract class AvroSchemaManager(connector: Connector) extends Logging {
     * @return A Sequence of (ID, Schema)
     */
   def getAll: Seq[(Long, Schema)]
+
   /**
     * Extracts the ID from a Schema.
     *
     * @param schema a Schema with unknown ID
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema): Long = SchemaNormalization.parsingFingerprint64(schema)
+  def getId(schema: Schema): Long = AvroSingleObjectEncodingUtils.getId(schema)
 
   /**
     * Extracts the Schema from its ID.
@@ -68,6 +74,34 @@ abstract class AvroSchemaManager(connector: Connector) extends Logging {
     AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(avroPayload, getId(schema))
   }
 
+  /** Writes to the given OutputStream the Single Object Encoding header then the avroValue and returns the OutputStream
+    *
+    * @param byteStream the stream to write to
+    * @param avroValue  the value to be written to the stream
+    * @param schemaId   id of the schema used to encode the payload
+    * @return the input OutputStream
+    */
+  def generateAvroSingleObjectEncoded(byteStream: OutputStream,
+                                      avroValue: Array[Byte],
+                                      schemaId: Long): OutputStream = {
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(byteStream, avroValue, schemaId)
+  }
+
+  /** Writes to the given OutputStream the Single Object Encoding header then calls the avroWriter function to
+    * possibly add data to the stream and finally returns the OutputStream
+    *
+    * @param byteStream the stream to write to
+    * @param schemaId   id of the schema used to encode the payload
+    * @param avroWriter function that will be called to add user generated avro to the stream
+    * @return the input OutputStream
+    */
+  def generateAvroSingleObjectEncoded(byteStream: OutputStream,
+                                      schemaId: Long)
+                                     (avroWriter: OutputStream => OutputStream): OutputStream = {
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(byteStream, schemaId)(avroWriter)
+  }
+
+
   /** Extracts a Tuple2 that contains the Schema and the Avro-encoded payload
     *
     * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
@@ -75,11 +109,49 @@ abstract class AvroSchemaManager(connector: Connector) extends Logging {
     */
   def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) = {
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      getSchema(AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)).get ->
-        AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
+      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)
+      getSchema(id) match {
+        case Some(schema) =>
+          schema -> AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
+        case _ =>
+          throw new DarwinException(s"No schema found for ID $id")
+      }
     }
     else {
       throw AvroSingleObjectEncodingUtils.parseException
+    }
+  }
+
+  /** Extracts the Schema from the ByteBuffer after the method call the ByteBuffer position will be right after the
+    * header.
+    *
+    * @param avroSingleObjectEncoded a ByteBuffer of a Single-Object encoded payload
+    * @return the avro Schema
+    */
+  def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: ByteBuffer): Schema = {
+    if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
+      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded)
+      getSchema(id) match {
+        case Some(schema) => schema
+        case _ => throw new DarwinException(s"No schema found for ID $id")
+      }
+    }
+    else {
+      throw AvroSingleObjectEncodingUtils.parseException
+    }
+  }
+
+  /** Extracts the schema from the avro single-object encoded at the head of this input stream.
+    * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
+    * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
+    * be consumed and returned in the Left part of the Either
+    *
+    * @param inputStream avro single-object encoded input stream
+    * @return the schema ID extracted from the input data
+    */
+  def extractSchema(inputStream: InputStream): Either[Array[Byte], Schema] = {
+    AvroSingleObjectEncodingUtils.extractId(inputStream).right.map { id =>
+      getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
   }
 

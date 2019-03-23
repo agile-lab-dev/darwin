@@ -1,5 +1,7 @@
 package it.agilelab.darwin.app.mock
 
+import java.nio.ByteBuffer
+
 import com.typesafe.config.ConfigFactory
 import it.agilelab.darwin.manager.AvroSchemaManagerFactory
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
@@ -29,7 +31,8 @@ class ManagerUtilsSuite extends FlatSpec with Matchers {
 
   it should "convert a long to byte array and back" in {
     val longs = (1 to 10).map(_ => Random.nextLong())
-    assert(longs == longs.map(_.longToByteArray.byteArrayToLong))
+
+    assert(longs == longs.map(x => ByteBuffer.wrap(x.longToByteArray).getLong))
   }
 
 }

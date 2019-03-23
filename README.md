@@ -1,5 +1,7 @@
 # Darwin
 
+[![Build Status](https://travis-ci.org/agile-lab-dev/darwin.svg?branch=master)](https://travis-ci.org/agile-lab-dev/darwin)
+
 <img align="right" height="260" src="docs/img/logo/darwin-icon.svg">
 
 Table of contents
@@ -16,7 +18,7 @@ Table of contents
   - [General](#general)
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
-    [REST](#rest)
+  - [REST](#rest)
 ---
 
 Overview
@@ -38,14 +40,14 @@ In order to access to Darwin core functionalities add the core dependency to you
 
 #### sbt
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.7"
+libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.8"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-core_2.11</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
 </dependency>
 ```
 
@@ -55,14 +57,14 @@ Then add the connector of your choice, either HBase:
 
 #### sbt
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.7"
+libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.8"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-hbase-connector_2.11</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
 </dependency>
 ```
 
@@ -73,14 +75,14 @@ Or PostgreSql:
 ### sbt
 
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.7"
+libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.8"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-postgres-connector_2.11</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
 </dependency>
 ```
 
@@ -114,14 +116,14 @@ Or Mock (only for test scenarios):
 ### sbt
 
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.0.7"
+libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.0.8"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-mock-connector_2.11</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
 </dependency>
 ```
 
@@ -308,7 +310,7 @@ The configuration keys managed by the `RestConnector` are:
 - 
 - **protocol**: http or https
 - **host**: the hostname where rest-server (or an http proxy) is deployed
-- **port**: the port wwhere rest-server (or an http proxy) is listening
+- **port**: the port where rest-server (or an http proxy) is listening
 - **basePath**: the path that should be prefixed to all requests (useful if rest-server is running behind a reverse proxy)
 
 Example of configuration for the `RestConnector`:
@@ -321,7 +323,7 @@ Example of configuration for the `RestConnector`:
 
 ### REST Server
 
-A rest server is provided by module rest-server, just run main class
+A rest server is provided by module rest-server (only for scala 2.11 and 2.12), just run main class
 
 `it.agilelab.darwin.server.rest.Main`
 
@@ -339,7 +341,7 @@ darwin {
   connector = "mock"
 }
 
-darwin-rest{
+darwin-rest {
   interface = "localhost"
   port = 8080
 }
