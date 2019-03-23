@@ -17,7 +17,7 @@ before_cache:
 before_install:
   - openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d
   - mkdir -p $HOME/.sbt/gpg/
-  - tar xzvf rings.tar
+  - tar xvf rings.tar
   - cp *.asc $HOME/.sbt/gpg/
 git:
   depth: false
