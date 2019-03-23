@@ -15,9 +15,7 @@ before_cache:
   - find $HOME/.sbt        -name "*.lock"               -print -delete
 before_install:
   - openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d
-  - mkdir -p $HOME/.sbt/gpg/
   - tar xvf rings.tar
-  - cp *.asc $HOME/.sbt/gpg/
 git:
   depth: false
 branches:
@@ -27,3 +25,5 @@ branches:
     - /^feature\/.*$/
     - /^release\/.*$/
     - /^hotfix\/.*$/
+    - /^hotfix\/.*$/
+    - /^\d+\.\d+(\.\d+)?$/
