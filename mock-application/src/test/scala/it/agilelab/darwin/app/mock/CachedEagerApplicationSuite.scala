@@ -15,12 +15,15 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.JavaConverters._
 
-class CachedEagerApplicationSuite extends FlatSpec with Matchers {
+class BigEndianCachedEagerApplicationSuite extends CachedEagerApplicationSuite(ByteOrder.BIG_ENDIAN)
+
+class LittleEndianCachedEagerApplicationSuite extends CachedEagerApplicationSuite(ByteOrder.LITTLE_ENDIAN)
+
+abstract class CachedEagerApplicationSuite(val endianness: ByteOrder) extends FlatSpec with Matchers {
 
   val config: Config = ConfigFactory.load()
   val connector: Connector = ConnectorFactory.connector(config)
-  val manager: AvroSchemaManager = new CachedEagerAvroSchemaManager(connector, ByteOrder.BIG_ENDIAN)
-  val endianness: ByteOrder = ByteOrder.BIG_ENDIAN
+  val manager: AvroSchemaManager = new CachedEagerAvroSchemaManager(connector, endianness)
 
   "CachedEagerAvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))

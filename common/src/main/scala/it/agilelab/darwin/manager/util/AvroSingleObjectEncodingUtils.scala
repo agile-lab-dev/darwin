@@ -154,15 +154,26 @@ object AvroSingleObjectEncodingUtils {
         s"required to store the Single-Object Encoder header")
     } else {
       avroSingleObjectEncoded.position(avroSingleObjectEncoded.position() + V1_HEADER.length)
-      if (avroSingleObjectEncoded.order() == endianness) {
-        avroSingleObjectEncoded.getLong
-      } else {
-        val lastEndianness = avroSingleObjectEncoded.order()
-        avroSingleObjectEncoded.order(endianness)
-        val toRet = avroSingleObjectEncoded.getLong
-        avroSingleObjectEncoded.order(lastEndianness)
-        toRet
-      }
+      readLong(avroSingleObjectEncoded, endianness)
+    }
+  }
+
+  /**
+    * Reads the content of the byte buffer honoring the input endianness and returns it.
+    * When this method returns the buffer position will 8 bytes forward but the byte order will be unchanged whatever
+    * the values of endianness and buf.order() are.
+    */
+  @inline
+  def readLong(buf: ByteBuffer,
+               endianness: ByteOrder): Long = {
+    if (buf.order() == endianness) {
+      buf.getLong
+    } else {
+      val lastEndianness = buf.order()
+      buf.order(endianness)
+      val toRet = buf.getLong
+      buf.order(lastEndianness)
+      toRet
     }
   }
 

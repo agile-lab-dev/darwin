@@ -11,7 +11,11 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.collection.JavaConverters._
 import scala.util.Random
 
-class ManagerUtilsSuite extends FlatSpec with Matchers {
+class BigEndianManagerUtilsSuite extends ManagerUtilsSuite(ByteOrder.BIG_ENDIAN)
+
+class LittleEndianManagerUtilsSuite extends ManagerUtilsSuite(ByteOrder.LITTLE_ENDIAN)
+
+abstract class ManagerUtilsSuite(endianness: ByteOrder) extends FlatSpec with Matchers {
 
   "AvroSchemaManager utilities" should "create a Single-Object encoded byte array" in {
     val ORIGINAL_LENGTH: Int = 10
@@ -19,7 +23,7 @@ class ManagerUtilsSuite extends FlatSpec with Matchers {
     val config =
       ConfigFactory.parseMap(Map(
         ConfigurationKeys.MANAGER_TYPE -> ConfigurationKeys.CACHED_EAGER,
-        ConfigurationKeys.ENDIANNESS -> "BIG_ENDIAN").asJava)
+        ConfigurationKeys.ENDIANNESS -> endianness.toString).asJava)
         .withFallback(ConfigFactory.load()).resolve()
     val manager = AvroSchemaManagerFactory.initialize(config)
     manager.registerAll(Seq(originalSchema))
@@ -35,7 +39,8 @@ class ManagerUtilsSuite extends FlatSpec with Matchers {
   it should "convert a long to byte array and back" in {
     val longs = (1 to 10).map(_ => Random.nextLong())
 
-    assert(longs == longs.map(x => ByteBuffer.wrap(x.longToByteArray(ByteOrder.BIG_ENDIAN)).getLong))
+    assert(longs == longs.map(x => AvroSingleObjectEncodingUtils
+      .readLong(ByteBuffer.wrap(x.longToByteArray(endianness)), endianness)))
   }
 
 }
