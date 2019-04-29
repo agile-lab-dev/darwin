@@ -1,5 +1,7 @@
 package it.agilelab.darwin.manager
 
+import java.nio.ByteOrder
+
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 
@@ -7,7 +9,8 @@ import org.apache.avro.Schema
   * Implementation of CachedAvroSchemaManager that loads all the schemas into the cache at startup and perform
   * all the retrieves onto the cache; an access to the storage is performed only if there is a cache miss.
   */
-class CachedLazyAvroSchemaManager (connector: Connector) extends CachedAvroSchemaManager(connector) {
+class CachedLazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
+  extends CachedAvroSchemaManager(connector, endianness) {
 
   override def getSchema(id: Long): Option[Schema] = {
     cache.getSchema(id).orElse {

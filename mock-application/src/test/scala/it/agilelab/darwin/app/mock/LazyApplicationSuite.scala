@@ -1,6 +1,7 @@
 package it.agilelab.darwin.app.mock
 
 import java.lang.reflect.Modifier
+import java.nio.ByteOrder
 
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.annotations.AvroSerde
@@ -18,7 +19,7 @@ class LazyApplicationSuite extends FlatSpec with Matchers {
 
   val config: Config = ConfigFactory.load()
   val connector: Connector = ConnectorFactory.connector(config)
-  val manager: AvroSchemaManager = new LazyAvroSchemaManager(connector)
+  val manager: AvroSchemaManager = new LazyAvroSchemaManager(connector, ByteOrder.BIG_ENDIAN)
 
   "LazyAvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))

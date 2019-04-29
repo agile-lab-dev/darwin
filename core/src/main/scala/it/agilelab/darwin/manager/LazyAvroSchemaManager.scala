@@ -1,5 +1,7 @@
 package it.agilelab.darwin.manager
 
+import java.nio.ByteOrder
+
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 
@@ -7,7 +9,8 @@ import org.apache.avro.Schema
   * Implementation of AvroSchemaManager that performs all the operations directly on the storage (retrievals and
   * insertions).
   */
-class LazyAvroSchemaManager (connector: Connector) extends AvroSchemaManager(connector) {
+class LazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
+  extends AvroSchemaManager(connector, endianness) {
 
   override def getSchema(id: Long): Option[Schema] = connector.findSchema(id)
 

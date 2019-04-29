@@ -35,10 +35,14 @@ object AvroSchemaManagerFactory extends Logging {
     val mappingFunc = new JFunction[String, AvroSchemaManager] {
       override def apply(t: String): AvroSchemaManager = {
         log.debug("creating instance of AvroSchemaManager")
+        val endianness = ConfigUtil.stringToEndianness(config.getString(ConfigurationKeys.ENDIANNESS))
         val result = config.getString(ConfigurationKeys.MANAGER_TYPE) match {
-          case ConfigurationKeys.CACHED_EAGER => new CachedEagerAvroSchemaManager(ConnectorFactory.connector(config))
-          case ConfigurationKeys.CACHED_LAZY => new CachedLazyAvroSchemaManager(ConnectorFactory.connector(config))
-          case ConfigurationKeys.LAZY => new LazyAvroSchemaManager(ConnectorFactory.connector(config))
+          case ConfigurationKeys.CACHED_EAGER =>
+            new CachedEagerAvroSchemaManager(ConnectorFactory.connector(config), endianness)
+          case ConfigurationKeys.CACHED_LAZY =>
+            new CachedLazyAvroSchemaManager(ConnectorFactory.connector(config), endianness)
+          case ConfigurationKeys.LAZY =>
+            new LazyAvroSchemaManager(ConnectorFactory.connector(config), endianness)
           case _ => throw new IllegalArgumentException(s"No valid manager can be created for" +
             s" ${ConfigurationKeys.MANAGER_TYPE} key ${config.getString(ConfigurationKeys.MANAGER_TYPE)}")
         }

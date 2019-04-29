@@ -1,7 +1,7 @@
 package it.agilelab.darwin.manager.util
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.nio.{BufferUnderflowException, ByteBuffer}
+import java.nio.{BufferUnderflowException, ByteBuffer, ByteOrder}
 import java.util
 
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
@@ -13,10 +13,11 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
-class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
+abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) extends FlatSpec with Matchers {
   val sizeOfBuffer = 200
   val testId = 4560514203639509981L
   val parser = new Schema.Parser()
+
   val schema = parser.parse(
     """{
       |     "type": "record",
@@ -50,22 +51,22 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
   }
 
   "extractId(InputStream)" should "return id = 77 and consume the stream" in {
-    val stream = new ByteArrayInputStream(Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray)
-    val id = AvroSingleObjectEncodingUtils.extractId(stream)
+    val stream = new ByteArrayInputStream(Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray(endianness))
+    val id = AvroSingleObjectEncodingUtils.extractId(stream, endianness)
     id should be(Right(testId))
     stream.read() should be(-1)
   }
 
   "extractId(InputStream)" should "return Left if the input stream is empty" in {
     val stream = new ByteArrayInputStream(Array.emptyByteArray)
-    val id = AvroSingleObjectEncodingUtils.extractId(stream)
+    val id = AvroSingleObjectEncodingUtils.extractId(stream, endianness)
     id.left.map(_.length == 0) should be(Left(true))
     stream.read() should be(-1)
   }
 
   "extractId(InputStream)" should "return Left if the input stream has only one byte" in {
     val stream = new ByteArrayInputStream(Array(Random.nextInt().toByte))
-    val id = AvroSingleObjectEncodingUtils.extractId(stream)
+    val id = AvroSingleObjectEncodingUtils.extractId(stream, endianness)
     id.left.map(_.length == 1) should be(Left(true))
     stream.read() should not be (-1)
     stream.read() should be(-1)
@@ -73,7 +74,7 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
 
   "extractId(InputStream)" should "return Left if the input stream does not have the expected header" in {
     val stream = new ByteArrayInputStream(Array(0xC3.toByte, 0x02.toByte))
-    val id = AvroSingleObjectEncodingUtils.extractId(stream)
+    val id = AvroSingleObjectEncodingUtils.extractId(stream, endianness)
     id.left.map(_.sameElements(Array(0xC3.toByte, 0x02.toByte))) should be(Left(true))
     stream.read().toByte should be(0xC3.toByte)
     stream.read().toByte should be(0x02.toByte)
@@ -82,25 +83,25 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
 
   "writeHeaderToStream" should "write the header in the stream" in {
     val os = new ByteArrayOutputStream()
-    AvroSingleObjectEncodingUtils.writeHeaderToStream(os, testId)
-    os.toByteArray.sameElements(Array(testId.longToByteArray))
+    AvroSingleObjectEncodingUtils.writeHeaderToStream(os, testId, endianness)
+    os.toByteArray.sameElements(Array(testId.longToByteArray(endianness)))
   }
 
   "extractId(ByteBuffer)" should "return id = 77 and consume the buffer" in {
-    val buffer = ByteBuffer.wrap(Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray)
-    val id = AvroSingleObjectEncodingUtils.extractId(buffer)
+    val buffer = ByteBuffer.wrap(Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray(endianness))
+    val id = AvroSingleObjectEncodingUtils.extractId(buffer, endianness)
     id should be(testId)
     buffer.hasRemaining should be(false)
   }
 
   "extractId(ByteBuffer)" should "throw an IllegalArgumentException" in {
     val buffer = ByteBuffer.wrap(Array.emptyByteArray)
-    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(buffer)
+    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(buffer, endianness)
   }
 
   "extractId(ByteBuffer)" should "throw an IllegalArgumentException if the buffer has only one byte" in {
     val stream = ByteBuffer.wrap(Array(Random.nextInt().toByte))
-    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream)
+    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream, endianness)
     stream.get()
     a[BufferUnderflowException] should be thrownBy stream.get()
   }
@@ -109,7 +110,7 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
     "if the buffer does not have the expected header" in {
 
     val stream = ByteBuffer.wrap(Array(0xC3.toByte, 0x02.toByte))
-    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream)
+    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream, endianness)
     stream.get should be(0xC3.toByte)
     stream.get should be(0x02.toByte)
     a[BufferUnderflowException] should be thrownBy stream.get
@@ -117,54 +118,54 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
 
 
   "extractId(Array[Byte])" should "return id = 77 and consume the buffer" in {
-    val buffer = Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray
-    val id = AvroSingleObjectEncodingUtils.extractId(buffer)
+    val buffer = Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray(endianness)
+    val id = AvroSingleObjectEncodingUtils.extractId(buffer, endianness)
     id should be(testId)
   }
 
   "extractId(Array[Byte])" should "throw an IllegalArgumentException" in {
     val buffer = Array.emptyByteArray
-    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(buffer)
+    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(buffer, endianness)
   }
 
   "extractId(Array[Byte])" should "throw an IllegalArgumentException if the buffer has only one byte" in {
     val stream = Array(Random.nextInt().toByte)
-    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream)
+    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream, endianness)
   }
 
   "extractId(Array[Byte])" should "throw an IllegalArgumentException " +
     "if the buffer does not have the expected header" in {
 
     val stream = Array(0xC3.toByte, 0x02.toByte)
-    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream)
+    a[IllegalArgumentException] should be thrownBy AvroSingleObjectEncodingUtils.extractId(stream, endianness)
   }
 
   "generateAvroSingleObjectEncoded(Array[Byte])" should "generate a single object encoded array" in {
     val buffer = new Array[Byte](sizeOfBuffer)
     Random.nextBytes(buffer)
 
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(buffer, testId) should contain theSameElementsAs (
-      Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray ++ buffer)
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(buffer, testId, endianness) should contain theSameElementsAs (
+      Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray(endianness) ++ buffer)
   }
 
   "generateAvroSingleObjectEncoded(OutputStream)" should "generate a single object encoded array" in {
     val random = new Array[Byte](sizeOfBuffer)
     Random.nextBytes(random)
     val bos = new ByteArrayOutputStream()
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(bos, random, testId)
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(bos, random, testId, endianness)
       .asInstanceOf[ByteArrayOutputStream].toByteArray should contain theSameElementsAs (
-      Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray ++ random)
+      Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray(endianness) ++ random)
   }
 
   "generateAvroSingleObjectEncoded(OutputStream)2" should "generate a single object encoded array" in {
     val random = new Array[Byte](sizeOfBuffer)
     Random.nextBytes(random)
     val bos = new ByteArrayOutputStream()
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(bos, testId) { x =>
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(bos, testId, endianness) { x =>
       x.write(random)
       x
     }.asInstanceOf[ByteArrayOutputStream].toByteArray should contain theSameElementsAs (
-      Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray ++ random)
+      Array(0xC3.toByte, 0x01.toByte) ++ testId.longToByteArray(endianness) ++ random)
   }
 
   "dropHeader" should "drop the first 10 bytes of the array" in {
@@ -174,7 +175,7 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
 
   "getId" should "return the testId" in {
 
-    AvroSingleObjectEncodingUtils.getId(schema) should be(testId)
+    AvroSingleObjectEncodingUtils.getId(schema, endianness) should be(testId)
   }
 
 
@@ -186,16 +187,17 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
     val stream = new ByteArrayOutputStream()
     val encoder = EncoderFactory.get.binaryEncoder(stream, null)
     val writer = new GenericDatumWriter[GenericRecord](schema)
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema)) {
-      os =>
-        writer.write(record, encoder)
-        writer.write(record, encoder)
-        os
-    }
+    AvroSingleObjectEncodingUtils
+      .generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema, endianness), endianness) {
+        os =>
+          writer.write(record, encoder)
+          writer.write(record, encoder)
+          os
+      }
     encoder.flush()
     val iStream = new ByteArrayInputStream(stream.toByteArray)
 
-    AvroSingleObjectEncodingUtils.extractId(iStream).right.map { id =>
+    AvroSingleObjectEncodingUtils.extractId(iStream, endianness).right.map { id =>
       id should be(testId)
       val decoder = DecoderFactory.get().binaryDecoder(iStream, null)
       val reader = new GenericDatumReader[GenericRecord](schema)
@@ -216,11 +218,11 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
     val stream = new ByteArrayOutputStream()
     val encoder = EncoderFactory.get.binaryEncoder(stream, null)
     val writer = new GenericDatumWriter[GenericRecord](schema)
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema)) {
-      os =>
-        writer.write(record, encoder)
-        writer.write(record, encoder)
-        os
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(stream,
+      AvroSingleObjectEncodingUtils.getId(schema, endianness), endianness) { os =>
+      writer.write(record, encoder)
+      writer.write(record, encoder)
+      os
     }
     encoder.flush()
     val buffer = ByteBuffer.allocateDirect(stream.toByteArray.length)
@@ -228,7 +230,7 @@ class AvroSingleObjectEncodingUtilsSpec extends FlatSpec with Matchers {
     buffer.rewind()
 
     val iStream = new ByteBufferInputStream(util.Arrays.asList(buffer))
-    val id = AvroSingleObjectEncodingUtils.extractId(buffer)
+    val id = AvroSingleObjectEncodingUtils.extractId(buffer, endianness)
     id should be(testId)
     val decoder = DecoderFactory.get().binaryDecoder(iStream, null)
     val reader = new GenericDatumReader[GenericRecord](schema)
