@@ -1,5 +1,7 @@
 package it.agilelab.darwin.app.spark
 
+import java.nio.ByteOrder
+
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.app.spark.classes._
 import it.agilelab.darwin.manager.AvroSchemaManagerFactory
@@ -11,6 +13,8 @@ import org.slf4j.{Logger, LoggerFactory}
 object SchemaManagerSparkApp extends GenericMainClass with SparkManager {
 
   val mainLogger: Logger = LoggerFactory.getLogger("SchemaManagerSparkApp")
+
+  val endianness: ByteOrder = ByteOrder.BIG_ENDIAN
 
   override protected def runJob(settings: Config)(implicit fs: FileSystem, sparkSession: SparkSession): Int = {
     import sparkSession.implicits._
@@ -41,7 +45,6 @@ object SchemaManagerSparkApp extends GenericMainClass with SparkManager {
     }
     d2.count()
     mainLogger.info("All schemas obtained")
-
     10
   }
 
