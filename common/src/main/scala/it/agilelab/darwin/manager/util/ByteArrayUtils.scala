@@ -1,30 +1,45 @@
 package it.agilelab.darwin.manager.util
 
 import java.io.OutputStream
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
 
 import it.agilelab.darwin.common.LONG_SIZE
 
 
 private[darwin] object ByteArrayUtils {
 
-
   implicit class EnrichedLong(val l: Long) extends AnyVal {
-    /** Converts Long to Array[Byte].
+    /** Converts Long to Array[Byte] honoring the input endianness
       */
-    def longToByteArray: Array[Byte] = {
-      ByteBuffer.allocate(LONG_SIZE).putLong(l).array()
+    def longToByteArray(endianness: ByteOrder): Array[Byte] = {
+      ByteBuffer.allocate(LONG_SIZE)
+        .order(endianness)
+        .putLong(l).array()
     }
 
-    def writeToStream(os: OutputStream): Unit = {
-      os.write((l >>> 56).asInstanceOf[Int])
-      os.write((l >>> 48).asInstanceOf[Int])
-      os.write((l >>> 40).asInstanceOf[Int])
-      os.write((l >>> 32).asInstanceOf[Int])
-      os.write((l >>> 24).asInstanceOf[Int])
-      os.write((l >>> 16).asInstanceOf[Int])
-      os.write((l >>> 8).asInstanceOf[Int])
-      os.write((l >>> 0).asInstanceOf[Int])
+    /** Writes to the stream the enriched long honoring the input endianness
+      */
+    def writeToStream(os: OutputStream, endianness: ByteOrder): Unit = {
+      endianness match {
+        case ByteOrder.BIG_ENDIAN =>
+          os.write((l >>> 56).asInstanceOf[Int])
+          os.write((l >>> 48).asInstanceOf[Int])
+          os.write((l >>> 40).asInstanceOf[Int])
+          os.write((l >>> 32).asInstanceOf[Int])
+          os.write((l >>> 24).asInstanceOf[Int])
+          os.write((l >>> 16).asInstanceOf[Int])
+          os.write((l >>> 8).asInstanceOf[Int])
+          os.write((l >>> 0).asInstanceOf[Int])
+        case ByteOrder.LITTLE_ENDIAN =>
+          os.write((l >>> 0).asInstanceOf[Int])
+          os.write((l >>> 8).asInstanceOf[Int])
+          os.write((l >>> 16).asInstanceOf[Int])
+          os.write((l >>> 24).asInstanceOf[Int])
+          os.write((l >>> 32).asInstanceOf[Int])
+          os.write((l >>> 40).asInstanceOf[Int])
+          os.write((l >>> 48).asInstanceOf[Int])
+          os.write((l >>> 56).asInstanceOf[Int])
+      }
     }
   }
 

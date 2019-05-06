@@ -1,5 +1,6 @@
 package it.agilelab.darwin.manager
 
+import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicReference
 
 import it.agilelab.darwin.common.Connector
@@ -9,7 +10,8 @@ import org.apache.avro.Schema
   * Implementation of AvroSchemaManager that defines a cache where the storage data is loaded, in order to reduce the
   * number of accesses to the storage.
   */
-abstract class CachedAvroSchemaManager(connector: Connector) extends AvroSchemaManager(connector) {
+abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrder)
+  extends AvroSchemaManager(connector, endianness) {
   protected val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
 
   def cache: AvroSchemaCache = _cache.get
