@@ -1,4 +1,5 @@
 language: scala
+jdk: openjdk8
 script:
   if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 sudo: false
