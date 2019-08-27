@@ -21,16 +21,15 @@ object Settings {
       "-Ywarn-dead-code",
       "-Ywarn-inaccessible",
       "-Xlint",
-      "-target:jvm-1.8",
       "-encoding", "UTF-8"
     ) ++ {
       CrossVersion.partialVersion(scalaVersion) match {
         case SCALA_210 =>
-          Nil
+          Seq("-target:jvm-1.7")
         case SCALA_211 =>
-          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any")
+          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.7")
         case SCALA_212 =>
-          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any")
+          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.8")
         case version: Option[(Long, Long)] =>
           throw new Exception(s"Unknown scala version: $version")
       }
@@ -54,7 +53,7 @@ object Settings {
     homepage := Some(url("https://github.com/agile-lab-dev/darwin")),
     description := "Avro Schema Evolution made easy",
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
-    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value),
+    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value)
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"

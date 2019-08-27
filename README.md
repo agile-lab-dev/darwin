@@ -12,6 +12,7 @@ Table of contents
   - [Artifacts](#artifacts)
   - [Background](#background)
   - [Architecture](#architecture)
+  - [JVM compatibility](#jvm-compatibility)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Configuration](#configuration)
@@ -180,6 +181,19 @@ utilities object `AvroSingleObjectEncodingUtils` exposes some generic purpose fu
 - remove the header (schema ID included) of a single-object encoded byte array
 
 ![Darwin interaction](docs/img/darwin_interaction.jpg)
+
+JVM compatibility
+-------------
+Darwin is cross-published among different scala versions (2.10, 2.11, 2.12).
+Depending on the Scala version, it targets different JVM versions.
+
+Please refer to the following compatibility matrix:
+
+| Scala version | JVM version |
+|---------------|-------------|
+| 2.10 | 1.7 |
+| 2.11 | 1.7 |
+| 2.12 | 1.8 |
 
 Installation
 -------------

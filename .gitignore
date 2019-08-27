@@ -201,6 +201,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
+.bloop/*
+.metals/*
+project/.bloop/*
 # End of https://www.gitignore.io/api/osx,sbt,java,linux,maven,scala,windows,intellij
 
