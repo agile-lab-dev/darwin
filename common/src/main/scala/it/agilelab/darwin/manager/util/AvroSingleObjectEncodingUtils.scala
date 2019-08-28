@@ -3,9 +3,8 @@ package it.agilelab.darwin.manager.util
 import java.io.{InputStream, OutputStream}
 import java.nio.{ByteBuffer, ByteOrder}
 import java.util
-import java.util.concurrent.ConcurrentHashMap
-import java.util.function.{Function => JFunction}
 
+import it.agilelab.darwin.common.DarwinConcurrentHashMap
 import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import org.apache.avro.{Schema, SchemaNormalization}
@@ -15,7 +14,7 @@ object AvroSingleObjectEncodingUtils {
   private val ID_SIZE = 8
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
-  private val schemaMap = new ConcurrentHashMap[Schema, (Long, Array[Byte])]()
+  private val schemaMap = DarwinConcurrentHashMap.empty[Schema, (Long, Array[Byte])]
 
   /** Exception that can be thrown if the data is not single-object encoded
     */
@@ -240,12 +239,12 @@ object AvroSingleObjectEncodingUtils {
     * @return the ID associated with the input schema
     */
   def getId(schema: Schema, endianness: ByteOrder): Long = {
-    schemaMap.computeIfAbsent(schema, new JFunction[Schema, (Long, Array[Byte])] {
-      override def apply(t: Schema): (Long, Array[Byte]) = {
+    schemaMap.getOrElseUpdate(schema,
+      {
         val f = SchemaNormalization.parsingFingerprint64(schema)
         (f, f.longToByteArray(endianness))
       }
-    })._1
+    )._1
   }
 
   /** Converts a byte array into its hexadecimal string representation

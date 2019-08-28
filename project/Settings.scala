@@ -46,12 +46,26 @@ object Settings {
     }
   }
 
+  def javacOptionsVersion(scalaVersion: String): Seq[String] = {
+    CrossVersion.partialVersion(scalaVersion) match {
+      case SCALA_210 =>
+        Seq("-source", "1.7", "-target", "1.7")
+      case SCALA_211 =>
+        Seq("-source", "1.7", "-target", "1.7")
+      case SCALA_212 =>
+        Seq("-source", "1.8", "-target", "1.8")
+      case version: Option[(Long, Long)] =>
+        throw new Exception(s"Unknown scala version: $version")
+    }
+  }
+
 
   lazy val projectSettings = Seq(
     organization := "it.agilelab",
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
     homepage := Some(url("https://github.com/agile-lab-dev/darwin")),
     description := "Avro Schema Evolution made easy",
+    javacOptions ++= javacOptionsVersion(scalaVersion.value),
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
     scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value)
   )
