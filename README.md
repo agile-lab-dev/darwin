@@ -41,14 +41,14 @@ In order to access to Darwin core functionalities add the core dependency to you
 
 #### sbt
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.11"
+libraryDependencies += "it.agilelab" %% "darwin-core" % "1.0.12"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-core_2.11</artifactId>
-  <version>1.0.11</version>
+  <version>1.0.12</version>
 </dependency>
 ```
 
@@ -58,14 +58,14 @@ Then add the connector of your choice, either HBase:
 
 #### sbt
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.11"
+libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.0.12"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-hbase-connector_2.11</artifactId>
-  <version>1.0.11</version>
+  <version>1.0.12</version>
 </dependency>
 ```
 
@@ -76,14 +76,14 @@ Or PostgreSql:
 ### sbt
 
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.11"
+libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.0.12"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-postgres-connector_2.11</artifactId>
-  <version>1.0.11</version>
+  <version>1.0.12</version>
 </dependency>
 ```
 
@@ -95,14 +95,14 @@ Or Rest
 ### sbt
 
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-rest-connector" % "1.0.11"
+libraryDependencies += "it.agilelab" %% "darwin-rest-connector" % "1.0.12"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-rest-connector_2.11</artifactId>
-  <version>1.0.11</version>
+  <version>1.0.12</version>
 </dependency>
 ```
 
@@ -117,14 +117,14 @@ Or Mock (only for test scenarios):
 ### sbt
 
 ```scala
-libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.0.11"
+libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.0.12"
 ``` 
 #### maven
 ```xml
 <dependency>
   <groupId>it.agilelab</groupId>
   <artifactId>darwin-mock-connector_2.11</artifactId>
-  <version>1.0.11</version>
+  <version>1.0.12</version>
 </dependency>
 ```
 
