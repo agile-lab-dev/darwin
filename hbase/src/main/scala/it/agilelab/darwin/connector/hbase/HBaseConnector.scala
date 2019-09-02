@@ -3,8 +3,8 @@ package it.agilelab.darwin.connector.hbase
 import it.agilelab.darwin.common.{Connector, Logging, using}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
-import org.apache.hadoop.hbase._
-import org.apache.hadoop.hbase.client._
+import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, NamespaceDescriptor, TableName}
+import org.apache.hadoop.hbase.client.{Connection, Get, Put, Result}
 import org.apache.hadoop.hbase.util.Bytes
 
 import scala.collection.JavaConverters._
