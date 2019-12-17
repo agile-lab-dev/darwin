@@ -7,9 +7,11 @@ import it.agilelab.darwin.common.Connector
 import org.apache.avro.reflect.ReflectData
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.hadoop.hbase.{HBaseTestingUtility, MiniHBaseCluster}
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll {
+class HBaseConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
 
   "HBaseConnector" should "load all existing schemas" in {

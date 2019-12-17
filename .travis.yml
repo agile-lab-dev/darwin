@@ -1,15 +1,15 @@
 language: scala
-jdk: openjdk8
+jdk: oraclejdk11
 script:
   if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 sudo: false
-cache:
-  directories:
-    - "$HOME/.ivy2/cache"
-    - "$HOME/.sbt/1.0"
-    - "$HOME/.sbt/boot"
-    - "$HOME/.sbt/preloaded"
-    - "$HOME/.embedpostgresql"
+#cache:
+#  directories:
+#    - "$HOME/.ivy2/cache"
+#    - "$HOME/.sbt/1.0"
+#    - "$HOME/.sbt/boot"
+#    - "$HOME/.sbt/preloaded"
+#    - "$HOME/.embedpostgresql"
 before_cache:
   - rm -fv $HOME/.ivy2/.sbt.ivy.lock
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
@@ -26,6 +26,5 @@ branches:
     - develop
     - /^feature\/.*$/
     - /^release\/.*$/
-    - /^hotfix\/.*$/
     - /^hotfix\/.*$/
     - /^\d+\.\d+(\.\d+)?$/

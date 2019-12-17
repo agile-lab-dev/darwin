@@ -2,10 +2,11 @@ package it.agilelab.darwin.connector.mock
 
 import com.typesafe.config.ConfigFactory
 import org.apache.avro.Schema
-import org.scalatest.{FlatSpec, Matchers}
 import org.apache.avro.Schema.Type
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class MockConnectorSpec extends FlatSpec with Matchers {
+class MockConnectorSpec extends AnyFlatSpec with Matchers {
 
   it should "load the test schemas" in {
     new MockConnectorCreator().create(ConfigFactory.empty()).fullLoad() should have size (2)

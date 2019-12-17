@@ -2,9 +2,11 @@ package it.agilelab.darwin.common
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DarwinConcurrentHashMapSpec extends FlatSpec with Matchers with BeforeAndAfter {
+class DarwinConcurrentHashMapSpec extends AnyFlatSpec with Matchers with BeforeAndAfter {
   private val realJavaVersion = System.getProperty("java.version")
 
   after {

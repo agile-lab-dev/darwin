@@ -3,11 +3,13 @@ package it.agilelab.darwin.connector.postgres
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.{Schema, SchemaNormalization}
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.BeforeAndAfterAll
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 import ru.yandex.qatools.embed.postgresql.distribution.Version
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PostgresConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll {
+class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   val config: Config = ConfigFactory.load("postgres.properties")
   val connector: Connector = new PostgresConnectorCreator().create(config)
   val embeddedPostgres: EmbeddedPostgres = new EmbeddedPostgres(Version.V9_6_11)

@@ -29,7 +29,7 @@ class MockConnector(config: Config) extends Connector {
 
   override def findSchema(id: Long): Option[Schema] = table.get(id)
 
-  override def createTable(): Unit = Unit
+  override def createTable(): Unit = ()
 
   override def tableExists(): Boolean = true
 
