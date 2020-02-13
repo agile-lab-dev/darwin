@@ -3,6 +3,7 @@ package it.agilelab.darwin.common
 import java.util.function.{Function => JFunction}
 
 import scala.collection.concurrent.TrieMap
+import scala.util.Try
 
 /** A thread safe lock-free concurrent map that exposes only getOrElseUpdate and getOrElse methods
   * It is backed by either a scala.collection.concurrent.TrieMap or java.util.concurrent.ConcurrentHashMap
@@ -28,9 +29,8 @@ object DarwinConcurrentHashMap {
       })
     }
 
-    override def getOrElse(k: K, default: => V): V = {
-      innerMap.getOrDefault(k, default)
-    }
+    override def getOrElse(k: K, default: => V): V =
+      Try(innerMap.get(k)).getOrElse(default)
   }
 
   private class DarwinTrieConcurrentHashMap[K, V] extends DarwinConcurrentHashMap[K, V] {

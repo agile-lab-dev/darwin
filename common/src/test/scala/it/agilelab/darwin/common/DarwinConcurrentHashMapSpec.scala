@@ -55,5 +55,20 @@ class DarwinConcurrentHashMapSpec extends FlatSpec with Matchers with BeforeAndA
     }
   }
 
+  it should "lazy evaluate the default param when using Java8 - getOrElse" in {
+    System.setProperty("java.version", "1.8")
+    val sut = DarwinConcurrentHashMap.empty[String, Int]
+    def defaultWithSideEffect: Int = throw new RuntimeException("Side effect evaluated!")
+    val aKey = "aKey"
+    val aValue = 1
+
+    sut.getOrElseUpdate(aKey, aValue)
+
+    val res = sut.getOrElse(aKey, defaultWithSideEffect)
+
+    noException should be thrownBy sut.getOrElse(aKey, defaultWithSideEffect)
+    res shouldBe aValue
+  }
+
 
 }
