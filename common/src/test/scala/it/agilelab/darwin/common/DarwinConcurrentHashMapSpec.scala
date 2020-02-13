@@ -64,9 +64,9 @@ class DarwinConcurrentHashMapSpec extends FlatSpec with Matchers with BeforeAndA
 
     sut.getOrElseUpdate(aKey, aValue)
 
-    val res = sut.getOrElse(aKey, defaultWithSideEffect)
+    lazy val res = sut.getOrElse(aKey, defaultWithSideEffect)
 
-    noException should be thrownBy sut.getOrElse(aKey, defaultWithSideEffect)
+    noException should be thrownBy res
     res shouldBe aValue
   }
 
