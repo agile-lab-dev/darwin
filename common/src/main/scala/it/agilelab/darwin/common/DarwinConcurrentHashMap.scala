@@ -19,7 +19,7 @@ trait DarwinConcurrentHashMap[K, V] {
 
 object DarwinConcurrentHashMap {
 
-  private class DarwinJava8ConcurrentHashMap[K, V] extends DarwinConcurrentHashMap[K, V] {
+  private[common] class DarwinJava8ConcurrentHashMap[K, V] extends DarwinConcurrentHashMap[K, V] {
     private val innerMap = new java.util.concurrent.ConcurrentHashMap[K, V]()
 
     override def getOrElseUpdate(k: K, newValue: => V): V = {
@@ -28,12 +28,11 @@ object DarwinConcurrentHashMap {
       })
     }
 
-    override def getOrElse(k: K, default: => V): V = {
-      innerMap.getOrDefault(k, default)
-    }
+    override def getOrElse(k: K, default: => V): V =
+      Option(innerMap.get(k)).getOrElse(default)
   }
 
-  private class DarwinTrieConcurrentHashMap[K, V] extends DarwinConcurrentHashMap[K, V] {
+  private[common] class DarwinTrieConcurrentHashMap[K, V] extends DarwinConcurrentHashMap[K, V] {
     private val innerMap = TrieMap.empty[K, V]
 
     override def getOrElseUpdate(k: K, newValue: => V): V = innerMap.getOrElseUpdate(k, newValue)

@@ -55,5 +55,4 @@ class DarwinConcurrentHashMapSpec extends FlatSpec with Matchers with BeforeAndA
     }
   }
 
-
 }
