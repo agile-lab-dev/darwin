@@ -6,7 +6,7 @@ import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.reflect.ReflectData
 import org.apache.avro.{Schema, SchemaNormalization}
-import org.apache.hadoop.hbase.{HBaseTestingUtility, MiniHBaseCluster}
+import org.apache.hadoop.hbase.HBaseTestingUtility
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
