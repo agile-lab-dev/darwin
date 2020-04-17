@@ -15,6 +15,11 @@ before_cache:
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
   - find $HOME/.sbt        -name "*.lock"               -print -delete
 before_install:
+  - rm -rf "$HOME/.ivy2/cache"
+  - rm -rf "$HOME/.sbt/1.0"
+  - rm -rf "$HOME/.sbt/boot"
+  - rm -rf "$HOME/.sbt/preloaded"
+  - rm -rf "$HOME/.embedpostgresql"
   # https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d; fi
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then tar xvf rings.tar; fi
