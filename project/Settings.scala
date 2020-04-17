@@ -12,24 +12,27 @@ object Settings {
   val SCALA_210 = Some((2L, 10L))
   val SCALA_211 = Some((2L, 11L))
   val SCALA_212 = Some((2L, 12L))
+  val SCALA_213 = Some((2L, 13L))
 
   def scalacOptionsVersion(scalaVersion: String): Seq[String] = {
     Seq(
       "-deprecation",
       "-feature",
       "-unchecked",
-      "-Ywarn-dead-code",
-      "-Ywarn-inaccessible",
       "-Xlint",
-      "-encoding", "UTF-8"
+      "-Ywarn-dead-code",
+      "-encoding",
+      "UTF-8"
     ) ++ {
       CrossVersion.partialVersion(scalaVersion) match {
         case SCALA_210 =>
-          Seq("-target:jvm-1.7")
+          Seq("-target:jvm-1.7", "-Ywarn-inaccessible")
         case SCALA_211 =>
-          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.7")
+          Seq("-Xfatal-warnings", "-Ywarn-inaccessible", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.7")
         case SCALA_212 =>
-          Seq("-Xfatal-warnings", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.8")
+          Seq("-Xfatal-warnings", "-Ywarn-inaccessible", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.8")
+        case SCALA_213 =>
+          Seq("-Xfatal-warnings", "-Xlint:inaccessible", "-Ywarn-unused:imports", "-Xlint:infer-any", "-target:jvm-1.8")
         case version: Option[(Long, Long)] =>
           throw new Exception(s"Unknown scala version: $version")
       }
@@ -37,12 +40,11 @@ object Settings {
   }
 
   def scalaDocOptionsVersion(scalaVersion: String): Seq[String] = {
-    scalacOptionsVersion(scalaVersion) ++ {
-      CrossVersion.partialVersion(scalaVersion) match {
-        case SCALA_210 | SCALA_211 => Nil
-        case SCALA_212 => Seq("-no-java-comments")
-        case version: Option[(Long, Long)] => throw new Exception(s"Unknown scala version: $version")
-      }
+    CrossVersion.partialVersion(scalaVersion) match {
+      case SCALA_210 | SCALA_211         => scalacOptionsVersion(scalaVersion)
+      case SCALA_212                     => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
+      case SCALA_213                     => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
+      case version: Option[(Long, Long)] => throw new Exception(s"Unknown scala version: $version")
     }
   }
 
@@ -54,11 +56,12 @@ object Settings {
         Seq("-source", "1.7", "-target", "1.7")
       case SCALA_212 =>
         Seq("-source", "1.8", "-target", "1.8")
+      case SCALA_213 =>
+        Seq("-source", "1.8", "-target", "1.8")
       case version: Option[(Long, Long)] =>
         throw new Exception(s"Unknown scala version: $version")
     }
   }
-
 
   lazy val projectSettings = Seq(
     organization := "it.agilelab",
@@ -67,7 +70,8 @@ object Settings {
     description := "Avro Schema Evolution made easy",
     javacOptions ++= javacOptionsVersion(scalaVersion.value),
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
-    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value)
+    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value),
+    useCoursier := false
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
@@ -83,7 +87,6 @@ object Settings {
 
   lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++
     scalastyleSettings
-
 
   lazy val hbaseTestSettings: SettingsDefinition = {
     //enable resolution of transitive dependencies of jars containing tests
@@ -103,8 +106,7 @@ object Settings {
 
   lazy val ciPublishSettings = {
     if (System.getenv().containsKey("TRAVIS")) {
-      Seq(pgpSecretRing := file("./secring.asc"),
-        pgpPublicRing := file("./pubring.asc"))
+      Seq(pgpSecretRing := file("./secring.asc"), pgpPublicRing := file("./pubring.asc"))
     } else {
       Seq.empty
     }

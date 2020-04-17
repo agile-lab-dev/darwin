@@ -1,10 +1,12 @@
 package it.agilelab.darwin.common
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap.{DarwinJava8ConcurrentHashMap, DarwinTrieConcurrentHashMap}
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 
 private[common] sealed class DarwinConcurrentHashMapRunner[K,V](sut: () => DarwinConcurrentHashMap[K,V])
-  extends FlatSpec with Matchers with BeforeAndAfterAll with BeforeAndAfter {
+  extends AnyFlatSpec with Matchers with BeforeAndAfterAll with BeforeAndAfter {
 
   protected class DefaultException extends Exception("Side effect evaluated!")
 

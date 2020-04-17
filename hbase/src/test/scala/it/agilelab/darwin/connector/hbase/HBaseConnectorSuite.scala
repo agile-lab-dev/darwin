@@ -2,15 +2,18 @@ package it.agilelab.darwin.connector.hbase
 
 import java.nio.file.Files
 
-import com.typesafe.config.{ ConfigFactory, ConfigValueFactory}
+import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.reflect.ReflectData
 import org.apache.avro.{Schema, SchemaNormalization}
-import org.apache.hadoop.hbase.{HBaseTestingUtility, MiniHBaseCluster}
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.apache.hadoop.hbase.HBaseTestingUtility
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll {
+class HBaseConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
+  var connector: Connector = _
 
   "HBaseConnector" should "load all existing schemas" in {
     connector.fullLoad()
@@ -41,15 +44,20 @@ class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll 
     connector.tableExists() should be(true)
   }
 
-
-  var connector: Connector = _
-
-  var util : HBaseTestingUtility = _
-  var minicluster: MiniHBaseCluster = _
-
   override def beforeAll(): Unit = {
-    util = new HBaseTestingUtility()
-    minicluster = util.startMiniCluster()
+
+    connector = new HBaseConnectorCreator().create(HBaseConnectorSuite.config)
+
+    connector.createTable()
+  }
+
+
+}
+
+object HBaseConnectorSuite {
+  private lazy val config = {
+    val util = new HBaseTestingUtility()
+    val minicluster = util.startMiniCluster()
 
     //Hbase connector can only load configurations from a file path so we need to render the hadoop conf
     val confFile = Files.createTempFile("prefix", "suffix")
@@ -61,17 +69,10 @@ class HBaseConnectorSuite extends FlatSpec with Matchers with BeforeAndAfterAll 
 
     //HbaseConnector will only load conf if hbase-site and core-site are given,
     //we give the same file to each.
-    val config = ConfigFactory.load()
-                              .withValue(ConfigurationKeys.HBASE_SITE, hbaseConfigPath)
-                              .withValue(ConfigurationKeys.CORE_SITE, hbaseConfigPath)
-
-    connector = new HBaseConnectorCreator().create(config)
-
-    connector.createTable()
-  }
-
-  override def afterAll(): Unit = {
-    minicluster.shutdown()
+    sys.addShutdownHook(minicluster.shutdown())
+    ConfigFactory.load()
+      .withValue(ConfigurationKeys.HBASE_SITE, hbaseConfigPath)
+      .withValue(ConfigurationKeys.CORE_SITE, hbaseConfigPath)
   }
 
 }

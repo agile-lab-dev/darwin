@@ -12,9 +12,7 @@ import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, 
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.security.UserGroupInformation
-
-import scala.collection.JavaConverters._
-
+import it.agilelab.darwin.common.compat._
 
 object HBaseConnector extends Logging {
 
@@ -85,11 +83,11 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     UserGroupInformation.setLoginUser(ugi)
     val user = User.create(ugi)
     log.trace(s"initialization of HBase connection with configuration:\n " +
-      s"${configuration.iterator().asScala.map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
+      s"${configuration.iterator().toScala.map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
     ConnectionFactory.createConnection(configuration, user)
   } else {
     log.trace(s"initialization of HBase connection with configuration:\n " +
-      s"${configuration.iterator().asScala.map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
+      s"${configuration.iterator().toScala.map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
     ConnectionFactory.createConnection(configuration)
   }
 
@@ -106,7 +104,7 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
 
   override def fullLoad(): Seq[(Long, Schema)] = {
     log.debug(s"loading all schemas from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
-    val scanner: Iterable[Result] = connection.getTable(TABLE_NAME).getScanner(CF, QUALIFIER_SCHEMA).asScala
+    val scanner: Iterable[Result] = connection.getTable(TABLE_NAME).getScanner(CF, QUALIFIER_SCHEMA).toScala
     val schemas = scanner.map { result =>
       val key = Bytes.toLong(result.getRow)
       val value = Bytes.toString(result.getValue(CF, QUALIFIER_SCHEMA))

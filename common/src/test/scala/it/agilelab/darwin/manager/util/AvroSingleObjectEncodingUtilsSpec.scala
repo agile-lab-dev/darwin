@@ -9,11 +9,13 @@ import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord}
 import org.apache.avro.io.{DecoderFactory, EncoderFactory}
 import org.apache.avro.util.ByteBufferInputStream
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import it.agilelab.darwin.common.compat._
 
-abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) extends FlatSpec with Matchers {
+abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) extends AnyFlatSpec with Matchers {
   val sizeOfBuffer = 200
   val testId = 4560514203639509981L
   val parser = new Schema.Parser()
@@ -197,7 +199,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
     encoder.flush()
     val iStream = new ByteArrayInputStream(stream.toByteArray)
 
-    AvroSingleObjectEncodingUtils.extractId(iStream, endianness).right.map { id =>
+    AvroSingleObjectEncodingUtils.extractId(iStream, endianness).rightMap { id =>
       id should be(testId)
       val decoder = DecoderFactory.get().binaryDecoder(iStream, null)
       val reader = new GenericDatumReader[GenericRecord](schema)

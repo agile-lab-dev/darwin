@@ -5,8 +5,7 @@ import java.io.InputStream
 import org.apache.avro.Schema
 import org.codehaus.jackson.map.ObjectMapper
 import org.codehaus.jackson.node.JsonNodeFactory
-
-import scala.collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
 
 trait JsonProtocol {
   val objectMapper = new ObjectMapper()
@@ -28,7 +27,7 @@ trait JsonProtocol {
   def toSeqOfIdSchema(in: InputStream): Seq[(Long, Schema)] = {
     val node = objectMapper.readTree(in)
 
-    node.getElements.asScala.map { node =>
+    node.getElements.toScala.map { node =>
       val id = node.get("id").asText().toLong
       val schemaNode = node.get("schema")
 

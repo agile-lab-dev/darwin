@@ -6,7 +6,7 @@ import com.typesafe.config.Config
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
 import it.agilelab.darwin.manager.util.ConfigurationKeys
 
-import scala.collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
 
 /**
   * Used to obtain the correct implementation of [[Connector]] found on the classpath using the [[ConnectorCreator]]
@@ -19,7 +19,7 @@ object ConnectorFactory extends Logging {
     * @return a sequence of all the loaded [[ConnectorCreator]]
     */
   def creators(): Seq[ConnectorCreator] = {
-    val creators = ServiceLoader.load(classOf[ConnectorCreator]).asScala.toSeq
+    val creators = ServiceLoader.load(classOf[ConnectorCreator]).toScala.toSeq
     log.debug(s"${creators.size} available connector creators found")
     creators
   }

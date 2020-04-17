@@ -8,7 +8,7 @@ import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import org.apache.avro.Schema
 
-import scala.collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
 import java.io.InputStream
 
 /**
@@ -63,7 +63,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @return a sequence of pairs of the input schemas associated with their IDs
     */
   def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
-    registerAll(schemas.asScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.asJava
+    registerAll(schemas.toScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.toJava
   }
 
   /** Create an array that creates a Single-Object encoded byte array.
@@ -154,7 +154,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @return the schema ID extracted from the input data
     */
   def extractSchema(inputStream: InputStream): Either[Array[Byte], Schema] = {
-    AvroSingleObjectEncodingUtils.extractId(inputStream, endianness).right.map { id =>
+    AvroSingleObjectEncodingUtils.extractId(inputStream, endianness).rightMap { id =>
       getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
   }

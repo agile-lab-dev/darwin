@@ -33,7 +33,9 @@ desired connector.
 
 Artifacts
 --------------
-Darwin artifacts are published for scala 2.10, 2.11 and 2.12. From version 1.0.2 Darwin is available from maven central so there is no need to configure additional repositories in your project.
+Darwin artifacts are published for scala 2.10, 2.11, 2.12 and 2.13 (from version 1.0.12). 
+From version 1.0.2 Darwin is available from maven central so there is no need to configure additional repositories 
+in your project.
 
 In order to access to Darwin core functionalities add the core dependency to you project:
 
@@ -184,7 +186,7 @@ utilities object `AvroSingleObjectEncodingUtils` exposes some generic purpose fu
 
 JVM compatibility
 -------------
-Darwin is cross-published among different scala versions (2.10, 2.11, 2.12).
+Darwin is cross-published among different scala versions (2.10, 2.11, 2.12, 2.13).
 Depending on the Scala version, it targets different JVM versions.
 
 Please refer to the following compatibility matrix:
@@ -194,6 +196,7 @@ Please refer to the following compatibility matrix:
 | 2.10 | 1.7 |
 | 2.11 | 1.7 |
 | 2.12 | 1.8 |
+| 2.13 | 1.8 |
 
 Installation
 -------------
@@ -338,7 +341,7 @@ Example of configuration for the `RestConnector`:
 
 ### REST Server
 
-A rest server is provided by module rest-server (only for scala 2.11 and 2.12), just run main class
+A rest server is provided by module rest-server (only for scala 2.11, 2.12 and 2.13), just run main class
 
 `it.agilelab.darwin.server.rest.Main`
 

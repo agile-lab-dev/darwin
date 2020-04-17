@@ -5,10 +5,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.typesafe.config.ConfigFactory
 import org.apache.avro.{Schema, SchemaBuilder}
-import org.scalatest.{BeforeAndAfterEach, FlatSpec, OptionValues}
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.scalatest.flatspec.AnyFlatSpec
 
 
-class RestConnectorSuite extends FlatSpec with BeforeAndAfterEach with OptionValues {
+class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with OptionValues {
 
   private val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
@@ -21,11 +22,11 @@ class RestConnectorSuite extends FlatSpec with BeforeAndAfterEach with OptionVal
        | basePath: "/"
       """.stripMargin)
 
-  override def beforeEach {
+  override def beforeEach: Unit = {
     wireMockServer.start()
   }
 
-  override def afterEach {
+  override def afterEach: Unit = {
     wireMockServer.stop()
   }
 

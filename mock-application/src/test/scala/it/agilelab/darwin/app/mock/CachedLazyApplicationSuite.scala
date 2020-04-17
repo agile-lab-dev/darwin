@@ -11,15 +11,16 @@ import it.agilelab.darwin.manager.{AvroSchemaManager, CachedLazyAvroSchemaManage
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.avro.reflect.ReflectData
 import org.reflections.Reflections
-import org.scalatest.{FlatSpec, Matchers}
 
-import scala.collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class BigEndianCachedLazyApplicationSuite extends CachedLazyApplicationSuite(ByteOrder.BIG_ENDIAN)
 
 class LittleEndianCachedLazyApplicationSuite extends CachedLazyApplicationSuite(ByteOrder.LITTLE_ENDIAN)
 
-abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends FlatSpec with Matchers {
+abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends AnyFlatSpec with Matchers {
 
   val config: Config = ConfigFactory.load()
   val connector: Connector = ConnectorFactory.connector(config)
@@ -60,7 +61,7 @@ abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends Fla
     val myClassSchema = ReflectData.get().getSchema(classOf[MyClass]).toString
 
     val annotationClass: Class[AvroSerde] = classOf[AvroSerde]
-    val classes = reflections.getTypesAnnotatedWith(annotationClass).asScala.toSeq
+    val classes = reflections.getTypesAnnotatedWith(annotationClass).toScala.toSeq
       .filter(c => !c.isInterface && !Modifier.isAbstract(c.getModifiers))
     val schemas = classes.map(c => ReflectData.get().getSchema(Class.forName(c.getName)).toString)
     Seq(oneFieldSchema, myClassSchema, myNestedSchema) should contain theSameElementsAs schemas
