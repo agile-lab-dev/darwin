@@ -3,26 +3,21 @@ jdk: openjdk8
 script:
   if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 sudo: false
-#cache:
-#  directories:
-#    - "$HOME/.ivy2/cache"
-#    - "$HOME/.sbt/1.0"
-#    - "$HOME/.sbt/boot"
-#    - "$HOME/.sbt/preloaded"
-#    - "$HOME/.embedpostgresql"
+cache:
+  directories:
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt/1.0"
+    - "$HOME/.sbt/boot"
+    - "$HOME/.sbt/preloaded"
+    - "$HOME/.embedpostgresql"
 before_cache:
   - rm -fv $HOME/.ivy2/.sbt.ivy.lock
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
   - find $HOME/.sbt        -name "*.lock"               -print -delete
 before_install:
-  - rm - "$HOME/.ivy2/cache"
-  - rm - "$HOME/.sbt/1.0"
-  - rm - "$HOME/.sbt/boot"
-  - rm - "$HOME/.sbt/preloaded"
-  - rm - "$HOME/.embedpostgresql"
-    # https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
-    - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d; fi
-    - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then tar xvf rings.tar; fi
+  # https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then tar xvf rings.tar; fi
 git:
   depth: false
 branches:
