@@ -77,8 +77,10 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)
   .settings(pgpPassphrase := Settings.pgpPass)
-  .settings(libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
-    Dependencies.httpClient)
+  .settings(
+    libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
+      Dependencies.httpClient
+  )
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
   .enablePlugins(JavaAppPackaging)
 
