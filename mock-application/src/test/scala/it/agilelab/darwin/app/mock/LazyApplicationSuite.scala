@@ -6,13 +6,12 @@ import java.nio.ByteOrder
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, NewClass, OneField}
-import it.agilelab.darwin.common.{Connector, ConnectorFactory}
-import it.agilelab.darwin.manager.{AvroSchemaManager, LazyAvroSchemaManager}
-import org.apache.avro.{Schema, SchemaNormalization}
-import org.apache.avro.reflect.ReflectData
-import org.reflections.Reflections
-
 import it.agilelab.darwin.common.compat._
+import it.agilelab.darwin.common.{Connector, ConnectorFactory, SchemaReader}
+import it.agilelab.darwin.manager.{AvroSchemaManager, LazyAvroSchemaManager}
+import org.apache.avro.reflect.ReflectData
+import org.apache.avro.{Schema, SchemaNormalization}
+import org.reflections.Reflections
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -21,7 +20,8 @@ class BigEndianLazyApplicationSuite extends LazyApplicationSuite(ByteOrder.BIG_E
 class LittleEndianLazyApplicationSuite extends LazyApplicationSuite(ByteOrder.LITTLE_ENDIAN)
 
 abstract class LazyApplicationSuite(endianness: ByteOrder) extends AnyFlatSpec with Matchers {
-
+  private val mockClassAloneFingerprint = 6675579114512671233L
+  private val mockClassParentFingerprint = -6310800772237892477L
   val config: Config = ConfigFactory.load()
   val connector: Connector = ConnectorFactory.connector(config)
   val manager: AvroSchemaManager = new LazyAvroSchemaManager(connector, endianness)
@@ -33,7 +33,7 @@ abstract class LazyApplicationSuite(endianness: ByteOrder) extends AnyFlatSpec w
 
   it should "load all existing schemas and register a new one" in {
     val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))
-    manager.getSchema(0L)
+    manager.getSchema(mockClassAloneFingerprint)
 
     manager.registerAll(schemas)
 
@@ -44,8 +44,8 @@ abstract class LazyApplicationSuite(endianness: ByteOrder) extends AnyFlatSpec w
 
   it should "get all previously registered schemas" in {
     val schema: Schema = SchemaReader.readFromResources("MyNestedClass.avsc")
-    val schema0 = manager.getSchema(0L)
-    val schema1 = manager.getSchema(1L)
+    val schema0 = manager.getSchema(mockClassAloneFingerprint)
+    val schema1 = manager.getSchema(mockClassParentFingerprint)
     assert(schema0.isDefined)
     assert(schema1.isDefined)
     assert(schema0.get != schema1.get)

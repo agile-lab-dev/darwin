@@ -3,6 +3,7 @@ package it.agilelab.darwin.app.mock
 import java.nio.{ByteBuffer, ByteOrder}
 
 import com.typesafe.config.ConfigFactory
+import it.agilelab.darwin.common.SchemaReader
 import it.agilelab.darwin.manager.AvroSchemaManagerFactory
 import it.agilelab.darwin.manager.util.{AvroSingleObjectEncodingUtils, ConfigurationKeys}
 import it.agilelab.darwin.manager.util.ByteArrayUtils._

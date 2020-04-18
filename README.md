@@ -364,3 +364,19 @@ darwin-rest {
   port = 8080
 }
 ```
+
+## Mock
+
+MockConnector can be conveniently used during tests or if all the schemas (past and current) are known when launching 
+the application.
+The MockConnector can load schemas from local files and classpath resources, it can run in two modes: strict and permissive.
+Strict mode fails if any schema cannot be read, while Permissive one will just warn on non-readable schemas. 
+Default mode is "strict".
+
+Here is an example of configuration:
+
+```json
+"files": ["/home/user/schema1.avsc", "/home/user/schema2.avsc"]
+"resources": ["schemas/Apple.avsc", "schemas/Orange.avsc"]
+"mode": "permissive"
+```
