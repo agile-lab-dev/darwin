@@ -26,7 +26,7 @@ class MockConnector(config: Config) extends Connector with Logging {
     ConfigurationKeys.Strict
   }
 
-  private val files = if (config.hasPath(ConfigurationKeys.FILES)) {
+  private def files = if (config.hasPath(ConfigurationKeys.FILES)) {
     config.getStringList(ConfigurationKeys.FILES).toScala().map { s =>
       try {
         SchemaReader.safeRead(new java.io.File(s))
@@ -38,7 +38,7 @@ class MockConnector(config: Config) extends Connector with Logging {
     Nil
   }
 
-  private val resources = if (config.hasPath(ConfigurationKeys.RESOURCES)) {
+  private def resources = if (config.hasPath(ConfigurationKeys.RESOURCES)) {
     config.getStringList(ConfigurationKeys.RESOURCES).toScala().map { s =>
       try {
         SchemaReader.safeReadFromResources(s)
@@ -70,16 +70,15 @@ class MockConnector(config: Config) extends Connector with Logging {
     }
   }
 
-  private val table: mutable.Map[Long, Schema] = {
-    val m = mutable.Map.empty[Long, Schema]
+  private val table: mutable.Map[Long, Schema] = mutable.Map.empty[Long, Schema]
+
+  override def fullLoad(): Seq[(Long, Schema)] = {
     (resources ++ files).foreach {
       case Left(error) => handleError(error)
-      case Right(schema) => m(SchemaNormalization.parsingFingerprint64(schema)) = schema
+      case Right(schema) => table(SchemaNormalization.parsingFingerprint64(schema)) = schema
     }
-    m
+    table.toSeq
   }
-
-  override def fullLoad(): Seq[(Long, Schema)] = table.toSeq
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
     schemas.foreach { case (id, schema) =>
@@ -87,11 +86,14 @@ class MockConnector(config: Config) extends Connector with Logging {
     }
   }
 
-  override def findSchema(id: Long): Option[Schema] = table.get(id)
+  override def findSchema(id: Long): Option[Schema] = {
+    fullLoad()
+    table.get(id)
+  }
 
   override def createTable(): Unit = ()
 
   override def tableExists(): Boolean = true
 
-  override def tableCreationHint(): String = ""
+  override def tableCreationHint(): String = "No table needs to be created since mock connecto"
 }
