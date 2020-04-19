@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.typesafe.config.ConfigFactory
+import it.agilelab.darwin.common.DarwinEntry
 import org.apache.avro.{Schema, SchemaBuilder}
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -14,7 +15,7 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
   private val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
 
-  private def config(port:Int) = ConfigFactory.parseString(
+  private def config(port: Int) = ConfigFactory.parseString(
     s"""
        | protocol: "http"
        | host: "localhost"
@@ -42,19 +43,21 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
       get(urlPathEqualTo("/schemas/")).willReturn {
         aResponse().withBody {
           s"""
-            |[{
-            |  "id": "$schemaId1",
-            |  "schema": {
-            |    "items": "string",
-            |    "type": "array"
-            |  }
-            | }, {
-            |  "id": "$schemaId2",
-            |  "schema": {
-            |    "items": "int",
-            |    "type": "array"
-            |  }
-            | }]
+             |[{
+             |  "id": "$schemaId1",
+             |  "schema": {
+             |    "items": "string",
+             |    "type": "array"
+             |  },
+             |  "version": 0
+             | }, {
+             |  "id": "$schemaId2",
+             |  "schema": {
+             |    "items": "int",
+             |    "type": "array"
+             |  },
+             |  "version": 0
+             | }]
           """.stripMargin
         }
       }
@@ -62,8 +65,8 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
 
     val result = connector.fullLoad()
 
-    assert(result.contains((schemaId1, SchemaBuilder.array().items(Schema.create(Schema.Type.STRING)))))
-    assert(result.contains((schemaId2, SchemaBuilder.array().items(Schema.create(Schema.Type.INT)))))
+    assert(result.contains(DarwinEntry(schemaId1, SchemaBuilder.array().items(Schema.create(Schema.Type.STRING)), 0L)))
+    assert(result.contains(DarwinEntry(schemaId2, SchemaBuilder.array().items(Schema.create(Schema.Type.INT)), 0L)))
     assert(result.size == 2)
 
     wireMockServer.verify {
@@ -81,11 +84,15 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
     wireMockServer.stubFor {
       get(urlPathEqualTo(s"/schemas/$schemaId")).willReturn {
         aResponse().withBody {
-          """
-            | {
-            |    "items": "string",
-            |    "type": "array"
-            | }
+          s"""
+             | {
+             |     "id": $schemaId,
+             |     "version": 0,
+             |     "schema": {
+             |        "items": "string",
+             |        "type": "array"
+             |     }
+             | }
           """.stripMargin
         }
       }
@@ -93,7 +100,7 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
 
     val result = connector.findSchema(schemaId).value
 
-    val expected = SchemaBuilder.array().items(Schema.create(Schema.Type.STRING))
+    val expected = DarwinEntry(schemaId, SchemaBuilder.array().items(Schema.create(Schema.Type.STRING)), 0)
 
     assert(result == expected)
 
@@ -109,15 +116,15 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
 
     val schema = SchemaBuilder.array().items(Schema.create(Schema.Type.INT))
 
-    wireMockServer.stubFor{
+    wireMockServer.stubFor {
       post(urlEqualTo("/schemas/")).withHeader("Content-Type", equalTo("application/json"))
     }
 
-    connector.insert(Seq((0, schema)))
+    connector.insert(Seq(DarwinEntry(0, schema, 0)))
 
-    val request = """[{"type":"array","items":"int"}]"""
+    val request = """[{"schema":{"type":"array","items":"int"},"version":0}]"""
 
-    wireMockServer.verify{
+    wireMockServer.verify {
       postRequestedFor(urlEqualTo("/schemas/")).withRequestBody(equalTo(request))
     }
 

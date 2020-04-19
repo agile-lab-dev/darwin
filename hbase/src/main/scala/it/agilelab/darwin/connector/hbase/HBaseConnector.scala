@@ -1,18 +1,17 @@
 package it.agilelab.darwin.connector.hbase
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{using, Connector, Logging}
-import org.apache.avro.Schema
+import it.agilelab.darwin.common.compat._
+import it.agilelab.darwin.common.{Connector, DarwinEntry, Logging, using}
 import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase._
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, Result}
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.security.UserGroupInformation
-import it.agilelab.darwin.common.compat._
 
 object HBaseConnector extends Logging {
 
@@ -102,26 +101,41 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
   //TODO Sadly the Schema.parse() method that would solve this problem is now deprecated
   private def parser: Parser = new Parser()
 
-  override def fullLoad(): Seq[(Long, Schema)] = {
+  override def fullLoad(): Seq[DarwinEntry] = {
     log.debug(s"loading all schemas from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
     val scanner: Iterable[Result] = connection.getTable(TABLE_NAME).getScanner(CF, QUALIFIER_SCHEMA).toScala
     val schemas = scanner.map { result =>
       val key = Bytes.toLong(result.getRow)
-      val value = Bytes.toString(result.getValue(CF, QUALIFIER_SCHEMA))
-      key -> parser.parse(value)
+      val cell = result.getColumnLatestCell(CF, QUALIFIER_SCHEMA)
+      val value = Bytes.toString(cell.getValueArray, cell.getValueOffset, cell.getValueLength)
+      val version = cell.getTimestamp
+      DarwinEntry(key, parser.parse(value), version)
     }.toSeq
     log.debug(s"${schemas.size} loaded from HBase")
     schemas
   }
 
-  override def insert(schemas: Seq[(Long, Schema)]): Unit = {
+  override def insert(schemas: Seq[DarwinEntry]): Unit = {
+    val oldSchemas = fullLoad().groupBy(e => e.schemaFullName)
+    val toInsert = schemas.flatMap { case e@DarwinEntry(fingerprint, _, _) =>
+      oldSchemas.get(e.schemaFullName).fold(List(e)) { oldVersions =>
+        if (oldVersions.exists(_.fingerprint == fingerprint)) {
+          log.debug(s"schema with fingerprint ${fingerprint} already found in storage, skipping insert")
+          Nil
+        } else {
+          List(e)
+        }
+      }
+    }
+
     log.debug(s"inserting ${schemas.size} schemas in HBase table $NAMESPACE_STRING:$TABLE_NAME_STRING")
+
     val mutator = connection.getBufferedMutator(TABLE_NAME)
-    schemas.map { case (id, schema) =>
+    toInsert.map { case DarwinEntry(id, schema, version) =>
       val put = new Put(Bytes.toBytes(id))
-      put.addColumn(CF, QUALIFIER_SCHEMA, Bytes.toBytes(schema.toString))
-      put.addColumn(CF, QUALIFIER_NAME, Bytes.toBytes(schema.getName))
-      put.addColumn(CF, QUALIFIER_NAMESPACE, Bytes.toBytes(schema.getNamespace))
+      put.addColumn(CF, QUALIFIER_SCHEMA, version, Bytes.toBytes(schema.toString))
+      put.addColumn(CF, QUALIFIER_NAME, version, Bytes.toBytes(schema.getName))
+      put.addColumn(CF, QUALIFIER_NAMESPACE, version, Bytes.toBytes(schema.getNamespace))
       put
     }.foreach(mutator.mutate)
     mutator.flush()
@@ -153,14 +167,19 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
        |  create '$NAMESPACE_STRING:$TABLE_NAME_STRING', '0'""".stripMargin
   }
 
-  override def findSchema(id: Long): Option[Schema] = {
+
+  override def findSchema(id: Long): Option[DarwinEntry] = {
     log.debug(s"loading a schema with id = $id from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
     val get: Get = new Get(Bytes.toBytes(id))
     get.addColumn(CF, QUALIFIER_SCHEMA)
     val result: Result = connection.getTable(TABLE_NAME).get(get)
-    val value: Option[Array[Byte]] = Option(result.getValue(CF, QUALIFIER_SCHEMA))
-    val schema: Option[Schema] = value.map(v => parser.parse(Bytes.toString(v)))
-    log.debug(s"$schema loaded from HBase for id = $id")
-    schema
+    val value: Option[Cell] = Option(result.getColumnLatestCell(CF, QUALIFIER_SCHEMA))
+    val entry: Option[DarwinEntry] = value.map(c =>
+      DarwinEntry(id,
+        parser.parse(Bytes.toString(c.getValueArray, c.getValueOffset, c.getValueLength)),
+        c.getTimestamp)
+    )
+    log.debug(s"$entry loaded from HBase")
+    entry
   }
 }

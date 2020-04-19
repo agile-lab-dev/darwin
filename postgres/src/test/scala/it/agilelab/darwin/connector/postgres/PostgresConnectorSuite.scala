@@ -1,7 +1,7 @@
 package it.agilelab.darwin.connector.postgres
 
 import com.typesafe.config.{Config, ConfigFactory}
-import it.agilelab.darwin.common.Connector
+import it.agilelab.darwin.common.{Connector, DarwinEntry}
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest.BeforeAndAfterAll
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
@@ -35,19 +35,18 @@ class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAft
   }
 
 
-
   "PostgresConnector" should "load all existing schemas" in {
     connector.fullLoad()
   }
 
-  ignore should "insert and retrieve" in {
+  it should "insert and retrieve" in {
     val outerSchema = new Schema.Parser().parse(getClass.getClassLoader.getResourceAsStream("postgresmock.avsc"))
     val innerSchema = outerSchema.getField("four").schema()
 
     val schemas = Seq(innerSchema, outerSchema)
-      .map(s => SchemaNormalization.parsingFingerprint64(s) -> s)
+      .map(s => DarwinEntry(SchemaNormalization.parsingFingerprint64(s), s, 0L))
     connector.insert(schemas)
-    val loaded: Seq[(Long, Schema)] = connector.fullLoad()
+    val loaded: Seq[DarwinEntry] = connector.fullLoad()
     assert(loaded.size == schemas.size)
     assert(loaded.forall(schemas.contains))
   }

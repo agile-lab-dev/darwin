@@ -31,6 +31,13 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
   def getAll: Seq[(Long, Schema)]
 
   /**
+    * Retrieves all registered schemas paired with their version
+    *
+    * @return A Sequence of (ID, SchemaAndVersion)
+    */
+  def getAllWithVersion: Seq[(Long, SchemaAndVersion)]
+
+  /**
     * Extracts the ID from a Schema.
     *
     * @param schema a Schema with unknown ID

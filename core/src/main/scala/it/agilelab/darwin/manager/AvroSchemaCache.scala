@@ -6,7 +6,7 @@ import org.apache.avro.Schema
   * Generic definition of the cache used by the manager to store the data loaded from the external storage.
   * @param schemas a sequence of (ID, schema) used to initialize the cache values
   */
-abstract class AvroSchemaCache(schemas: Seq[(Long, Schema)]) {
+abstract class AvroSchemaCache(schemas: Seq[(Long, SchemaAndVersion)]) {
 
   /**
     * Retrieves a registered schema for the input ID.
@@ -31,7 +31,7 @@ abstract class AvroSchemaCache(schemas: Seq[(Long, Schema)]) {
     * @param values new pair (ID, schema) to insert inside the cache
     * @return a new instance of [[AvroSchemaCache]] containing the new values in addition to the original ones.
     */
-  def insert(values: Seq[(Long, Schema)]): AvroSchemaCache
+  def insert(values: Seq[(Long, SchemaAndVersion)]): AvroSchemaCache
 
   /**
     * Retrieves all registered schemas
@@ -39,4 +39,11 @@ abstract class AvroSchemaCache(schemas: Seq[(Long, Schema)]) {
     * @return A Sequence of (ID, Schema)
     */
   def getAll : Seq[(Long, Schema)]
+
+  /**
+    * Retrieves all registered schemas with their version
+    *
+    * @return A Sequence of (ID, Schema)
+    */
+  def getAllWithVersion : Seq[(Long, SchemaAndVersion)]
 }

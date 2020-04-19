@@ -1,7 +1,5 @@
 package it.agilelab.darwin.common
 
-import org.apache.avro.Schema
-
 /**
   * Generic abstraction of a component capable of reading and writing Schema entities in an external storage.
   * The external storage should keep at least the ID (Long) and the schema (Schema) for each entry.
@@ -29,9 +27,9 @@ trait Connector extends Serializable {
     * This method can be invoked multiple times: to initialize the initial values or to update the existing ones with
     * the new data found on the storage.
     *
-    * @return a sequence of all the pairs (ID, schema) found on the storage
+    * @return a sequence of all [[DarwinEntry]] found on the storage
     */
-  def fullLoad(): Seq[(Long, Schema)]
+  def fullLoad(): Seq[DarwinEntry]
 
   /**
     * Inserts all the schema passed as parameters in the storage.
@@ -39,9 +37,9 @@ trait Connector extends Serializable {
     * the storage should be performed before the invocation of this method, e.g. by checking them against the
     * pre-loaded cache).
     *
-    * @param schemas a sequence of pairs (ID, schema) Schema entities to insert in the storage.
+    * @param schemas a sequence of [[DarwinEntry]] to insert in the storage.
     */
-  def insert(schemas: Seq[(Long, Schema)]): Unit
+  def insert(schemas: Seq[DarwinEntry]): Unit
 
   /**
     * Retrieves a single schema using its ID from the storage.
@@ -49,5 +47,5 @@ trait Connector extends Serializable {
     * @param id the ID of the schema
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
-  def findSchema(id: Long): Option[Schema]
+  def findSchema(id: Long): Option[DarwinEntry]
 }
