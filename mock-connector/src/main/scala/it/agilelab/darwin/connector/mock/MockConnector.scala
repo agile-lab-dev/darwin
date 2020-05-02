@@ -20,6 +20,8 @@ class MockConnectorException(msg: String, t: Option[Throwable]) extends RuntimeE
 
 class MockConnector(config: Config) extends Connector with Logging {
 
+  private[this] var loaded: Boolean = false
+
   val mode: ConfigurationKeys.Mode = if (config.hasPath(ConfigurationKeys.MODE)) {
     ConfigurationKeys.Mode.parse(config.getString(ConfigurationKeys.MODE))
   } else {
@@ -87,7 +89,14 @@ class MockConnector(config: Config) extends Connector with Logging {
   }
 
   override def findSchema(id: Long): Option[Schema] = {
-    fullLoad()
+    if (!loaded) {
+      this.synchronized {
+        if (!loaded) {
+          fullLoad()
+          loaded = true
+        }
+      }
+    }
     table.get(id)
   }
 
