@@ -322,6 +322,10 @@ Example of configuration for the `PostgresConnector`:
 "table": "schema_registry"
 ```
 
+## MongoDB
+
+TODO: MongoDB connector
+
 ## REST
 
 The configuration keys managed by the `RestConnector` are:
