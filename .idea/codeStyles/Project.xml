@@ -1,12 +1,5 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
-    <option name="OTHER_INDENT_OPTIONS">
-      <value>
-        <option name="INDENT_SIZE" value="2" />
-        <option name="TAB_SIZE" value="2" />
-        <option name="SMART_TABS" value="true" />
-      </value>
-    </option>
     <DBN-PSQL>
       <case-options enabled="false">
         <option name="KEYWORD_CASE" value="lower" />
@@ -34,8 +27,5 @@
     <MarkdownNavigatorCodeStyleSettings>
       <option name="RIGHT_MARGIN" value="72" />
     </MarkdownNavigatorCodeStyleSettings>
-    <ScalaCodeStyleSettings>
-      <option name="USE_SCALADOC2_FORMATTING" value="true" />
-    </ScalaCodeStyleSettings>
   </code_scheme>
 </component>
