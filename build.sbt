@@ -13,7 +13,7 @@ lazy val root = Project("darwin", file("."))
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
-  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication, restConnector)
+  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication, restConnector, dynamoConnector)
 
 lazy val core = Project("darwin-core", file("core"))
   .settings(Settings.commonSettings: _*)
@@ -54,6 +54,16 @@ lazy val igniteConnector = Project("darwin-ignite-connector", file("ignite"))
   .settings(libraryDependencies ++= Dependencies.core_deps)
   .settings(crossScalaVersions := Versions.crossScalaVersions)
   .settings(Settings.notPublishSettings)
+  .enablePlugins(JavaAppPackaging)
+
+
+lazy val dynamoConnector = Project("darwin-dynamo-connector", file("dynamo"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon)
+  .settings(pgpPassphrase := Settings.pgpPass)
+  .settings(libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
+    Dependencies.dynamo_conn)
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
   .enablePlugins(JavaAppPackaging)
 
 lazy val restConnector = Project("darwin-rest-connector", file("rest"))

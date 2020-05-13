@@ -18,6 +18,9 @@ object Dependencies {
   lazy val spark_core = "org.apache.spark" %% "spark-core" % "2.4.5" % "provided"
   lazy val spark_sql = "org.apache.spark" %% "spark-sql" % "2.4.5" % "provided"
   lazy val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
+  lazy val dynamo_conn = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.587"
+
+
   lazy val junit = "org.junit.jupiter" % "junit-jupiter-api" % "5.3.2" % Test
 
 
