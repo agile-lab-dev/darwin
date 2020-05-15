@@ -328,17 +328,31 @@ MongoDB dependencies added for creating this connector are provided.
 
 There are two possibilities to create a `MongoConnector`:
 - Use the MongoConnectorCreator: A connection to MongoDB will be created by reading the information from a configuration file
-- Use the MongoConnector constructor: 
+- Use the MongoConnector constructor: Create a MongoConnector. This constructor allows you to build a connector and pass a user-customized connection to it.
 
-
+The configuration keys managed by the `MongoConnectorCreator` are:
+- **collection**: name of the collection used by Darwin to store the schema repository
+- **host**: list of the hosts where you want to connect
+- **database**: the name of the database where the table will be looked for
+- **username**: the user to connect to MongoDB
+- **password**: the password of the user to connect to MongoDB
+- **timeout**: maximum waiting time in milliseconds to obtain the results
 
 The configuration keys managed by the `MongoConnector` are:
-- **table** (optional): name of the table used by Darwin to store the schema repository (if it isn't set, the default
- value "SCHEMA_REPOSITORY" is used)
-- **host**: the host of the PostgreSql database
-- **db**: the name of the database where the table will be looked for
-- **username**: the user to connect to PostgreSql
-- **password**: the password of the user to connect to PostgreSql
+- **collection**: name of the collection used by Darwin to store the schema repository
+- **database**: the name of the database where the table will be looked for
+- **timeout**: maximum waiting time in milliseconds to obtain the results.
+
+Entering other configuration keys will not lead to errors, they will not simply be considered.
+
+```
+username = "mongo"
+password = "mongo"
+host = ["localhost:12345"]
+database = "test"
+collection = "collection_test"
+timeout = 5000
+```
 
 ## REST
 

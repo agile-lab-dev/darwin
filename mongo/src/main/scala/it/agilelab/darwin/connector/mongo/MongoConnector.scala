@@ -24,18 +24,23 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
         .getDatabase(mongoConfig.database)
         .getCollection(mongoConfig.collection)
 
-    val schemas: Seq[(Long, Schema)] =
+    val schemas: Seq[Option[(Long, Schema)]] =
       Await.result(
         collection.find().map(document => {
-          // usare option per tirare l'eccezione se non trova la key
-          val key = document.filterKeys(k => k == "_id").head._2.asInt64().getValue
-          val schema = parser.parse(document.filterKeys(k => k == "schema").head._2.asString().getValue)
-          key -> schema
+          try {
+            val key = document.filterKeys(k => k == "_id").head._2.asInt64().getValue
+            val schema = parser.parse(document.filterKeys(k => k == "schema").head._2.asString().getValue)
+            Some(key -> schema)
+          } catch {
+            case exception: Exception =>
+              log.info(exception.getMessage)
+              None
+          }
         }).toFuture(),
         mongoConfig.timeout
       )
     log.debug(s"${schemas.size} loaded from MongoDB")
-    schemas
+    schemas.flatten
   }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
