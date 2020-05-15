@@ -20,6 +20,7 @@ object Dependencies {
   lazy val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
   lazy val junit = "org.junit.jupiter" % "junit-jupiter-api" % "5.3.2" % Test
   lazy val mongo = "org.mongodb.scala" %% "mongo-scala-driver" % "2.8.0" % "provided"
+  lazy val mongoTest = "com.github.simplyscala" %% "scalatest-embedmongo" % "0.2.4" % "test"
 
 
   lazy val postgres_embedded = "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.10" % Test
@@ -65,5 +66,5 @@ object Dependencies {
   lazy val hbase_conn_dep = core_deps ++ Seq(hbase_common, hbase_server, hadoop_common)
   lazy val postgres_conn_dep = core_deps :+ postgres_conn :+ postgres_embedded
   lazy val spark_app = mock_app_dep ++ Seq(spark_core, spark_sql, hbase_common)
-  lazy val mongo_conn = core_deps ++ Seq(mongo)
+  lazy val mongo_conn = core_deps ++ Seq(mongo, mongoTest)
 }

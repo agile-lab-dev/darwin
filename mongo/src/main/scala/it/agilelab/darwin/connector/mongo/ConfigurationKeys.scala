@@ -2,10 +2,11 @@ package it.agilelab.darwin.connector.mongo
 
 object ConfigurationKeys {
 
-  val USER: String = "username"                   // the user name
-  val DATABASE: String = "db"                     // the name of the database in which the user is defined
-  val PASSWORD: String = "password"               // the password to use in mongoDB connector must be a character array
-  val HOST: String = "host"                       // the host to connect
-  val TABLE: String = "table"            // the user name
+  val USERNAME: String = "username"           // the username
+  val PASSWORD: String = "password"           // the password
+  val HOST: String = "host"                   // the hostname where you want to connect
+  val DATABASE: String = "database"           // the name of the database in which the user is defined
+  val COLLECTION: String = "collection"       // the collection name
+  val TIMEOUT: String = "timeout"             // the timeout max to wait the results
 
 }

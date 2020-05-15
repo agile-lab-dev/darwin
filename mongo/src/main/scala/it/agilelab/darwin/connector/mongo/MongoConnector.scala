@@ -1,159 +1,119 @@
 package it.agilelab.darwin.connector.mongo
 
-import java.util
-
-import avro.shaded.com.google.common.primitives.Bytes
-import com.mongodb.{BasicDBObject, MongoClientSettings, MongoCredential, ServerAddress}
-import com.typesafe.config.Config
+import com.mongodb.{BasicDBObject, ErrorCategory}
 import it.agilelab.darwin.common.{Connector, Logging}
+import it.agilelab.darwin.connector.mongo.ConfigurationMongoModels.BaseMongoConfig
 import org.apache.avro.Schema
-import com.mongodb.MongoCredential._
-import com.mongodb.client.model.Projections
 import org.apache.avro.Schema.Parser
-import org.bson.{BsonString, BsonValue}
-import org.mongodb.scala.bson.{BsonDocument, BsonString}
-import org.mongodb.scala.connection.NettyStreamFactoryFactory
-import org.mongodb.scala.{Document, FindObservable, ListCollectionsObservable, MongoClient, MongoDatabase, Observable, SingleObservable, bson}
+import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoWriteException, bson}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import collection.JavaConverters._
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-import org.bson.Document
+import scala.concurrent.Await
+import scala.util.{Failure, Success}
 
-
-case class MongoConfig(user: String, password: String, hosts: List[String], db: String, table: String)
-
-class MongoConnector(config: Config) extends Connector with Logging {
-
-  require(config.hasPath(ConfigurationKeys.USER))
-  require(config.hasPath(ConfigurationKeys.DATABASE))
-  require(config.hasPath(ConfigurationKeys.PASSWORD))
-  require(config.hasPath(ConfigurationKeys.HOST))
-  require(config.hasPath(ConfigurationKeys.TABLE))
-
-  log.debug("Creating default MongoConfiguration")
-  val mongoConfig: MongoConfig = MongoConfig(
-    config.getString(ConfigurationKeys.USER),
-    config.getString(ConfigurationKeys.PASSWORD),
-    config.getStringList(ConfigurationKeys.HOST).asScala.toList,
-    config.getString(ConfigurationKeys.DATABASE),
-    config.getString(ConfigurationKeys.TABLE)
-  )
-  log.debug("Created default MongoConfiguration")
-
-  log.debug(s"Creating connections")
-  val mongoClient: MongoClient = createConnection(mongoConfig)
-  log.debug(s"Connection created")
-
-  //  In MongoDB tables are called collections.
-  //  Schema:
-  //    id:        idSchema         (long)
-  //    schema:    schema           (string)
-  //    name:      schema.name      (string)
-  //    namespace: schema.namespace (string)
-
-  /**
-   * return the MongoClient
-   * @param mongoConf : config with keys defined by ConfigurationKeys object
-   * @return MongoClient
-   */
-  private def createConnection(mongoConf: MongoConfig): MongoClient = {
-
-    val credential: MongoCredential = createCredential(mongoConf.user, mongoConf.db, mongoConf.password.toCharArray)
-
-    val hosts: List[ServerAddress] = mongoConf.hosts.map(host => new ServerAddress(host))
-
-    val settings: MongoClientSettings = MongoClientSettings.builder()
-      .credential(credential)
-      .applyToClusterSettings(builder => builder.hosts(hosts.asJava))
-      //.streamFactoryFactory(NettyStreamFactoryFactory())
-      .build()
-
-    MongoClient(settings)
-
-  }
+class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) extends Connector with Logging {
 
   private def parser: Parser = new Parser()
 
   override def fullLoad(): Seq[(Long, Schema)] = {
-    log.debug(s"loading all schemas from table ${mongoConfig.table}")
-    val collectionNames =
+
+    log.debug(s"loading all schemas from collection ${mongoConfig.collection}")
+    val collection =
       mongoClient
-        .getDatabase(mongoConfig.db)
-        .listCollectionNames()
+        .getDatabase(mongoConfig.database)
+        .getCollection(mongoConfig.collection)
 
     val schemas: Seq[(Long, Schema)] =
       Await.result(
-        collectionNames.flatMap(collectionName =>
-          mongoClient.getDatabase(mongoConfig.db).getCollection(collectionName).find().map(document => {
-            val key = document.filterKeys(k => k == "id").head._2.asInt64().getValue
-            val schema = parser.parse(document.filterKeys(k => k == "schema").head._2.asString().getValue)
-            key -> schema
-          })
-        ).toFuture()
-        ,
-        Duration.Undefined
+        collection.find().map(document => {
+          // usare option per tirare l'eccezione se non trova la key
+          val key = document.filterKeys(k => k == "_id").head._2.asInt64().getValue
+          val schema = parser.parse(document.filterKeys(k => k == "schema").head._2.asString().getValue)
+          key -> schema
+        }).toFuture(),
+        mongoConfig.timeout
       )
-
     log.debug(s"${schemas.size} loaded from MongoDB")
     schemas
   }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
 
-    schemas.foreach{
-      case (id, schema) => {
+    log.debug(s"inclusion of new schemas in the collection ${mongoConfig.collection}")
+
+    schemas.foreach {
+      case (id, schema) =>
         val document = new BsonDocument
-        document.put("id", bson.BsonInt64(id))
+        document.put("_id", bson.BsonInt64(id))
         document.put("schema", bson.BsonString(schema.toString))
         document.put("name", bson.BsonString(schema.getName))
         document.put("namespace", bson.BsonString(schema.getNamespace))
 
-        mongoClient.getDatabase(mongoConfig.db).getCollection(mongoConfig.table).insertOne(document)
-      }
+        insertIfNotExists(mongoClient.getDatabase(mongoConfig.database).getCollection(mongoConfig.collection), document)
     }
+  }
 
+  private def insertIfNotExists(collection: MongoCollection[Document], document: BsonDocument): Unit = {
+    try {
+      Await.result(collection.insertOne(document).toFuture(), mongoConfig.timeout)
+    } catch {
+      case ex: MongoWriteException if ex.getError.getCategory == ErrorCategory.DUPLICATE_KEY =>
+        log.info("document already present, doing nothing")
+    }
+    Unit
   }
 
   override def createTable(): Unit = {
-    log.debug(s"Creating table ${mongoConfig.table}")
-    mongoClient.getDatabase(mongoConfig.db).createCollection(mongoConfig.table)
-    log.debug(s"Table ${mongoConfig.table} created")
+    log.debug(s"Creating collection ${mongoConfig.collection}")
+    val result = mongoClient.getDatabase(mongoConfig.database).createCollection(mongoConfig.collection)
+    result.toFuture().onComplete {
+      case Success(s) => log.info(s"collection ${mongoConfig.collection} has been correctly created. \n ${s.toString()}")
+      case Failure(t) => log.info(s"collection ${mongoConfig.collection} was not created. \n ${t.getMessage}")
+    }
   }
 
   override def tableExists(): Boolean = {
     Await.result(
       mongoClient
-        .getDatabase(mongoConfig.db)
+        .getDatabase(mongoConfig.database)
         .listCollectionNames()
-        .filter(x => x == mongoConfig.table)
-        .toFuture().map(_.size)
-      ,
-      Duration.Undefined
+        .filter(x => x == mongoConfig.collection)
+        .toFuture().map(_.size),
+      mongoConfig.timeout
     ) == 1
   }
 
   override def tableCreationHint(): String = {
-    s"""To create table perform the following command:
-       |mongoClient.getDatabase(<DATABASE>).createCollection(<TABLE>)
+    s"""To create the collection from shell perform the following command:
+       |db.createCollection(${mongoConfig.collection})
      """.stripMargin
   }
 
   override def findSchema(id: Long): Option[Schema] = {
 
     val query = new BasicDBObject
-    query.put("id", id)
+    query.put("_id", bson.BsonInt64(id))
 
-    val document =
+    val documents =
       mongoClient
-        .getDatabase(mongoConfig.db)
-        .getCollection(mongoConfig.table)
+        .getDatabase(mongoConfig.database)
+        .getCollection(mongoConfig.collection)
         .find(query)
         .toFuture()
 
     // at max there is only one schema value (string)
-    val schemaValue = Await.result(document, Duration.Undefined).flatMap(documents => documents.map(doc => doc._2.asString().getValue))
+    val schemaValue: Seq[String] =
+      Await.result(documents, mongoConfig.timeout)
+        .flatMap(document =>
+          document.flatMap(field =>
+            if (field._1 == "schema") {
+              Some(field._2.asString().getValue)
+            }
+            else {
+              None
+            })
+        )
 
     if (schemaValue.nonEmpty) {
       Some(parser.parse(schemaValue.head))
@@ -161,5 +121,4 @@ class MongoConnector(config: Config) extends Connector with Logging {
       None
     }
   }
-
 }

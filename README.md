@@ -324,7 +324,21 @@ Example of configuration for the `PostgresConnector`:
 
 ## MongoDB
 
-TODO: MongoDB connector
+MongoDB dependencies added for creating this connector are provided.
+
+There are two possibilities to create a `MongoConnector`:
+- Use the MongoConnectorCreator: A connection to MongoDB will be created by reading the information from a configuration file
+- Use the MongoConnector constructor: 
+
+
+
+The configuration keys managed by the `MongoConnector` are:
+- **table** (optional): name of the table used by Darwin to store the schema repository (if it isn't set, the default
+ value "SCHEMA_REPOSITORY" is used)
+- **host**: the host of the PostgreSql database
+- **db**: the name of the database where the table will be looked for
+- **username**: the user to connect to PostgreSql
+- **password**: the password of the user to connect to PostgreSql
 
 ## REST
 
