@@ -322,6 +322,40 @@ Example of configuration for the `PostgresConnector`:
 "table": "schema_registry"
 ```
 
+## MongoDB
+
+MongoDB Connector works with scala 2.11, 2.12 and 2.13.
+
+MongoDB dependencies added for creating this connector should be provided by the user.
+
+There are two possibilities to create a `MongoConnector`:
+- Use the MongoConnectorCreator: A connection to MongoDB will be created by reading the information from a configuration file
+- Use the MongoConnector constructor: Create a MongoConnector. This constructor allows you to build a connector and pass a user-customized connection to it.
+
+The configuration keys managed by the `MongoConnectorCreator` are:
+- **collection**: name of the collection used by Darwin to store the schema repository
+- **host**: list of the hosts where you want to connect
+- **database**: the name of the database where the table will be looked for
+- **username**: the user to connect to MongoDB
+- **password**: the password of the user to connect to MongoDB
+- **timeout**: maximum waiting time in milliseconds to obtain the results
+
+The configuration keys managed by the `MongoConnector` are:
+- **collection**: name of the collection used by Darwin to store the schema repository
+- **database**: the name of the database where the table will be looked for
+- **timeout**: maximum waiting time in milliseconds to obtain the results.
+
+Entering other configuration keys will not lead to errors, they will not simply be considered.
+
+```
+username = "mongo"
+password = "mongo"
+host = ["localhost:12345"]
+database = "test"
+collection = "collection_test"
+timeout = 5000
+```
+
 ## REST
 
 The configuration keys managed by the `RestConnector` are:
