@@ -1,8 +1,10 @@
 package it.agilelab.darwin.connector.mongo
 
+import com.mongodb.Block
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.{Connector, ConnectorCreator}
 import it.agilelab.darwin.connector.mongo.ConfigurationMongoModels.MongoConnectorConfig
+import org.mongodb.scala.connection.ClusterSettings
 import org.mongodb.scala.{MongoClient, MongoClientSettings, MongoCredential, ServerAddress}
 
 import collection.JavaConverters._
@@ -35,7 +37,10 @@ class MongoConnectorCreator extends ConnectorCreator {
 
     val settings: MongoClientSettings = MongoClientSettings.builder()
       .credential(credential)
-      .applyToClusterSettings(builder => builder.hosts(hosts.asJava))
+      .applyToClusterSettings(new Block[ClusterSettings.Builder] {
+        override def apply(builder: ClusterSettings.Builder): Unit =
+          builder.hosts(hosts.asJava)
+      })
       .build()
 
     MongoClient(settings)

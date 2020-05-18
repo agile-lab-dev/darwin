@@ -78,7 +78,7 @@ lazy val mongoConnector = Project("darwin-mongo-connector", file("mongo"))
   .dependsOn(coreCommon)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.mongo_conn)
-  .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
+  .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211))
   .enablePlugins(JavaAppPackaging)
 
 lazy val mockConnector = Project("darwin-mock-connector", file("mock-connector"))
