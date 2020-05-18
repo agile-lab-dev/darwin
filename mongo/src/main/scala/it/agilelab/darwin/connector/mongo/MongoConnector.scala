@@ -5,12 +5,12 @@ import it.agilelab.darwin.common.{Connector, Logging}
 import it.agilelab.darwin.connector.mongo.ConfigurationMongoModels.BaseMongoConfig
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
-import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.bson.{BsonDocument, BsonValue}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoWriteException, bson}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Try}
 
 class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) extends Connector with Logging {
 
@@ -24,23 +24,32 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
         .getDatabase(mongoConfig.database)
         .getCollection(mongoConfig.collection)
 
-    val schemas: Seq[Option[(Long, Schema)]] =
+    val schemas: Seq[Try[(Long, Schema)]] =
       Await.result(
-        collection.find().map(document => {
-          try {
-            val key = document.filterKeys(k => k == "_id").head._2.asInt64().getValue
-            val schema = parser.parse(document.filterKeys(k => k == "schema").head._2.asString().getValue)
-            Some(key -> schema)
-          } catch {
-            case exception: Exception =>
-              log.info(exception.getMessage)
-              None
-          }
-        }).toFuture(),
+        collection.find().map { document =>
+          for {
+            key <- extract(document, "_id", _.asInt64().getValue)
+            schemaStr <- extract(document, "schema", _.asString().getValue)
+            schema <- Try(parser.parse(schemaStr))
+          } yield key -> schema
+        }.toFuture(),
         mongoConfig.timeout
       )
     log.debug(s"${schemas.size} loaded from MongoDB")
-    schemas.flatten
+    // this way the first exception is thrown, but we can change this line to support different error handling strategies
+    schemas.map(_.get)
+  }
+
+  private def extract[A](d: Document, fieldName: String, f: BsonValue => A): Try[A] = {
+    d.filterKeys(k => k == fieldName)
+      .headOption
+      .fold[Try[A]](Failure(new RuntimeException(s"Cannot find $fieldName field in document"))) {
+        case (_, value) =>
+          Try(f(value)).recoverWith {
+            case t: Throwable =>
+              Failure(new RuntimeException(s"$fieldName was not of expected type", t))
+          }
+      }
   }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
@@ -71,10 +80,14 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
 
   override def createTable(): Unit = {
     log.debug(s"Creating collection ${mongoConfig.collection}")
-    val result = mongoClient.getDatabase(mongoConfig.database).createCollection(mongoConfig.collection)
-    result.toFuture().onComplete {
-      case Success(s) => log.info(s"collection ${mongoConfig.collection} has been correctly created. \n ${s.toString()}")
-      case Failure(t) => log.info(s"collection ${mongoConfig.collection} was not created. \n ${t.getMessage}")
+    try {
+      Await.result(
+        mongoClient.getDatabase(mongoConfig.database).createCollection(mongoConfig.collection).toFuture(),
+        mongoConfig.timeout
+      )
+      log.info(s"collection ${mongoConfig.collection} has been correctly created")
+    } catch {
+      case e: Exception => log.info(s"collection ${mongoConfig.collection} was not created. \n ${e.getMessage}")
     }
   }
 
@@ -107,23 +120,12 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
         .find(query)
         .toFuture()
 
-    // at max there is only one schema value (string)
     val schemaValue: Seq[String] =
-      Await.result(documents, mongoConfig.timeout)
-        .flatMap(document =>
-          document.flatMap(field =>
-            if (field._1 == "schema") {
-              Some(field._2.asString().getValue)
-            }
-            else {
-              None
-            })
-        )
-
-    if (schemaValue.nonEmpty) {
-      Some(parser.parse(schemaValue.head))
-    } else {
-      None
-    }
+      for {
+        document <- Await.result(documents, mongoConfig.timeout)
+        field <- document
+        if field._1 == "schema"
+      } yield field._2.asString().getValue
+    schemaValue.headOption.map(parser.parse)
   }
 }

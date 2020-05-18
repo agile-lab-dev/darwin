@@ -9,7 +9,6 @@ lazy val Settings.pgpPass = Option(System.getenv().get("PGP_PASS")).map(_.toArra
 lazy val root = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
   .settings(libraryDependencies ++= Dependencies.core_deps)
-  //.settings(crossScalaVersions := Versions.crossScalaVersions)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)

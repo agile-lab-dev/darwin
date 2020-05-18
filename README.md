@@ -324,7 +324,7 @@ Example of configuration for the `PostgresConnector`:
 
 ## MongoDB
 
-MongoDB dependencies added for creating this connector are provided.
+MongoDB dependencies added for creating this connector should be provided by the user.
 
 There are two possibilities to create a `MongoConnector`:
 - Use the MongoConnectorCreator: A connection to MongoDB will be created by reading the information from a configuration file
