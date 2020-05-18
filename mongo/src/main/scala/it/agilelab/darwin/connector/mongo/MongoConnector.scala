@@ -36,7 +36,8 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
         mongoConfig.timeout
       )
     log.debug(s"${schemas.size} loaded from MongoDB")
-    // this way the first exception is thrown, but we can change this line to support different error handling strategies
+    // this way the first exception is thrown, but we can change this line 
+    // to support different error handling strategies
     schemas.map(_.get)
   }
 
