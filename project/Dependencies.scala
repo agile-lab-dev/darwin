@@ -20,7 +20,7 @@ object Dependencies {
   lazy val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
   lazy val junit = "org.junit.jupiter" % "junit-jupiter-api" % "5.3.2" % Test
   lazy val mongo = "org.mongodb.scala" %% "mongo-scala-driver" % "2.8.0" % "provided"
-  lazy val mongoTest = "com.github.simplyscala" %% "scalatest-embedmongo" % "0.2.4" % "test"
+  lazy val mongoTest = "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.2.0" % "test"
 
 
   lazy val postgres_embedded = "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.10" % Test

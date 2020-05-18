@@ -6,8 +6,7 @@ import it.agilelab.darwin.common.{Connector, ConnectorCreator}
 import it.agilelab.darwin.connector.mongo.ConfigurationMongoModels.MongoConnectorConfig
 import org.mongodb.scala.connection.ClusterSettings
 import org.mongodb.scala.{MongoClient, MongoClientSettings, MongoCredential, ServerAddress}
-
-import collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
 import scala.concurrent.duration.Duration
 
 class MongoConnectorCreator extends ConnectorCreator {
@@ -39,7 +38,7 @@ class MongoConnectorCreator extends ConnectorCreator {
       .credential(credential)
       .applyToClusterSettings(new Block[ClusterSettings.Builder] {
         override def apply(builder: ClusterSettings.Builder): Unit =
-          builder.hosts(hosts.asJava)
+          builder.hosts(java.util.Arrays.asList(hosts:_*))
       })
       .build()
 
@@ -63,7 +62,7 @@ class MongoConnectorCreator extends ConnectorCreator {
       config.getString(ConfigurationKeys.PASSWORD),
       config.getString(ConfigurationKeys.DATABASE),
       config.getString(ConfigurationKeys.COLLECTION),
-      config.getStringList(ConfigurationKeys.HOST).asScala,
+      config.getStringList(ConfigurationKeys.HOST).toScala().toSeq,
       if (config.hasPath(ConfigurationKeys.TIMEOUT)) {
         Duration.create(config.getInt(ConfigurationKeys.TIMEOUT), "millis")
       } else {

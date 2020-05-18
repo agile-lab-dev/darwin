@@ -324,7 +324,7 @@ Example of configuration for the `PostgresConnector`:
 
 ## MongoDB
 
-MongoDB Connector works only with scala 2.11 and 2.12.
+MongoDB Connector works with scala 2.11, 2.12 and 2.13.
 
 MongoDB dependencies added for creating this connector should be provided by the user.
 

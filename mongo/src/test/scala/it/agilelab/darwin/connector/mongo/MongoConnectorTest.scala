@@ -1,6 +1,5 @@
 package it.agilelab.darwin.connector.mongo
 
-import com.github.simplyscala.MongoEmbedDatabase
 import com.typesafe.config.{Config, ConfigFactory}
 import de.flapdoodle.embed.mongo.{MongodExecutable, MongodProcess, MongodStarter}
 import de.flapdoodle.embed.mongo.config.{IMongodConfig, MongodConfigBuilder, Net}
@@ -18,7 +17,7 @@ import org.apache.avro.Schema.Parser
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class MongoConnectorTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll with MongoEmbedDatabase {
+class MongoConnectorTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
   val port = 12345
   val config: Config = ConfigFactory.load("mongo.conf")
@@ -34,7 +33,7 @@ class MongoConnectorTest extends AnyFlatSpec with Matchers with BeforeAndAfterAl
     if (config.hasPath(ConfigurationKeys.TIMEOUT)) {
       Duration.create(config.getInt(ConfigurationKeys.TIMEOUT), "millis")
     } else {
-      Duration.Undefined
+      Duration.create(ConfigurationMongoModels.DEFAULT_DURATION, "millis")
     })
   val mongodExecutable: MongodExecutable = starter.prepare(mongodConfig)
   var mongod: MongodProcess = _
