@@ -75,7 +75,7 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
       case ex: MongoWriteException if ex.getError.getCategory == ErrorCategory.DUPLICATE_KEY =>
         log.info("document already present, doing nothing")
     }
-    Unit
+    ()
   }
 
   override def createTable(): Unit = {
