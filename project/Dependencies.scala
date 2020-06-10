@@ -14,7 +14,7 @@ object Dependencies {
   lazy val hbase_server = "org.apache.hbase" % "hbase-server" % "1.2.2" % "provided"
   lazy val hbase_common = "org.apache.hbase" % "hbase-common" % "1.2.2" % "provided"
   lazy val hadoop_common = "org.apache.hadoop" % "hadoop-common" % "2.6.0" % "provided"
-  lazy val reflections = "org.reflections" % "reflections" % "0.9.11"
+  lazy val reflections = "org.reflections" % "reflections" % "0.9.11" % Test
   lazy val spark_core = "org.apache.spark" %% "spark-core" % "2.4.5" % "provided"
   lazy val spark_sql = "org.apache.spark" %% "spark-sql" % "2.4.5" % "provided"
   lazy val postgres_conn = "org.postgresql" % "postgresql" % "9.3-1100-jdbc4"
