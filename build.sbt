@@ -64,6 +64,15 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
   .enablePlugins(JavaAppPackaging)
 
+lazy val restConfluentConnector = Project("darwin-confluent-rest-connector", file("rest-confluent"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon)
+  .settings(pgpPassphrase := Settings.pgpPass)
+  .settings(libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
+    Dependencies.httpClient)
+  .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
+  .enablePlugins(JavaAppPackaging)
+
 lazy val restServer = Project("darwin-rest-server", file("rest-server"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon, mockConnector)
