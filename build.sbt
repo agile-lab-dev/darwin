@@ -115,3 +115,6 @@ lazy val sparkApplication = Project("darwin-spark-application", file("spark-appl
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211))
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
+
+
+

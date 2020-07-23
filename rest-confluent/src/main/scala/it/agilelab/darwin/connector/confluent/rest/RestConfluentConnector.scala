@@ -12,7 +12,7 @@ import org.apache.avro.Schema
 import scalaj.http.{Http, HttpResponse}
 
 class RestConfluentConnector(options: RestConfluentConnectorOptions, config: Config)
-  extends Connector with JsonProtocol with JsonSupport {
+  extends Connector with JsonProtocol {
 
   //with directives with debuggingdirectives
 //  implicit val system = ActorSystem()

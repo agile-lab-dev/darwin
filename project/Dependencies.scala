@@ -23,6 +23,7 @@ object Dependencies {
   lazy val mongoTest = "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.2.0" % "test"
 
 
+
   lazy val postgres_embedded = "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.10" % Test
 
   lazy val akka = Seq(
@@ -67,4 +68,6 @@ object Dependencies {
   lazy val postgres_conn_dep = core_deps :+ postgres_conn :+ postgres_embedded
   lazy val spark_app = mock_app_dep ++ Seq(spark_core, spark_sql, hbase_common)
   lazy val mongo_conn = core_deps ++ Seq(mongo, mongoTest)
+
+
 }
