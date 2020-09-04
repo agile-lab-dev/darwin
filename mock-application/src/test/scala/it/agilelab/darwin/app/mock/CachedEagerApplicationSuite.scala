@@ -6,12 +6,11 @@ import java.nio.ByteOrder
 import com.typesafe.config.{Config, ConfigFactory}
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, NewClass, OneField}
-import it.agilelab.darwin.common.{Connector, ConnectorFactory}
+import it.agilelab.darwin.common.{Connector, ConnectorFactory, SchemaReader}
 import it.agilelab.darwin.manager.{AvroSchemaManager, CachedEagerAvroSchemaManager}
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.apache.avro.reflect.ReflectData
 import org.reflections.Reflections
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import it.agilelab.darwin.common.compat._
@@ -22,19 +21,20 @@ class LittleEndianCachedEagerApplicationSuite extends CachedEagerApplicationSuit
 
 abstract class CachedEagerApplicationSuite(val endianness: ByteOrder) extends AnyFlatSpec with Matchers {
 
-  val config: Config = ConfigFactory.load()
-  val connector: Connector = ConnectorFactory.connector(config)
-  val manager: AvroSchemaManager = new CachedEagerAvroSchemaManager(connector, endianness)
+  private val mockClassAloneFingerprint = 6675579114512671233L
+  private val mockClassParentFingerprint = -6310800772237892477L
+
+  private val config: Config = ConfigFactory.load()
+  private val connector: Connector = ConnectorFactory.connector(config)
+  private val manager: AvroSchemaManager = new CachedEagerAvroSchemaManager(connector, endianness)
 
   "CachedEagerAvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))
     assert(manager.registerAll(schemas).size == 1)
   }
 
-  it should "load all existing schemas and register a new one" in {
+  it should "register a new schema" in {
     val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))
-    manager.getSchema(0L)
-
     manager.registerAll(schemas)
 
     val id = manager.getId(schemas.head)
@@ -44,8 +44,8 @@ abstract class CachedEagerApplicationSuite(val endianness: ByteOrder) extends An
 
   it should "get all previously registered schemas" in {
     val schema: Schema = SchemaReader.readFromResources("MyNestedClass.avsc")
-    val schema0 = manager.getSchema(0L)
-    val schema1 = manager.getSchema(1L)
+    val schema0 = manager.getSchema(mockClassAloneFingerprint)
+    val schema1 = manager.getSchema(mockClassParentFingerprint)
     assert(schema0.isDefined)
     assert(schema1.isDefined)
     assert(schema0.get != schema1.get)

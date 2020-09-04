@@ -1,0 +1,1 @@
+{"type":"record","name":"MockClassParent","namespace":"it.agilelab.darwin.connector.mock.testclasses","fields":[{"name":"one","type":"int"},{"name":"two","type":"string"},{"name":"three","type":"long"},{"name":"four","type":{"type":"record","name":"MockClassChild","fields":[{"name":"twoOne","type":"long"},{"name":"twoTwo","type":"string"}]}}]}
