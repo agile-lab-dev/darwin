@@ -16,36 +16,28 @@ class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAft
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-
     val port = 5432
     val host = "localhost"
     val dbname = "postgres"
     val username = "postgres"
     val password = "mysecretpassword"
-
     embeddedPostgres.start(host, port, dbname, username, password)
-
     connector.createTable()
   }
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-
     embeddedPostgres.stop()
   }
 
-
-
-  "PostgresConnector" should "load all existing schemas" in {
-    connector.fullLoad()
-  }
-
-  ignore should "insert and retrieve" in {
+  it should "multiple insert and retrieve" in {
     val outerSchema = new Schema.Parser().parse(getClass.getClassLoader.getResourceAsStream("postgresmock.avsc"))
     val innerSchema = outerSchema.getField("four").schema()
-
     val schemas = Seq(innerSchema, outerSchema)
       .map(s => SchemaNormalization.parsingFingerprint64(s) -> s)
+    connector.insert(schemas)
+    connector.insert(schemas)
+    connector.insert(schemas)
     connector.insert(schemas)
     val loaded: Seq[(Long, Schema)] = connector.fullLoad()
     assert(loaded.size == schemas.size)

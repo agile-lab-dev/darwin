@@ -6,10 +6,10 @@ import com.typesafe.config.Config
 
 trait PostgresConnection {
 
-  private var connectionUrl : String = ""
-  private val driverName : String = "org.postgresql.Driver"
+  private var connectionUrl: String = ""
+  private val driverName: String = "org.postgresql.Driver"
 
-  protected def setConnectionConfig(config : Config) = {
+  protected def setConnectionConfig(config: Config) = {
     val db = config.getString(ConfigurationKeys.DATABASE)
     val host = config.getString(ConfigurationKeys.HOST)
     val user = config.getString(ConfigurationKeys.USER)
