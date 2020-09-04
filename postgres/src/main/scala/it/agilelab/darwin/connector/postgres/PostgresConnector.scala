@@ -78,6 +78,7 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
     val UPD_NAMESPACE: Int = 3
     using(getConnection) { connection =>
       connection.setAutoCommit(false)
+      connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
       using(connection.prepareStatement(INSERT_STMT)) {
         insertSchemaPS =>
           using(connection.prepareStatement(UPDATE_STMT)) {
