@@ -25,7 +25,7 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
     config.getString(ConfigurationKeys.MODE) match {
       case ExceptionDriven.value => ExceptionDriven
       case OneTransaction.value => OneTransaction
-      case other => throw new RuntimeException(s"Unknown mode: $other")
+      case other: String => throw new RuntimeException(s"Unknown mode: $other")
     }
   } else {
     OneTransaction
