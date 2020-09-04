@@ -322,6 +322,7 @@ Example of configuration for the `PostgresConnector`:
 "username": "postgres"
 "password": "srpsql"
 "table": "schema_registry"
+"mode": "transaction"
 ```
 
 ## MongoDB
