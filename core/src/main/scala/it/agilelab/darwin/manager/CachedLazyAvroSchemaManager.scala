@@ -12,6 +12,8 @@ import org.apache.avro.Schema
 class CachedLazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
   extends CachedAvroSchemaManager(connector, endianness) {
 
+  def this(connector: Connector) = this(connector, ByteOrder.BIG_ENDIAN)
+
   override def getSchema(id: Long): Option[Schema] = {
     cache.getSchema(id).orElse {
       val schema: Option[Schema] = connector.findSchema(id)

@@ -20,6 +20,8 @@ import org.apache.avro.Schema
  */
 abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) extends Logging {
 
+  def this(connector: Connector) = this(connector, ByteOrder.BIG_ENDIAN)
+
   /**
    * @return the configured endianness of this AvroSchemaManager instance
    */

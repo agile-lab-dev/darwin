@@ -17,6 +17,11 @@ private[darwin] object ByteArrayUtils {
         .putLong(l).array()
     }
 
+    /** Converts Long to Array[Byte] in BigEndian order
+     */
+    def longToByteArray(): Array[Byte] = longToByteArray(ByteOrder.BIG_ENDIAN)
+
+
     /** Writes to the stream the enriched long honoring the input endianness
       */
     def writeToStream(os: OutputStream, endianness: ByteOrder): Unit = {
@@ -40,6 +45,11 @@ private[darwin] object ByteArrayUtils {
           os.write((l >>> 48).asInstanceOf[Int])
           os.write((l >>> 56).asInstanceOf[Int])
       }
+    }
+    /** Writes to the stream the enriched long in BigEndian order
+     */
+    def writeToStream(os: OutputStream): Unit = {
+      writeToStream(os, ByteOrder.BIG_ENDIAN)
     }
   }
 

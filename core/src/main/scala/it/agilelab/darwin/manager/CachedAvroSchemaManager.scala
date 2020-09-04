@@ -7,11 +7,14 @@ import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 
 /**
-  * Implementation of AvroSchemaManager that defines a cache where the storage data is loaded, in order to reduce the
-  * number of accesses to the storage.
-  */
+ * Implementation of AvroSchemaManager that defines a cache where the storage data is loaded, in order to reduce the
+ * number of accesses to the storage.
+ */
 abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrder)
   extends AvroSchemaManager(connector, endianness) {
+
+  def this(connector: Connector) = this(connector, ByteOrder.BIG_ENDIAN)
+
   protected val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
 
   def cache: AvroSchemaCache = _cache.get
@@ -27,10 +30,10 @@ abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrd
   }
 
   /**
-    * Reloads all the schemas from the previously configured storage.
-    * Throws an exception if the cache wasn't already loaded (the getInstance method must always be used to
-    * initialize the cache using the required configuration).
-    */
+   * Reloads all the schemas from the previously configured storage.
+   * Throws an exception if the cache wasn't already loaded (the getInstance method must always be used to
+   * initialize the cache using the required configuration).
+   */
   override def reload(): AvroSchemaManager = {
     log.debug("reloading cache...")
     _cache.set(Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
@@ -51,9 +54,9 @@ abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrd
 
 
   /**
-    * Retrieves all registered schemas
-    *
-    * @return A Sequence of (ID, Schema)
-    */
+   * Retrieves all registered schemas
+   *
+   * @return A Sequence of (ID, Schema)
+   */
   override def getAll: Seq[(Long, Schema)] = cache.getAll
 }
