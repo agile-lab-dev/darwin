@@ -7,7 +7,7 @@ import it.agilelab.darwin.common.{Connector, using}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class PostgresConnector(config: Config) extends Connector with PostgresConnection {
 
@@ -84,13 +84,12 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
                       updateSchemaPS.executeUpdate()
                       connection.commit()
                     }
-                }.fold(
-                  t => {
+                } match {
+                  case Failure(t) =>
                     connection.rollback()
                     throw t
-                  },
-                  identity
-                )
+                  case Success(_) =>
+                }
               }
           }
       }
