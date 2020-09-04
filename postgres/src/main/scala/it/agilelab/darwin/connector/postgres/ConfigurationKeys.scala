@@ -6,4 +6,5 @@ object ConfigurationKeys {
   val DATABASE : String = "db"
   val USER : String = "username"
   val PASSWORD : String = "password"
+  val MODE: String = "mode"
 }

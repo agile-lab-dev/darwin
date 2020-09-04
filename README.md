@@ -312,6 +312,8 @@ The configuration keys managed by the `PostgresConnector` are:
 - **db**: the name of the database where the table will be looked for
 - **username**: the user to connect to PostgreSql
 - **password**: the password of the user to connect to PostgreSql
+- **mode**: controls the way upserts are implemented, either with a single transaction (transaction), or trying to 
+insert and then falling back to update when key violation is raised (exception). default: `transaction` 
 
 Example of configuration for the `PostgresConnector`:
 ```

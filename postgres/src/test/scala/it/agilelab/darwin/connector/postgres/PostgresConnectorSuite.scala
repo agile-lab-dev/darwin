@@ -1,6 +1,6 @@
 package it.agilelab.darwin.connector.postgres
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest.BeforeAndAfterAll
@@ -10,8 +10,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
-  val config: Config = ConfigFactory.load("postgres.properties")
-  val connector: Connector = new PostgresConnectorCreator().create(config)
   val embeddedPostgres: EmbeddedPostgres = new EmbeddedPostgres(Version.V9_6_11)
 
   override protected def beforeAll(): Unit = {
@@ -22,6 +20,8 @@ class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAft
     val username = "postgres"
     val password = "mysecretpassword"
     embeddedPostgres.start(host, port, dbname, username, password)
+    val config: Config = ConfigFactory.load("postgres.properties")
+    val connector: Connector = new PostgresConnectorCreator().create(config)
     connector.createTable()
   }
 
@@ -30,7 +30,27 @@ class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAft
     embeddedPostgres.stop()
   }
 
-  it should "multiple insert and retrieve" in {
+  it should "multiple insert and retrieve [No conf - OneTransaction]" in {
+    val config: Config = ConfigFactory.load("postgres.properties")
+    val connector: Connector = new PostgresConnectorCreator().create(config)
+    test(connector)
+  }
+
+  it should "multiple insert and retrieve [OneTransaction]" in {
+    val config: Config = ConfigFactory.load("postgres.properties")
+      .withValue(ConfigurationKeys.MODE, ConfigValueFactory.fromAnyRef(OneTransaction.value))
+    val connector: Connector = new PostgresConnectorCreator().create(config)
+    test(connector)
+  }
+
+  it should "multiple insert and retrieve [ExceptionDriven]" in {
+    val config: Config = ConfigFactory.load("postgres.properties")
+      .withValue(ConfigurationKeys.MODE, ConfigValueFactory.fromAnyRef(ExceptionDriven.value))
+    val connector: Connector = new PostgresConnectorCreator().create(config)
+    test(connector)
+  }
+
+  private def test(connector: Connector) = {
     val outerSchema = new Schema.Parser().parse(getClass.getClassLoader.getResourceAsStream("postgresmock.avsc"))
     val innerSchema = outerSchema.getField("four").schema()
     val schemas = Seq(innerSchema, outerSchema)
@@ -43,5 +63,4 @@ class PostgresConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAft
     assert(loaded.size == schemas.size)
     assert(loaded.forall(schemas.contains))
   }
-
 }
