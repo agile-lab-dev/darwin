@@ -173,4 +173,9 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * Reloads all the schemas from the previously configured storage.
     */
   def reload(): AvroSchemaManager
+
+  /**
+   * Retrieves the endianness
+   */
+  def getEndianness(): ByteOrder = endianness
 }

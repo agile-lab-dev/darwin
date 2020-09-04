@@ -12,7 +12,7 @@ lazy val root = Project("darwin", file("."))
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
-  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication, restConnector, mongoConnector)
+  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication, restConnector, mongoConnector, restConfluentConnector)
 
 lazy val core = Project("darwin-core", file("core"))
   .settings(Settings.commonSettings: _*)

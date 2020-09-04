@@ -82,7 +82,7 @@ object Settings {
 
   lazy val buildSettings = Seq(
     resolvers ++= customResolvers,
-    scalaVersion := Versions.scala
+    scalaVersion := Versions.scala_211
   )
 
   lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++
