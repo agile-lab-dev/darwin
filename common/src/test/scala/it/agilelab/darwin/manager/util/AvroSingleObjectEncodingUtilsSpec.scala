@@ -20,6 +20,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
   val testId = 4560514203639509981L
   val parser = new Schema.Parser()
 
+
   val schema = parser.parse(
     """{
       |     "type": "record",
@@ -177,7 +178,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
 
   "getId" should "return the testId" in {
 
-    AvroSingleObjectEncodingUtils.getId(schema, endianness) should be(testId)
+    AvroSingleObjectEncodingUtils.getId(schema) should be(testId)
   }
 
 
@@ -190,7 +191,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
     val encoder = EncoderFactory.get.binaryEncoder(stream, null)
     val writer = new GenericDatumWriter[GenericRecord](schema)
     AvroSingleObjectEncodingUtils
-      .generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema, endianness), endianness) {
+      .generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema), endianness) {
         os =>
           writer.write(record, encoder)
           writer.write(record, encoder)
@@ -221,7 +222,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
     val encoder = EncoderFactory.get.binaryEncoder(stream, null)
     val writer = new GenericDatumWriter[GenericRecord](schema)
     AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(stream,
-      AvroSingleObjectEncodingUtils.getId(schema, endianness), endianness) { os =>
+      AvroSingleObjectEncodingUtils.getId(schema), endianness) { os =>
       writer.write(record, encoder)
       writer.write(record, encoder)
       os

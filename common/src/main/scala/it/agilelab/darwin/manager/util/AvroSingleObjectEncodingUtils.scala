@@ -14,7 +14,7 @@ object AvroSingleObjectEncodingUtils {
   private val ID_SIZE = 8
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
-  private val schemaMap = DarwinConcurrentHashMap.empty[Schema, (Long, Array[Byte])]
+  private val schemaMap = DarwinConcurrentHashMap.empty[Schema, Long]
 
   /** Exception that can be thrown if the data is not single-object encoded
     */
@@ -234,17 +234,10 @@ object AvroSingleObjectEncodingUtils {
     * Extracts the ID from a Schema.
     *
     * @param schema     a Schema with unknown ID
-    * @param endianness the endianness that will be used to read fingerprint bytes,
-    *                   it won't affect how avro payload is read, that is up to the darwin user
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema, endianness: ByteOrder): Long = {
-    schemaMap.getOrElseUpdate(schema,
-      {
-        val f = SchemaNormalization.parsingFingerprint64(schema)
-        (f, f.longToByteArray(endianness))
-      }
-    )._1
+  def getId(schema: Schema): Long = {
+    schemaMap.getOrElseUpdate(schema, SchemaNormalization.parsingFingerprint64(schema))
   }
 
   /** Converts a byte array into its hexadecimal string representation

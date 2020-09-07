@@ -36,7 +36,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param schema a Schema with unknown ID
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema): Long = AvroSingleObjectEncodingUtils.getId(schema, endianness)
+  def getId(schema: Schema): Long = AvroSingleObjectEncodingUtils.getId(schema)
 
   /**
     * Extracts the Schema from its ID.
