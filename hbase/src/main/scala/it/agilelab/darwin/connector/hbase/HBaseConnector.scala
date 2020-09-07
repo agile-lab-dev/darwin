@@ -115,17 +115,22 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
   }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
-    log.debug(s"inserting ${schemas.size} schemas in HBase table $NAMESPACE_STRING:$TABLE_NAME_STRING")
-    val mutator = connection.getBufferedMutator(TABLE_NAME)
-    schemas.map { case (id, schema) =>
-      val put = new Put(Bytes.toBytes(id))
-      put.addColumn(CF, QUALIFIER_SCHEMA, Bytes.toBytes(schema.toString))
-      put.addColumn(CF, QUALIFIER_NAME, Bytes.toBytes(schema.getName))
-      put.addColumn(CF, QUALIFIER_NAMESPACE, Bytes.toBytes(schema.getNamespace))
-      put
-    }.foreach(mutator.mutate)
-    mutator.flush()
-    log.debug(s"insertion of schemas into $NAMESPACE_STRING:$TABLE_NAME_STRING successful")
+    if (schemas.nonEmpty) {
+
+      log.debug(s"inserting ${schemas.size} schemas in HBase table $NAMESPACE_STRING:$TABLE_NAME_STRING")
+      using(connection.getBufferedMutator(TABLE_NAME)) { mutator =>
+        schemas.map { case (id, schema) =>
+          val put = new Put(Bytes.toBytes(id))
+          put.addColumn(CF, QUALIFIER_SCHEMA, Bytes.toBytes(schema.toString))
+          put.addColumn(CF, QUALIFIER_NAME, Bytes.toBytes(schema.getName))
+          put.addColumn(CF, QUALIFIER_NAMESPACE, Bytes.toBytes(schema.getNamespace))
+          put
+        }.foreach(mutator.mutate)
+        mutator.flush()
+        log.debug(s"insertion of schemas into $NAMESPACE_STRING:$TABLE_NAME_STRING successful")
+      }
+    }
+
   }
 
   override def createTable(): Unit = {
