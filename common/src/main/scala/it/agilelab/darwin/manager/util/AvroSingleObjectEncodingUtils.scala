@@ -323,16 +323,6 @@ object AvroSingleObjectEncodingUtils {
     schemaMap.getOrElseUpdate(schema, SchemaNormalization.parsingFingerprint64(schema))
   }
 
-  /**
-   * Extracts the ID from a Schema.
-   *
-   * @param schema     a Schema with unknown ID
-   * @return the ID associated with the input schema
-   */
-  def getId(schema: Schema): Long = {
-    getId(schema, ByteOrder.BIG_ENDIAN)
-  }
-
   /** Converts a byte array into its hexadecimal string representation
    * e.g. for the V1_HEADER => [C3 01]
    *
