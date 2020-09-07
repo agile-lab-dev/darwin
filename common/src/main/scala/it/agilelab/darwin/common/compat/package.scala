@@ -58,11 +58,11 @@ package object compat {
     }
   }
 
-  implicit class RightBiasedEither[+L, +R](self: Either[L, R]) {
+  implicit class RightBiasedEither[+L, +R](val self: Either[L, R]) extends AnyVal {
     def rightMap[R1](f: R => R1): Either[L, R1] = {
       self match {
         case Right(v) => Right(f(v))
-        case _        => this.asInstanceOf[Either[L, R1]]
+        case _        => self.asInstanceOf[Either[L, R1]]
       }
     }
   }
