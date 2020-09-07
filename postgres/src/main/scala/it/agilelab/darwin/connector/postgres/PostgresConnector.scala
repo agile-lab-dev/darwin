@@ -61,9 +61,11 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
   }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
-    MODE match {
-      case ExceptionDriven => insertExceptionDriven(schemas)
-      case OneTransaction => insertOneTransaction(schemas)
+    if (schemas.nonEmpty) {
+      MODE match {
+        case ExceptionDriven => insertExceptionDriven(schemas)
+        case OneTransaction => insertOneTransaction(schemas)
+      }
     }
   }
 
@@ -151,21 +153,26 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
 
   private def findSchemas(connection: Connection, ids: Seq[(Long, Schema)]): Map[Long, Schema] = {
 
-    val withIdx = ids.zipWithIndex
-    val statement = connection.prepareStatement(s"select * from $TABLE_NAME where id in " +
-      withIdx.map(_ => "?").mkString("(", ",", ")")
-    )
-    withIdx.foreach { case (f, idx) =>
-      statement.setLong(idx + 1, f._1)
-    }
-    using(statement.executeQuery()) { resultSet =>
-      val schemas = Map.newBuilder[Long, Schema]
-      while (resultSet.next()) {
-        val id = resultSet.getLong("id")
-        val schema = parser.parse(resultSet.getString("schema"))
-        schemas += (id -> schema)
+    if (ids.nonEmpty) {
+      val withIdx = ids.zipWithIndex
+      using(connection.prepareStatement(s"select * from $TABLE_NAME where id in " +
+        withIdx.map(_ => "?").mkString("(", ",", ")")
+      )) { statement =>
+        withIdx.foreach { case (f, idx) =>
+          statement.setLong(idx + 1, f._1)
+        }
+        using(statement.executeQuery()) { resultSet =>
+          val schemas = Map.newBuilder[Long, Schema]
+          while (resultSet.next()) {
+            val id = resultSet.getLong("id")
+            val schema = parser.parse(resultSet.getString("schema"))
+            schemas += (id -> schema)
+          }
+          schemas.result()
+        }
       }
-      schemas.result()
+    } else {
+      Map.empty
     }
   }
 

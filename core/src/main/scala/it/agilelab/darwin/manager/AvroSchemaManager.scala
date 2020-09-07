@@ -170,6 +170,21 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     }
   }
 
+  /** Extracts the schema from the avro single-object encoded in the input array.
+   *
+   * @param array avro single-object encoded array
+   * @return the schema ID extracted from the input data
+   */
+  def extractSchema(array: Array[Byte]): Either[Exception, Schema] = {
+    try {
+      val id = AvroSingleObjectEncodingUtils.extractId(array, endianness)
+      getSchema(id)
+        .toRight(new RuntimeException(s"Cannot find schema with id $id"))
+    } catch {
+      case ie: IllegalArgumentException => Left(ie)
+    }
+  }
+
   /** Extracts a [[SchemaPayloadPair]] that contains the Schema and the Avro-encoded payload
    *
    * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
