@@ -95,6 +95,14 @@ object Settings {
     libraryDependencies ++= Dependencies.hbaseTestDependencies
   }
 
+  lazy val hbase2TestSettings: SettingsDefinition = {
+    //enable resolution of transitive dependencies of jars containing tests
+    //needed to run tests over hbase minicluster
+    transitiveClassifiers in Test := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
+    libraryDependencies ++= Dependencies.hbase2TestDependencies
+  }
+
+
   lazy val notPublishSettings = Seq(skip in publish := true)
 
   lazy val myCredentials = Credentials(
@@ -115,6 +123,8 @@ object Settings {
   lazy val pgpPass: Option[Array[Char]] = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
 
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
+
+//  lazy val testSettings = Seq(parallelExecution in Test := false)
 
   lazy val publishSettings = Seq(
     publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),

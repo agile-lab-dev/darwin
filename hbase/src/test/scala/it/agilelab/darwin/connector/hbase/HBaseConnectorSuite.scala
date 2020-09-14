@@ -1,19 +1,21 @@
 package it.agilelab.darwin.connector.hbase
 
 import java.nio.file.Files
+import java.util.UUID
 
 import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.reflect.ReflectData
 import org.apache.avro.{Schema, SchemaNormalization}
-import org.apache.hadoop.hbase.HBaseTestingUtility
+import org.apache.hadoop.hbase.{HBaseConfiguration, HBaseTestingUtility, MiniHBaseCluster}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class HBaseConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
-  var connector: Connector = _
+  private var connector: Connector = _
+  private var minicluster: MiniHBaseCluster = _
 
   "HBaseConnector" should "load all existing schemas" in {
     connector.fullLoad()
@@ -45,34 +47,32 @@ class HBaseConnectorSuite extends AnyFlatSpec with Matchers with BeforeAndAfterA
   }
 
   override def beforeAll(): Unit = {
-
-    connector = new HBaseConnectorCreator().create(HBaseConnectorSuite.config)
-
-    connector.createTable()
-  }
-
-
-}
-
-object HBaseConnectorSuite {
-  private lazy val config = {
-    val util = new HBaseTestingUtility()
-    val minicluster = util.startMiniCluster()
-
-    //Hbase connector can only load configurations from a file path so we need to render the hadoop conf
-    val confFile = Files.createTempFile("prefix", "suffix")
+    val testUUID = UUID.randomUUID().toString
+    val hConf = HBaseConfiguration.create()
+    hConf.set("test.build.data.basedirectory", s"./target/hbase-test-data-$testUUID")
+    val util = new HBaseTestingUtility(hConf)
+    minicluster = util.startMiniCluster(1, true)
+    val confFile = Files.createTempFile(testUUID, ".xml")
+    // Hbase connector can only load configurations from a file path so we need to render the hadoop conf
     val stream = Files.newOutputStream(confFile)
+    // mc.getConfiguration.writeXml(System.out)
     minicluster.getConfiguration.writeXml(stream)
     stream.flush()
     stream.close()
-    val hbaseConfigPath = ConfigValueFactory.fromAnyRef(confFile.toAbsolutePath.toString)
-
-    //HbaseConnector will only load conf if hbase-site and core-site are given,
-    //we give the same file to each.
+    // HbaseConnector will only load conf if hbase-site and core-site are given,
+    // we give the same file to each.
     sys.addShutdownHook(minicluster.shutdown())
-    ConfigFactory.load()
-      .withValue(ConfigurationKeys.HBASE_SITE, hbaseConfigPath)
-      .withValue(ConfigurationKeys.CORE_SITE, hbaseConfigPath)
+    val config = ConfigFactory.load()
+      .withValue(ConfigurationKeys.HBASE_SITE, ConfigValueFactory.fromAnyRef(confFile.toAbsolutePath.toString))
+      .withValue(ConfigurationKeys.CORE_SITE, ConfigValueFactory.fromAnyRef(confFile.toAbsolutePath.toString))
+    connector = new HBaseConnectorCreator().create(config)
+    connector.createTable()
   }
+
+  override def afterAll(): Unit = {
+    minicluster.shutdown()
+    minicluster.waitUntilShutDown()
+  }
+
 
 }

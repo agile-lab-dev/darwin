@@ -1,18 +1,18 @@
 package it.agilelab.darwin.connector.hbase
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{using, Connector, Logging}
+import it.agilelab.darwin.common.compat._
+import it.agilelab.darwin.common.{Connector, Logging, using}
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase._
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Get, Put, Result}
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.security.User
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.security.UserGroupInformation
-import it.agilelab.darwin.common.compat._
 
 object HBaseConnector extends Logging {
 
@@ -49,7 +49,8 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
 
   lazy val TABLE_NAME: TableName = TableName.valueOf(Bytes.toBytes(NAMESPACE_STRING), Bytes.toBytes(TABLE_NAME_STRING))
 
-  val CF: Array[Byte] = Bytes.toBytes("0")
+  val CF_STRING = "0"
+  val CF: Array[Byte] = Bytes.toBytes(CF_STRING)
   val QUALIFIER_SCHEMA: Array[Byte] = Bytes.toBytes("schema")
   val QUALIFIER_NAME: Array[Byte] = Bytes.toBytes("name")
   val QUALIFIER_NAMESPACE: Array[Byte] = Bytes.toBytes("namespace")
@@ -141,10 +142,12 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
       }
       if (!tableExists()) {
         log.info(s"Table $TABLE_NAME does not exists, creating it")
-        admin.createTable(new HTableDescriptor(TABLE_NAME).addFamily(new HColumnDescriptor(CF)))
+        HBaseUtils.createTable(admin, TABLE_NAME, CF)
       }
     }
   }
+
+
 
   override def tableExists(): Boolean = {
     using(connection.getAdmin) { admin =>
@@ -155,7 +158,7 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
   override def tableCreationHint(): String = {
     s"""To create namespace and table from an HBase shell issue:
        |  create_namespace '$NAMESPACE_STRING'
-       |  create '$NAMESPACE_STRING:$TABLE_NAME_STRING', '0'""".stripMargin
+       |  create '$NAMESPACE_STRING:$TABLE_NAME_STRING', '$CF_STRING'""".stripMargin
   }
 
   override def findSchema(id: Long): Option[Schema] = {

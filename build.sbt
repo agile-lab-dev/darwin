@@ -1,3 +1,5 @@
+import sbt.Keys.baseDirectory
+
 /*
  * Main build definition.
  *
@@ -5,6 +7,7 @@
  * See project/Dependencies.scala for the dependencies definitions.
  * See project/Versions.scala for the versions definitions.
  */
+
 lazy val Settings.pgpPass = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
 lazy val root = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
@@ -29,13 +32,28 @@ lazy val coreCommon = Project("darwin-core-common", file("common"))
   .settings(crossScalaVersions := Versions.crossScalaVersions)
   .enablePlugins(JavaAppPackaging)
 
-lazy val hbaseConnector = Project("darwin-hbase-connector", file("hbase"))
+lazy val hbaseConnector = Project("darwin-hbase-connector", file("hbase1"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.hbase_conn_dep)
   .settings(crossScalaVersions := Versions.crossScalaVersions)
+  .settings(Compile / unmanagedSourceDirectories += baseDirectory.value / ".." / "hbase" / "src" / "main" / "scala")
+  .settings(Test / unmanagedSourceDirectories += baseDirectory.value / ".." / "hbase" / "src" / "test" / "scala")
+  .settings(Test / unmanagedResourceDirectories += baseDirectory.value / ".." / "hbase" / "src" / "test" / "resources")
   .settings(Settings.hbaseTestSettings)
+  .enablePlugins(JavaAppPackaging)
+
+lazy val hbaseConnector2 = Project("darwin-hbase2-connector", file("hbase2"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon)
+  .settings(pgpPassphrase := Settings.pgpPass)
+  .settings(libraryDependencies ++= Dependencies.hbase2_conn_dep)
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
+  .settings(Compile / unmanagedSourceDirectories += baseDirectory.value / ".." / "hbase" / "src" / "main" / "scala")
+  .settings(Test / unmanagedSourceDirectories += baseDirectory.value / ".." / "hbase" / "src" / "test" / "scala")
+  .settings(Test / unmanagedResourceDirectories += baseDirectory.value / ".." / "hbase" / "src" / "test" / "resources")
+  .settings(Settings.hbase2TestSettings)
   .enablePlugins(JavaAppPackaging)
 
 lazy val postgresConnector = Project("darwin-postgres-connector", file("postgres"))
