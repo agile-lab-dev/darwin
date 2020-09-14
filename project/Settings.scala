@@ -124,6 +124,8 @@ object Settings {
 
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
 
+//  lazy val testSettings = Seq(parallelExecution in Test := false)
+
   lazy val publishSettings = Seq(
     publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),
     credentials += myCredentials,
