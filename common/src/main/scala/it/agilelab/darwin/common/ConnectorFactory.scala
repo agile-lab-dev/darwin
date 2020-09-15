@@ -19,7 +19,7 @@ object ConnectorFactory extends Logging {
     * @return a sequence of all the loaded [[ConnectorCreator]]
     */
   def creators(): Seq[ConnectorCreator] = {
-    val creators = ServiceLoader.load(classOf[ConnectorCreator]).toScala.toSeq
+    val creators = ServiceLoader.load(classOf[ConnectorCreator]).toScala().toSeq
     log.debug(s"${creators.size} available connector creators found")
     creators
   }
@@ -34,7 +34,7 @@ object ConnectorFactory extends Logging {
     * @return the ConnectorCreator identified by the name given as input
     */
   def creator(name: String): Option[ConnectorCreator] = {
-    creators().find(_.name == name)
+    creators().find(_.name() == name)
   }
 
   /**
