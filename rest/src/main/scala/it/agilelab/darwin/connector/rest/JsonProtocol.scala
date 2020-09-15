@@ -27,7 +27,7 @@ trait JsonProtocol {
   def toSeqOfIdSchema(in: InputStream): Seq[(Long, Schema)] = {
     val node = objectMapper.readTree(in)
 
-    node.getElements.toScala.map { node =>
+    node.getElements.toScala().map { node =>
       val id = node.get("id").asText().toLong
       val schemaNode = node.get("schema")
 

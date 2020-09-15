@@ -65,7 +65,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
    * @return a sequence of pairs of the input schemas associated with their IDs
    */
   def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
-    registerAll(schemas.toScala.toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.toJava
+    registerAll(schemas.toScala().toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.toJava()
   }
 
   /** Writes to the given OutputStream the Single Object Encoding header and returns the OutputStream
@@ -133,7 +133,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
       }
     }
     else {
-      throw AvroSingleObjectEncodingUtils.parseException
+      throw AvroSingleObjectEncodingUtils.parseException()
     }
   }
 
@@ -152,7 +152,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
       }
     }
     else {
-      throw AvroSingleObjectEncodingUtils.parseException
+      throw AvroSingleObjectEncodingUtils.parseException()
     }
   }
 
