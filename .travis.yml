@@ -2,6 +2,8 @@ language: scala
 jdk: openjdk8
 os: linux
 dist: xenial
+before_script:
+  - curl -L https://github.com/sbt/sbtn-dist/releases/download/v1.4.0-RC2/sbtn-x86_64-pc-linux-1.4.0-RC2.tar.gz | tar -xz
 script:
   if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 cache:
