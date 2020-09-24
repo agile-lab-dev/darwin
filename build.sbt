@@ -69,7 +69,7 @@ lazy val restConfluentConnector = Project("darwin-confluent-rest-connector", fil
   .dependsOn(coreCommon)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
-    Dependencies.httpClient)
+    Dependencies.httpClient :+ "ch.qos.logback" % "logback-classic" % "1.2.3" % "test")
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
   .enablePlugins(JavaAppPackaging)
 
