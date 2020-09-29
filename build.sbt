@@ -9,13 +9,22 @@ import sbt.Keys.baseDirectory
  */
 
 lazy val Settings.pgpPass = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
-lazy val root = Project("darwin", file("."))
+lazy val root             = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
   .settings(libraryDependencies ++= Dependencies.core_deps)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
-  .aggregate(core, coreCommon, hbaseConnector, postgresConnector, mockConnector, mockApplication, restConnector, mongoConnector)
+  .aggregate(
+    core,
+    coreCommon,
+    hbaseConnector,
+    postgresConnector,
+    mockConnector,
+    mockApplication,
+    restConnector,
+    mongoConnector
+  )
 
 lazy val core = Project("darwin-core", file("core"))
   .settings(Settings.commonSettings: _*)

@@ -10,7 +10,7 @@ import org.apache.avro.Schema
   * insertions).
   */
 class LazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
-  extends AvroSchemaManager(connector, endianness) {
+    extends AvroSchemaManager(connector, endianness) {
 
   override def getSchema(id: Long): Option[Schema] = connector.findSchema(id)
 

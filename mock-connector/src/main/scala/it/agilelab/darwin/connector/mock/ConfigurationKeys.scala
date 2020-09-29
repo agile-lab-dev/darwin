@@ -1,10 +1,10 @@
 package it.agilelab.darwin.connector.mock
 
 object ConfigurationKeys {
-  val FILES = "files"
-  val RESOURCES = "resources"
-  val MODE = "mode"
-  val STRICT = "strict"
+  val FILES      = "files"
+  val RESOURCES  = "resources"
+  val MODE       = "mode"
+  val STRICT     = "strict"
   val PERMISSIVE = "permissive"
 
   trait Mode
@@ -12,8 +12,8 @@ object ConfigurationKeys {
   object Mode {
     def parse(string: String): Mode = {
       string.toLowerCase match {
-        case STRICT => Strict
-        case PERMISSIVE => Permissive
+        case STRICT        => Strict
+        case PERMISSIVE    => Permissive
         case other: String => throw new IllegalArgumentException(s"Unknown mode: $other")
       }
     }

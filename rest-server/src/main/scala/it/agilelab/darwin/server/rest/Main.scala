@@ -9,13 +9,13 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    implicit val actorSystem: ActorSystem = ActorSystem()
+    implicit val actorSystem: ActorSystem        = ActorSystem()
     implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-    val config = ConfigFactory.load()
+    val config              = ConfigFactory.load()
     val schemaManagerConfig = config.getConfig("darwin")
-    val restConfig = config.getConfig("darwin-rest")
-    val schemaManager = AvroSchemaManagerFactory.initialize(schemaManagerConfig)
+    val restConfig          = config.getConfig("darwin-rest")
+    val schemaManager       = AvroSchemaManagerFactory.initialize(schemaManagerConfig)
 
     HttpApp(restConfig, DarwinService(schemaManager)).run()
 

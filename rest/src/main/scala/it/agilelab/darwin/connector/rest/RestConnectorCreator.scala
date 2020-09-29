@@ -1,7 +1,7 @@
 package it.agilelab.darwin.connector.rest
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, ConnectorCreator, Logging}
+import it.agilelab.darwin.common.{ Connector, ConnectorCreator, Logging }
 
 class RestConnectorCreator extends ConnectorCreator with Logging {
 
@@ -21,6 +21,3 @@ class RestConnectorCreator extends ConnectorCreator with Logging {
     */
   override def name(): String = "rest"
 }
-
-
-

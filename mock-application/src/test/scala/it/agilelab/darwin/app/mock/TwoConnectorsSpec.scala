@@ -13,7 +13,7 @@ class TwoConnectorsSpec extends AnyFlatSpec with Matchers {
   it should "have both HBase and Postgresql available" in {
     ConnectorFactory.creators().map(_.getClass) should contain theSameElementsAs (
       classOf[HBaseConnectorCreator] :: classOf[PostgresConnectorCreator] :: classOf[MockConnectorCreator] :: Nil
-      )
+    )
   }
 
   it should "choose HBase connector over Postgresql one" in {

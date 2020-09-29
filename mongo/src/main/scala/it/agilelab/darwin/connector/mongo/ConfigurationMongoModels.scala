@@ -11,19 +11,19 @@ object ConfigurationMongoModels {
   }
 
   case class MongoConfig(
-                          database: String,
-                          collection: String,
-                          timeout: Duration
-                        ) extends BaseMongoConfig
+    database: String,
+    collection: String,
+    timeout: Duration
+  ) extends BaseMongoConfig
 
   case class MongoConnectorConfig(
-                                   username: String,
-                                   password: String,
-                                   database: String,
-                                   collection: String,
-                                   hosts: Seq[String],
-                                   timeout: Duration
-                                 ) extends BaseMongoConfig
+    username: String,
+    password: String,
+    database: String,
+    collection: String,
+    hosts: Seq[String],
+    timeout: Duration
+  ) extends BaseMongoConfig
 
   val DEFAULT_DURATION = 5000
 

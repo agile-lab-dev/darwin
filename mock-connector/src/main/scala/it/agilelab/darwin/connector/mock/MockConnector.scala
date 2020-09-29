@@ -2,8 +2,8 @@ package it.agilelab.darwin.connector.mock
 
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.compat._
-import it.agilelab.darwin.common.{Connector, Logging, SchemaReader}
-import org.apache.avro.{Schema, SchemaNormalization}
+import it.agilelab.darwin.common.{ Connector, Logging, SchemaReader }
+import org.apache.avro.{ Schema, SchemaNormalization }
 
 import scala.collection.mutable
 
@@ -14,7 +14,7 @@ class MockConnectorException(msg: String, t: Option[Throwable]) extends RuntimeE
 
   override def getCause: Throwable = t match {
     case Some(value) => value
-    case None => super.getCause
+    case None        => super.getCause
   }
 }
 
@@ -54,20 +54,20 @@ class MockConnector(config: Config) extends Connector with Logging {
 
   private def handleError(error: SchemaReader.SchemaReaderError): Unit = {
     mode match {
-      case ConfigurationKeys.Strict =>
+      case ConfigurationKeys.Strict     =>
         error match {
           case SchemaReader.SchemaParserError(exception) =>
             throw new MockConnectorException(exception)
-          case SchemaReader.IOError(exception) => throw new MockConnectorException(exception)
-          case SchemaReader.ResourceNotFoundError(msg) => throw new MockConnectorException(msg)
-          case SchemaReader.UnknownError(t) => throw new MockConnectorException(t)
+          case SchemaReader.IOError(exception)           => throw new MockConnectorException(exception)
+          case SchemaReader.ResourceNotFoundError(msg)   => throw new MockConnectorException(msg)
+          case SchemaReader.UnknownError(t)              => throw new MockConnectorException(t)
         }
       case ConfigurationKeys.Permissive =>
         error match {
           case SchemaReader.SchemaParserError(exception) => log.warn(exception.getMessage, exception)
-          case SchemaReader.IOError(exception) => log.warn(exception.getMessage, exception)
-          case SchemaReader.ResourceNotFoundError(msg) => log.warn(msg)
-          case SchemaReader.UnknownError(t) => log.warn(t.getMessage, t)
+          case SchemaReader.IOError(exception)           => log.warn(exception.getMessage, exception)
+          case SchemaReader.ResourceNotFoundError(msg)   => log.warn(msg)
+          case SchemaReader.UnknownError(t)              => log.warn(t.getMessage, t)
         }
     }
   }
@@ -76,7 +76,7 @@ class MockConnector(config: Config) extends Connector with Logging {
 
   override def fullLoad(): Seq[(Long, Schema)] = {
     (resources ++ files).foreach {
-      case Left(error) => handleError(error)
+      case Left(error)   => handleError(error)
       case Right(schema) => table(SchemaNormalization.parsingFingerprint64(schema)) = schema
     }
     table.toSeq

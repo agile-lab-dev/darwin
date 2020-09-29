@@ -1,16 +1,16 @@
 package it.agilelab.darwin.connector.mongo
 
-import com.mongodb.{BasicDBObject, ErrorCategory}
-import it.agilelab.darwin.common.{Connector, Logging}
+import com.mongodb.{ BasicDBObject, ErrorCategory }
+import it.agilelab.darwin.common.{ Connector, Logging }
 import it.agilelab.darwin.connector.mongo.ConfigurationMongoModels.BaseMongoConfig
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
-import org.mongodb.scala.bson.{BsonDocument, BsonValue}
-import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoWriteException, bson}
+import org.mongodb.scala.bson.{ BsonDocument, BsonValue }
+import org.mongodb.scala.{ bson, Document, MongoClient, MongoCollection, MongoWriteException }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
-import scala.util.{Failure, Try}
+import scala.util.{ Failure, Try }
 
 class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) extends Connector with Logging {
 
@@ -26,13 +26,16 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
 
     val schemas: Seq[Try[(Long, Schema)]] =
       Await.result(
-        collection.find().map { document =>
-          for {
-            key <- extract(document, "_id", _.asInt64().getValue)
-            schemaStr <- extract(document, "schema", _.asString().getValue)
-            schema <- Try(parser.parse(schemaStr))
-          } yield key -> schema
-        }.toFuture(),
+        collection
+          .find()
+          .map { document =>
+            for {
+              key       <- extract(document, "_id", _.asInt64().getValue)
+              schemaStr <- extract(document, "schema", _.asString().getValue)
+              schema    <- Try(parser.parse(schemaStr))
+            } yield key -> schema
+          }
+          .toFuture(),
         mongoConfig.timeout
       )
     log.debug(s"${schemas.size} loaded from MongoDB")
@@ -44,12 +47,10 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
   private def extract[A](d: Document, fieldName: String, f: BsonValue => A): Try[A] = {
     d.filterKeys(k => k == fieldName)
       .headOption
-      .fold[Try[A]](Failure(new RuntimeException(s"Cannot find $fieldName field in document"))) {
-        case (_, value) =>
-          Try(f(value)).recoverWith {
-            case t: Throwable =>
-              Failure(new RuntimeException(s"$fieldName was not of expected type", t))
-          }
+      .fold[Try[A]](Failure(new RuntimeException(s"Cannot find $fieldName field in document"))) { case (_, value) =>
+        Try(f(value)).recoverWith { case t: Throwable =>
+          Failure(new RuntimeException(s"$fieldName was not of expected type", t))
+        }
       }
   }
 
@@ -57,15 +58,14 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
 
     log.debug(s"inclusion of new schemas in the collection ${mongoConfig.collection}")
 
-    schemas.foreach {
-      case (id, schema) =>
-        val document = new BsonDocument
-        document.put("_id", bson.BsonInt64(id))
-        document.put("schema", bson.BsonString(schema.toString))
-        document.put("name", bson.BsonString(schema.getName))
-        document.put("namespace", bson.BsonString(schema.getNamespace))
+    schemas.foreach { case (id, schema) =>
+      val document = new BsonDocument
+      document.put("_id", bson.BsonInt64(id))
+      document.put("schema", bson.BsonString(schema.toString))
+      document.put("name", bson.BsonString(schema.getName))
+      document.put("namespace", bson.BsonString(schema.getNamespace))
 
-        insertIfNotExists(mongoClient.getDatabase(mongoConfig.database).getCollection(mongoConfig.collection), document)
+      insertIfNotExists(mongoClient.getDatabase(mongoConfig.database).getCollection(mongoConfig.collection), document)
     }
   }
 
@@ -98,7 +98,8 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
         .getDatabase(mongoConfig.database)
         .listCollectionNames()
         .filter(x => x == mongoConfig.collection)
-        .toFuture().map(_.size),
+        .toFuture()
+        .map(_.size),
       mongoConfig.timeout
     ) == 1
   }
@@ -124,7 +125,7 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
     val schemaValue: Seq[String] =
       for {
         document <- Await.result(documents, mongoConfig.timeout)
-        field <- document
+        field    <- document
         if field._1 == "schema"
       } yield field._2.asString().getValue
     schemaValue.headOption.map(parser.parse)

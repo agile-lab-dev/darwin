@@ -2,10 +2,10 @@ package it.agilelab.darwin.connector.mongo
 
 import com.mongodb.Block
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, ConnectorCreator}
+import it.agilelab.darwin.common.{ Connector, ConnectorCreator }
 import it.agilelab.darwin.connector.mongo.ConfigurationMongoModels.MongoConnectorConfig
 import org.mongodb.scala.connection.ClusterSettings
-import org.mongodb.scala.{MongoClient, MongoClientSettings, MongoCredential, ServerAddress}
+import org.mongodb.scala.{ MongoClient, MongoClientSettings, MongoCredential, ServerAddress }
 import it.agilelab.darwin.common.compat._
 import scala.concurrent.duration.Duration
 
@@ -23,10 +23,10 @@ class MongoConnectorCreator extends ConnectorCreator {
   override def name(): String = "mongo"
 
   /**
-   * return the MongoClient
-   * @param mongoConf : config to create a connection to MongoDB
-   * @return MongoClient
-   */
+    * return the MongoClient
+    * @param mongoConf : config to create a connection to MongoDB
+    * @return MongoClient
+    */
   private def createConnection(mongoConf: MongoConnectorConfig): MongoClient = {
 
     val credential: MongoCredential =
@@ -34,11 +34,12 @@ class MongoConnectorCreator extends ConnectorCreator {
 
     val hosts: Seq[ServerAddress] = mongoConf.hosts.map(host => new ServerAddress(host))
 
-    val settings: MongoClientSettings = MongoClientSettings.builder()
+    val settings: MongoClientSettings = MongoClientSettings
+      .builder()
       .credential(credential)
       .applyToClusterSettings(new Block[ClusterSettings.Builder] {
         override def apply(builder: ClusterSettings.Builder): Unit =
-          builder.hosts(java.util.Arrays.asList(hosts:_*))
+          builder.hosts(java.util.Arrays.asList(hosts: _*))
       })
       .build()
 
@@ -46,10 +47,10 @@ class MongoConnectorCreator extends ConnectorCreator {
   }
 
   /**
-   * create MongoConnectorConfig started from a configuration file
-   * @param config: configurations parsed from the file
-   * @return MongoConnectorConfig
-   */
+    * create MongoConnectorConfig started from a configuration file
+    * @param config: configurations parsed from the file
+    * @return MongoConnectorConfig
+    */
   def createConfig(config: Config): MongoConnectorConfig = {
     require(config.hasPath(ConfigurationKeys.USERNAME))
     require(config.hasPath(ConfigurationKeys.PASSWORD))

@@ -1,30 +1,33 @@
 package it.agilelab.darwin.manager.util
 
-import java.io.{InputStream, OutputStream}
-import java.nio.{ByteBuffer, ByteOrder}
+import java.io.{ InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
 import java.util
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap
 import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
-import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.avro.{ Schema, SchemaNormalization }
 
 object AvroSingleObjectEncodingUtils {
-  private val V1_HEADER = Array[Byte](0xC3.toByte, 0x01.toByte)
-  private val ID_SIZE = 8
+  private val V1_HEADER     = Array[Byte](0xc3.toByte, 0x01.toByte)
+  private val ID_SIZE       = 8
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
   private val schemaMap = DarwinConcurrentHashMap.empty[Schema, Long]
 
-  /** Exception that can be thrown if the data is not single-object encoded
+  /**
+    * Exception that can be thrown if the data is not single-object encoded
     */
   private[manager] def parseException(): DarwinException = {
-    new DarwinException(s"Byte array is not in correct format." +
-      s" First ${V1_HEADER.length} bytes are not equal to ${byteArray2HexString(V1_HEADER)}")
+    new DarwinException(
+      s"Byte array is not in correct format." +
+        s" First ${V1_HEADER.length} bytes are not equal to ${byteArray2HexString(V1_HEADER)}"
+    )
   }
 
-
-  /** Checks if a byte array is Avro Single-Object encoded (
+  /**
+    * Checks if a byte array is Avro Single-Object encoded (
     * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
     * Documentation</a>)
     *
@@ -32,13 +35,17 @@ object AvroSingleObjectEncodingUtils {
     * @return true if the input byte array is Single-Object encoded
     */
   def isAvroSingleObjectEncoded(data: Array[Byte]): Boolean = {
-    if (data.length < V1_HEADER.length) throw new IllegalArgumentException(s"At least ${V1_HEADER.length} bytes " +
-      s"required to store the Single-Object Encoder header")
+    if (data.length < V1_HEADER.length) {
+      throw new IllegalArgumentException(
+        s"At least ${V1_HEADER.length} bytes " +
+          s"required to store the Single-Object Encoder header"
+      )
+    }
     isAvroSingleObjectEncoded(ByteBuffer.wrap(data))
   }
 
-
-  /** Checks if a byte array is Avro Single-Object encoded (
+  /**
+    * Checks if a byte array is Avro Single-Object encoded (
     * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
     * Documentation</a>)
     *
@@ -48,18 +55,22 @@ object AvroSingleObjectEncodingUtils {
   def isAvroSingleObjectEncoded(data: ByteBuffer): Boolean = {
     try {
       val originalPosition = data.position()
-      val buffer = new Array[Byte](V1_HEADER.length)
+      val buffer           = new Array[Byte](V1_HEADER.length)
       data.get(buffer)
       data.position(originalPosition)
       util.Arrays.equals(buffer, V1_HEADER)
     } catch {
       case indexOutOfBoundsException: IndexOutOfBoundsException =>
-        throw new IllegalArgumentException(s"At least ${V1_HEADER.length} bytes " +
-          s"required to store the Single-Object Encoder header", indexOutOfBoundsException)
+        throw new IllegalArgumentException(
+          s"At least ${V1_HEADER.length} bytes " +
+            s"required to store the Single-Object Encoder header",
+          indexOutOfBoundsException
+        )
     }
   }
 
-  /** Create an array that creates a Single-Object encoded byte array.
+  /**
+    * Create an array that creates a Single-Object encoded byte array.
     * By specifications the encoded array is obtained concatenating the V1_HEADER, the schema id and the avro-encoded
     * payload.
     *
@@ -68,28 +79,25 @@ object AvroSingleObjectEncodingUtils {
     * @param endianness  a byte order to drive endianness of schemaId
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte],
-                                      schemaId: Long,
-                                      endianness: ByteOrder): Array[Byte] = {
+  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long, endianness: ByteOrder): Array[Byte] = {
     Array.concat(V1_HEADER, schemaId.longToByteArray(endianness), avroPayload)
   }
 
-  /** Writes to the given OutputStream the Single Object Encoding header and returns the OutputStream
+  /**
+    * Writes to the given OutputStream the Single Object Encoding header and returns the OutputStream
     *
     * @param endianness the endianness that will be used to persist fingerprint bytes, it won't affect how avro
     *                   payload is written, that is up to the darwin user
     * @return the input OutputStream
     */
-  def writeHeaderToStream(byteStream: OutputStream,
-                          schemaId: Long,
-                          endianness: ByteOrder): OutputStream = {
+  def writeHeaderToStream(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder): OutputStream = {
     byteStream.write(V1_HEADER)
     schemaId.writeToStream(byteStream, endianness)
     byteStream
   }
 
-
-  /** Writes to the given OutputStream the Single Object Encoding header then the avroValue and returns the OutputStream
+  /**
+    * Writes to the given OutputStream the Single Object Encoding header then the avroValue and returns the OutputStream
     *
     * @param byteStream the stream to write to
     * @param avroValue  the value to be written to the stream
@@ -98,16 +106,19 @@ object AvroSingleObjectEncodingUtils {
     *                   payload is written, that is up to the darwin user
     * @return the input OutputStream
     */
-  def generateAvroSingleObjectEncoded(byteStream: OutputStream,
-                                      avroValue: Array[Byte],
-                                      schemaId: Long,
-                                      endianness: ByteOrder): OutputStream = {
+  def generateAvroSingleObjectEncoded(
+    byteStream: OutputStream,
+    avroValue: Array[Byte],
+    schemaId: Long,
+    endianness: ByteOrder
+  ): OutputStream = {
     writeHeaderToStream(byteStream, schemaId, endianness)
     byteStream.write(avroValue)
     byteStream
   }
 
-  /** Writes to the given OutputStream the Single Object Encoding header then calls the avroWriter function to
+  /**
+    * Writes to the given OutputStream the Single Object Encoding header then calls the avroWriter function to
     * possibly add data to the stream and finally returns the OutputStream
     *
     * @param byteStream the stream to write to
@@ -117,28 +128,28 @@ object AvroSingleObjectEncodingUtils {
     *                   payload is written, that is up to the darwin user
     * @return the input OutputStream
     */
-  def generateAvroSingleObjectEncoded(byteStream: OutputStream,
-                                      schemaId: Long,
-                                      endianness: ByteOrder)
-                                     (avroWriter: OutputStream => OutputStream): OutputStream = {
+  def generateAvroSingleObjectEncoded(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder)(
+    avroWriter: OutputStream => OutputStream
+  ): OutputStream = {
     byteStream.write(V1_HEADER)
     schemaId.writeToStream(byteStream, endianness)
     avroWriter(byteStream)
   }
 
-  /** Extracts the schema ID from the avro single-object encoded byte array
+  /**
+    * Extracts the schema ID from the avro single-object encoded byte array
     *
     * @param avroSingleObjectEncoded avro single-object encoded byte array
     * @param endianness              the endianness that will be used to read fingerprint bytes,
     *                                it won't affect how avro payload is read, that is up to the darwin user
     * @return the schema ID extracted from the input data
     */
-  def extractId(avroSingleObjectEncoded: Array[Byte],
-                endianness: ByteOrder): Long = {
+  def extractId(avroSingleObjectEncoded: Array[Byte], endianness: ByteOrder): Long = {
     extractId(ByteBuffer.wrap(avroSingleObjectEncoded), endianness)
   }
 
-  /** Extracts the schema ID from the avro single-object encoded ByteBuffer, the ByteBuffer position will be after the
+  /**
+    * Extracts the schema ID from the avro single-object encoded ByteBuffer, the ByteBuffer position will be after the
     * header when this method returns
     *
     * @param avroSingleObjectEncoded avro single-object encoded byte array
@@ -146,11 +157,12 @@ object AvroSingleObjectEncodingUtils {
     *                                it won't affect how avro payload is read, that is up to the darwin user
     * @return the schema ID extracted from the input data
     */
-  def extractId(avroSingleObjectEncoded: ByteBuffer,
-                endianness: ByteOrder): Long = {
+  def extractId(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder): Long = {
     if (avroSingleObjectEncoded.remaining() < HEADER_LENGTH) {
-      throw new IllegalArgumentException(s"At least ${V1_HEADER.length} bytes " +
-        s"required to store the Single-Object Encoder header")
+      throw new IllegalArgumentException(
+        s"At least ${V1_HEADER.length} bytes " +
+          s"required to store the Single-Object Encoder header"
+      )
     } else {
       avroSingleObjectEncoded.position(avroSingleObjectEncoded.position() + V1_HEADER.length)
       readLong(avroSingleObjectEncoded, endianness)
@@ -163,21 +175,20 @@ object AvroSingleObjectEncodingUtils {
     * the values of endianness and buf.order() are.
     */
   @inline
-  def readLong(buf: ByteBuffer,
-               endianness: ByteOrder): Long = {
+  def readLong(buf: ByteBuffer, endianness: ByteOrder): Long = {
     if (buf.order() == endianness) {
       buf.getLong
     } else {
       val lastEndianness = buf.order()
       buf.order(endianness)
-      val toRet = buf.getLong
+      val toRet          = buf.getLong
       buf.order(lastEndianness)
       toRet
     }
   }
 
-
-  /** Extracts the schema ID from the avro single-object encoded at the head of this input stream.
+  /**
+    * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
     * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
     * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
     * be consumed and returned in the Left part of the Either.
@@ -187,9 +198,8 @@ object AvroSingleObjectEncodingUtils {
     *                    it won't affect how avro payload is read, that is up to the darwin user
     * @return the schema ID extracted from the input data
     */
-  def extractId(inputStream: InputStream,
-                endianness: ByteOrder): Either[Array[Byte], Long] = {
-    val buffer = new Array[Byte](HEADER_LENGTH)
+  def extractId(inputStream: InputStream, endianness: ByteOrder): Either[Array[Byte], Long] = {
+    val buffer              = new Array[Byte](HEADER_LENGTH)
     if (inputStream.markSupported()) {
       inputStream.mark(2)
     }
@@ -221,7 +231,8 @@ object AvroSingleObjectEncodingUtils {
     }
   }
 
-  /** Extract the payload from an avro single-object encoded byte array, removing the header (the first 10 bytes)
+  /**
+    * Extract the payload from an avro single-object encoded byte array, removing the header (the first 10 bytes)
     *
     * @param avroSingleObjectEncoded avro single-object encoded byte array
     * @return the payload without the avro single-object encoded header
@@ -240,7 +251,8 @@ object AvroSingleObjectEncodingUtils {
     schemaMap.getOrElseUpdate(schema, SchemaNormalization.parsingFingerprint64(schema))
   }
 
-  /** Converts a byte array into its hexadecimal string representation
+  /**
+    * Converts a byte array into its hexadecimal string representation
     * e.g. for the V1_HEADER => [C3 01]
     *
     * @param bytes a byte array

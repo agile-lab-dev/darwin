@@ -4,22 +4,19 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.typesafe.config.ConfigFactory
-import org.apache.avro.{Schema, SchemaBuilder}
-import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.apache.avro.{ Schema, SchemaBuilder }
+import org.scalatest.{ BeforeAndAfterEach, OptionValues }
 import org.scalatest.flatspec.AnyFlatSpec
-
 
 class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with OptionValues {
 
   private val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
-
-  private def config(port:Int) = ConfigFactory.parseString(
-    s"""
-       | protocol: "http"
-       | host: "localhost"
-       | port: ${wireMockServer.port()}
-       | basePath: "/"
+  private def config(port: Int) = ConfigFactory.parseString(s"""
+                                                               | protocol: "http"
+                                                               | host: "localhost"
+                                                               | port: ${wireMockServer.port()}
+                                                               | basePath: "/"
       """.stripMargin)
 
   override def beforeEach(): Unit = {
@@ -29,7 +26,6 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
   override def afterEach(): Unit = {
     wireMockServer.stop()
   }
-
 
   "rest connector" should "get all schemas" in {
 
@@ -42,19 +38,19 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
       get(urlPathEqualTo("/schemas/")).willReturn {
         aResponse().withBody {
           s"""
-            |[{
-            |  "id": "$schemaId1",
-            |  "schema": {
-            |    "items": "string",
-            |    "type": "array"
-            |  }
-            | }, {
-            |  "id": "$schemaId2",
-            |  "schema": {
-            |    "items": "int",
-            |    "type": "array"
-            |  }
-            | }]
+             |[{
+             |  "id": "$schemaId1",
+             |  "schema": {
+             |    "items": "string",
+             |    "type": "array"
+             |  }
+             | }, {
+             |  "id": "$schemaId2",
+             |  "schema": {
+             |    "items": "int",
+             |    "type": "array"
+             |  }
+             | }]
           """.stripMargin
         }
       }
@@ -72,10 +68,9 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
 
   }
 
-
   "rest connector" should "get one schemas" in {
 
-    val schemaId = -3577210133426481249L
+    val schemaId  = -3577210133426481249L
     val connector = new RestConnectorCreator().create(config(wireMockServer.port()))
 
     wireMockServer.stubFor {
@@ -103,13 +98,12 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
 
   }
 
-
   "rest connector" should "post schemas" in {
     val connector = new RestConnectorCreator().create(config(wireMockServer.port()))
 
     val schema = SchemaBuilder.array().items(Schema.create(Schema.Type.INT))
 
-    wireMockServer.stubFor{
+    wireMockServer.stubFor {
       post(urlEqualTo("/schemas/")).withHeader("Content-Type", equalTo("application/json"))
     }
 
@@ -117,10 +111,9 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
 
     val request = """[{"type":"array","items":"int"}]"""
 
-    wireMockServer.verify{
+    wireMockServer.verify {
       postRequestedFor(urlEqualTo("/schemas/")).withRequestBody(equalTo(request))
     }
-
 
   }
 }

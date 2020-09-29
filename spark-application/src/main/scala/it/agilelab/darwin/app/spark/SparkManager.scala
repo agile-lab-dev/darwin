@@ -4,7 +4,7 @@ import com.typesafe.config.Config
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.{ Logger, LoggerFactory }
 
 import scala.collection.JavaConverters._
 
@@ -24,7 +24,7 @@ trait SparkManager {
         Seq()
       }
     // Add hbase related hadoop confs
-    val hconfs = HBaseConfiguration.create().asScala.map { entry =>
+    val hconfs        = HBaseConfiguration.create().asScala.map { entry =>
       "spark.hadoop." + entry.getKey -> entry.getValue
     }
     new SparkConf()
@@ -42,11 +42,11 @@ trait SparkManager {
   /**
     * @return a SparkSession given the settings
     */
-  protected def makeSparkSession(settings: Config): SparkSession = withSparkConf(settings) {
-    conf =>
-      SparkSession.builder()
-        .config(conf)
-        .getOrCreate()
+  protected def makeSparkSession(settings: Config): SparkSession = withSparkConf(settings) { conf =>
+    SparkSession
+      .builder()
+      .config(conf)
+      .getOrCreate()
   }
 
   /**
@@ -57,10 +57,12 @@ trait SparkManager {
     sparkSession.conf.getOption(SparkConfigurationKeys.SPARK_EXECUTOR_INSTANCES) match {
       case Some(instances) =>
         sparkSession.conf.getOption(SparkConfigurationKeys.SPARK_CORES).getOrElse("1").toInt * instances.toInt
-      case None =>
-        sparkManagerLogger.info("Spark is configured with dynamic allocation, default parallelism will be gathered from app " +
-          "conf: " +
-          "next.process.parallelism")
+      case None            =>
+        sparkManagerLogger.info(
+          "Spark is configured with dynamic allocation, default parallelism will be gathered from app " +
+            "conf: " +
+            "next.process.parallelism"
+        )
         if (config.hasPath(SparkConfigurationKeys.PARALLELISM)) {
           config.getInt(SparkConfigurationKeys.PARALLELISM)
         } else {

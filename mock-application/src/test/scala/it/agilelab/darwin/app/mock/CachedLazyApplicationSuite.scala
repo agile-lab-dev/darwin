@@ -3,12 +3,12 @@ package it.agilelab.darwin.app.mock
 import java.lang.reflect.Modifier
 import java.nio.ByteOrder
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import it.agilelab.darwin.annotations.AvroSerde
-import it.agilelab.darwin.app.mock.classes.{MyClass, MyNestedClass, NewClass, OneField}
-import it.agilelab.darwin.common.{Connector, ConnectorFactory, SchemaReader}
-import it.agilelab.darwin.manager.{AvroSchemaManager, CachedLazyAvroSchemaManager}
-import org.apache.avro.{Schema, SchemaNormalization}
+import it.agilelab.darwin.app.mock.classes.{ MyClass, MyNestedClass, NewClass, OneField }
+import it.agilelab.darwin.common.{ Connector, ConnectorFactory, SchemaReader }
+import it.agilelab.darwin.manager.{ AvroSchemaManager, CachedLazyAvroSchemaManager }
+import org.apache.avro.{ Schema, SchemaNormalization }
 import org.apache.avro.reflect.ReflectData
 import org.reflections.Reflections
 import it.agilelab.darwin.common.compat._
@@ -21,11 +21,11 @@ class LittleEndianCachedLazyApplicationSuite extends CachedLazyApplicationSuite(
 
 abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends AnyFlatSpec with Matchers {
 
-  private val mockClassAloneFingerprint = 6675579114512671233L
+  private val mockClassAloneFingerprint  = 6675579114512671233L
   private val mockClassParentFingerprint = -6310800772237892477L
-  val config: Config = ConfigFactory.load()
-  val connector: Connector = ConnectorFactory.connector(config)
-  val manager: AvroSchemaManager = new CachedLazyAvroSchemaManager(connector, endianness)
+  val config: Config                     = ConfigFactory.load()
+  val connector: Connector               = ConnectorFactory.connector(config)
+  val manager: AvroSchemaManager         = new CachedLazyAvroSchemaManager(connector, endianness)
 
   "CachedLazyAvroSchemaManager" should "not fail after the initialization" in {
     val schemas: Seq[Schema] = Seq(SchemaReader.readFromResources("MyNestedClass.avsc"))
@@ -45,8 +45,8 @@ abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends Any
 
   it should "get all previously registered schemas" in {
     val schema: Schema = SchemaReader.readFromResources("MyNestedClass.avsc")
-    val schema0 = manager.getSchema(mockClassAloneFingerprint)
-    val schema1 = manager.getSchema(mockClassParentFingerprint)
+    val schema0        = manager.getSchema(mockClassAloneFingerprint)
+    val schema1        = manager.getSchema(mockClassParentFingerprint)
     assert(schema0.isDefined)
     assert(schema1.isDefined)
     assert(schema0.get != schema1.get)
@@ -59,18 +59,21 @@ abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends Any
 
     val oneFieldSchema = ReflectData.get().getSchema(classOf[OneField]).toString
     val myNestedSchema = ReflectData.get().getSchema(classOf[MyNestedClass]).toString
-    val myClassSchema = ReflectData.get().getSchema(classOf[MyClass]).toString
+    val myClassSchema  = ReflectData.get().getSchema(classOf[MyClass]).toString
 
     val annotationClass: Class[AvroSerde] = classOf[AvroSerde]
-    val classes = reflections.getTypesAnnotatedWith(annotationClass).toScala().toSeq
+    val classes                           = reflections
+      .getTypesAnnotatedWith(annotationClass)
+      .toScala()
+      .toSeq
       .filter(c => !c.isInterface && !Modifier.isAbstract(c.getModifiers))
-    val schemas = classes.map(c => ReflectData.get().getSchema(Class.forName(c.getName)).toString)
+    val schemas                           = classes.map(c => ReflectData.get().getSchema(Class.forName(c.getName)).toString)
     Seq(oneFieldSchema, myClassSchema, myNestedSchema) should contain theSameElementsAs schemas
   }
 
   it should "reload all schemas from the connector" in {
     val newSchema = ReflectData.get().getSchema(classOf[NewClass])
-    val newId = SchemaNormalization.parsingFingerprint64(newSchema)
+    val newId     = SchemaNormalization.parsingFingerprint64(newSchema)
     assert(manager.getSchema(newId).isEmpty)
 
     connector.insert(Seq(newId -> newSchema))

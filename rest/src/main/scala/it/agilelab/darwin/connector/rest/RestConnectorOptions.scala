@@ -11,15 +11,16 @@ case class RestConnectorOptions(protocol: String, host: String, port: Int, baseP
 
 object RestConnectorOptions {
 
-  private val PROTOCOL = "protocol"
-  private val HOST = "host"
-  private val PORT = "port"
+  private val PROTOCOL  = "protocol"
+  private val HOST      = "host"
+  private val PORT      = "port"
   private val BASE_PATH = "basePath"
 
-
   def fromConfig(config: Config): RestConnectorOptions =
-    RestConnectorOptions(config.getString(PROTOCOL),
+    RestConnectorOptions(
+      config.getString(PROTOCOL),
       config.getString(HOST),
       config.getInt(PORT),
-      config.getString(BASE_PATH))
+      config.getString(BASE_PATH)
+    )
 }

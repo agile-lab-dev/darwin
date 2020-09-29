@@ -1,8 +1,8 @@
 package it.agilelab.darwin.common
 
-import java.io.{File, IOException, InputStream}
+import java.io.{ File, IOException, InputStream }
 
-import org.apache.avro.{Schema, SchemaParseException}
+import org.apache.avro.{ Schema, SchemaParseException }
 
 object SchemaReader {
 
@@ -38,8 +38,8 @@ object SchemaReader {
         safeRead(stream)
       } catch {
         case e: SchemaParseException => Left(SchemaParserError(e))
-        case e: IOException => Left(IOError(e))
-        case e: Throwable => Left(UnknownError(e))
+        case e: IOException          => Left(IOError(e))
+        case e: Throwable            => Left(UnknownError(e))
       } finally {
         stream.close()
       }
@@ -51,8 +51,8 @@ object SchemaReader {
       Right(new Schema.Parser().parse(f))
     } catch {
       case e: SchemaParseException => Left(SchemaParserError(e))
-      case e: IOException => Left(IOError(e))
-      case e: Throwable => Left(UnknownError(e))
+      case e: IOException          => Left(IOError(e))
+      case e: Throwable            => Left(UnknownError(e))
     }
   }
 
@@ -61,8 +61,8 @@ object SchemaReader {
       Right(new Schema.Parser().parse(s))
     } catch {
       case e: SchemaParseException => Left(SchemaParserError(e))
-      case e: IOException => Left(IOError(e))
-      case e: Throwable => Left(UnknownError(e))
+      case e: IOException          => Left(IOError(e))
+      case e: Throwable            => Left(UnknownError(e))
     }
   }
 
@@ -74,8 +74,8 @@ object SchemaReader {
       Right(new Schema.Parser().parse(is))
     } catch {
       case e: SchemaParseException => Left(SchemaParserError(e))
-      case e: IOException => Left(IOError(e))
-      case e: Throwable => Left(UnknownError(e))
+      case e: IOException          => Left(IOError(e))
+      case e: Throwable            => Left(UnknownError(e))
     }
   }
 

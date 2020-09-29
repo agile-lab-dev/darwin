@@ -6,7 +6,7 @@ class DarwinTrieConcurrentHashMapSpec extends DarwinJava7ConcurrentHashMapRunner
 
   private def defaultWithSideEffect: Int = throw new DefaultException
 
-  private val aKey = "aKey"
+  private val aKey   = "aKey"
   private val aValue = 1
 
   it should "not evaluate the default param when key found - getOrElse" in {
@@ -39,6 +39,5 @@ class DarwinTrieConcurrentHashMapSpec extends DarwinJava7ConcurrentHashMapRunner
     sut shouldBe a[DarwinTrieConcurrentHashMap[_, _]]
     an[DefaultException] should be thrownBy res
   }
-
 
 }
