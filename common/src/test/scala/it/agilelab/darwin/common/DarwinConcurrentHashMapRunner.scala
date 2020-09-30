@@ -1,12 +1,15 @@
 package it.agilelab.darwin.common
 
-import it.agilelab.darwin.common.DarwinConcurrentHashMap.{DarwinJava8ConcurrentHashMap, DarwinTrieConcurrentHashMap}
+import it.agilelab.darwin.common.DarwinConcurrentHashMap.{ DarwinJava8ConcurrentHashMap, DarwinTrieConcurrentHashMap }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
+import org.scalatest.{ BeforeAndAfter, BeforeAndAfterAll }
 
-private[common] sealed class DarwinConcurrentHashMapRunner[K,V](sut: () => DarwinConcurrentHashMap[K,V])
-  extends AnyFlatSpec with Matchers with BeforeAndAfterAll with BeforeAndAfter {
+sealed private[common] class DarwinConcurrentHashMapRunner[K, V](sut: () => DarwinConcurrentHashMap[K, V])
+    extends AnyFlatSpec
+    with Matchers
+    with BeforeAndAfterAll
+    with BeforeAndAfter {
 
   protected class DefaultException extends Exception("Side effect evaluated!")
 
@@ -14,5 +17,7 @@ private[common] sealed class DarwinConcurrentHashMapRunner[K,V](sut: () => Darwi
 
 }
 
-abstract class DarwinJava8ConcurrentHashMapRunner[K,V] extends DarwinConcurrentHashMapRunner[K,V](() => new DarwinJava8ConcurrentHashMap)
-abstract class DarwinJava7ConcurrentHashMapRunner[K,V] extends DarwinConcurrentHashMapRunner[K,V](() => new DarwinTrieConcurrentHashMap)
+abstract class DarwinJava8ConcurrentHashMapRunner[K, V]
+    extends DarwinConcurrentHashMapRunner[K, V](() => new DarwinJava8ConcurrentHashMap)
+abstract class DarwinJava7ConcurrentHashMapRunner[K, V]
+    extends DarwinConcurrentHashMapRunner[K, V](() => new DarwinTrieConcurrentHashMap)

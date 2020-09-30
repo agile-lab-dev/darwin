@@ -12,14 +12,14 @@ package object compat {
 
   def toScala[A](jIterator: java.util.Iterator[A]): scala.collection.Iterator[A] = {
     new scala.collection.Iterator[A] {
-      def next() = jIterator.next()
+      def next()  = jIterator.next()
       def hasNext = jIterator.hasNext()
     }
   }
 
   def toScala[A](jSet: java.util.Set[A]): scala.collection.Set[A] = {
     val iterator = jSet.iterator()
-    val builder = Set.newBuilder[A]
+    val builder  = Set.newBuilder[A]
     while (iterator.hasNext) {
       builder += iterator.next()
     }
@@ -44,7 +44,6 @@ package object compat {
       compat.toScala(jSet)
     }
   }
-
 
   implicit class JIterableConverter[A](iterable: scala.collection.Iterable[A]) {
     def toJava(): java.lang.Iterable[A] = {

@@ -10,7 +10,7 @@ import org.apache.avro.Schema
   * all the retrieves onto the cache; an access to the storage is performed only if there is a cache miss.
   */
 class CachedLazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
-  extends CachedAvroSchemaManager(connector, endianness) {
+    extends CachedAvroSchemaManager(connector, endianness) {
 
   override def getSchema(id: Long): Option[Schema] = {
     cache.getSchema(id).orElse {

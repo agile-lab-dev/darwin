@@ -1,13 +1,13 @@
 package it.agilelab.darwin.connector.postgres
 
-import java.sql.{Connection, SQLException}
+import java.sql.{ Connection, SQLException }
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{Connector, using}
+import it.agilelab.darwin.common.{ using, Connector }
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 class PostgresConnector(config: Config) extends Connector with PostgresConnection {
 
@@ -24,8 +24,8 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
   val MODE: Mode = if (config.hasPath(ConfigurationKeys.MODE)) {
     config.getString(ConfigurationKeys.MODE) match {
       case ExceptionDriven.value => ExceptionDriven
-      case OneTransaction.value => OneTransaction
-      case other: String => throw new RuntimeException(s"Unknown mode: $other")
+      case OneTransaction.value  => OneTransaction
+      case other: String         => throw new RuntimeException(s"Unknown mode: $other")
     }
   } else {
     OneTransaction
@@ -47,11 +47,11 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
 
   override def fullLoad(): Seq[(Long, Schema)] = {
     using(getConnection) { connection =>
-      val schemas = Seq.newBuilder[(Long, Schema)]
+      val schemas   = Seq.newBuilder[(Long, Schema)]
       val statement = connection.createStatement()
       using(statement.executeQuery(s"select * from $TABLE_NAME")) { resultSet =>
         while (resultSet.next()) {
-          val id = resultSet.getLong("id")
+          val id     = resultSet.getLong("id")
           val schema = parser.parse(resultSet.getString("schema"))
           schemas += (id -> schema)
         }
@@ -64,66 +64,63 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
     if (schemas.nonEmpty) {
       MODE match {
         case ExceptionDriven => insertExceptionDriven(schemas)
-        case OneTransaction => insertOneTransaction(schemas)
+        case OneTransaction  => insertOneTransaction(schemas)
       }
     }
   }
 
   private def insertExceptionDriven(schemas: Seq[(Long, Schema)]): Unit = {
-    val INS_ID: Int = 1
-    val INS_SCHEMA: Int = 2
-    val INS_NAME: Int = 3
+    val INS_ID: Int        = 1
+    val INS_SCHEMA: Int    = 2
+    val INS_NAME: Int      = 3
     val INS_NAMESPACE: Int = 4
-    val UPD_ID: Int = 4
-    val UPD_SCHEMA: Int = 1
-    val UPD_NAME: Int = 2
+    val UPD_ID: Int        = 4
+    val UPD_SCHEMA: Int    = 1
+    val UPD_NAME: Int      = 2
     val UPD_NAMESPACE: Int = 3
     using(getConnection) { connection =>
       connection.setAutoCommit(false)
       connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-      using(connection.prepareStatement(INSERT_STMT)) {
-        insertSchemaPS =>
-          using(connection.prepareStatement(UPDATE_STMT)) {
-            updateSchemaPS =>
-              schemas.foreach { case (id, schema) =>
-                Try {
-                  insertSchemaPS.setLong(INS_ID, id)
-                  insertSchemaPS.setString(INS_SCHEMA, schema.toString)
-                  insertSchemaPS.setString(INS_NAME, schema.getName)
-                  insertSchemaPS.setString(INS_NAMESPACE, schema.getNamespace)
-                  insertSchemaPS.executeUpdate()
-                  connection.commit()
-                }.recoverWith {
-                  case _: SQLException =>
-                    Try {
-                      connection.rollback()
-                      updateSchemaPS.setLong(UPD_ID, id)
-                      updateSchemaPS.setString(UPD_SCHEMA, schema.toString)
-                      updateSchemaPS.setString(UPD_NAME, schema.getName)
-                      updateSchemaPS.setString(UPD_NAMESPACE, schema.getNamespace)
-                      updateSchemaPS.executeUpdate()
-                      connection.commit()
-                    }
-                } match {
-                  case Failure(t) =>
-                    connection.rollback()
-                    throw t
-                  case Success(_) =>
-                }
+      using(connection.prepareStatement(INSERT_STMT)) { insertSchemaPS =>
+        using(connection.prepareStatement(UPDATE_STMT)) { updateSchemaPS =>
+          schemas.foreach { case (id, schema) =>
+            Try {
+              insertSchemaPS.setLong(INS_ID, id)
+              insertSchemaPS.setString(INS_SCHEMA, schema.toString)
+              insertSchemaPS.setString(INS_NAME, schema.getName)
+              insertSchemaPS.setString(INS_NAMESPACE, schema.getNamespace)
+              insertSchemaPS.executeUpdate()
+              connection.commit()
+            }.recoverWith { case _: SQLException =>
+              Try {
+                connection.rollback()
+                updateSchemaPS.setLong(UPD_ID, id)
+                updateSchemaPS.setString(UPD_SCHEMA, schema.toString)
+                updateSchemaPS.setString(UPD_NAME, schema.getName)
+                updateSchemaPS.setString(UPD_NAMESPACE, schema.getNamespace)
+                updateSchemaPS.executeUpdate()
+                connection.commit()
               }
+            } match {
+              case Failure(t) =>
+                connection.rollback()
+                throw t
+              case Success(_) =>
+            }
           }
+        }
       }
     }
   }
 
   def insertOneTransaction(schemas: Seq[(Long, Schema)]): Unit = {
-    val INS_ID: Int = 1
-    val INS_SCHEMA: Int = 2
-    val INS_NAME: Int = 3
+    val INS_ID: Int        = 1
+    val INS_SCHEMA: Int    = 2
+    val INS_NAME: Int      = 3
     val INS_NAMESPACE: Int = 4
-    val UPD_ID: Int = 4
-    val UPD_SCHEMA: Int = 1
-    val UPD_NAME: Int = 2
+    val UPD_ID: Int        = 4
+    val UPD_SCHEMA: Int    = 1
+    val UPD_NAME: Int      = 2
     val UPD_NAMESPACE: Int = 3
     using(getConnection) { connection =>
       connection.setAutoCommit(false)
@@ -155,16 +152,19 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
 
     if (ids.nonEmpty) {
       val withIdx = ids.zipWithIndex
-      using(connection.prepareStatement(s"select * from $TABLE_NAME where id in " +
-        withIdx.map(_ => "?").mkString("(", ",", ")")
-      )) { statement =>
+      using(
+        connection.prepareStatement(
+          s"select * from $TABLE_NAME where id in " +
+            withIdx.map(_ => "?").mkString("(", ",", ")")
+        )
+      ) { statement =>
         withIdx.foreach { case (f, idx) =>
           statement.setLong(idx + 1, f._1)
         }
         using(statement.executeQuery()) { resultSet =>
           val schemas = Map.newBuilder[Long, Schema]
           while (resultSet.next()) {
-            val id = resultSet.getLong("id")
+            val id     = resultSet.getLong("id")
             val schema = parser.parse(resultSet.getString("schema"))
             schemas += (id -> schema)
           }
@@ -191,9 +191,8 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
   }
 
   override def createTable(): Unit = {
-    using(getConnection) {
-      conn =>
-        conn.createStatement().executeUpdate(CREATE_TABLE_STMT)
+    using(getConnection) { conn =>
+      conn.createStatement().executeUpdate(CREATE_TABLE_STMT)
     }
   }
 

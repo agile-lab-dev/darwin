@@ -1,9 +1,9 @@
 package it.agilelab.darwin.manager
 
 import com.typesafe.config.Config
-import it.agilelab.darwin.common.{ConnectorFactory, DarwinConcurrentHashMap, Logging}
+import it.agilelab.darwin.common.{ ConnectorFactory, DarwinConcurrentHashMap, Logging }
 import it.agilelab.darwin.manager.exception.ConnectorNotFoundException
-import it.agilelab.darwin.manager.util.{ConfigUtil, ConfigurationKeys}
+import it.agilelab.darwin.manager.util.{ ConfigUtil, ConfigurationKeys }
 
 /**
   * Factory used to obtain the desired implementation of AvroSchemaManager.
@@ -32,15 +32,18 @@ object AvroSchemaManagerFactory extends Logging {
     lazy val mappingFunc = {
       log.debug("creating instance of AvroSchemaManager")
       val endianness = ConfigUtil.stringToEndianness(config.getString(ConfigurationKeys.ENDIANNESS))
-      val result = config.getString(ConfigurationKeys.MANAGER_TYPE) match {
+      val result     = config.getString(ConfigurationKeys.MANAGER_TYPE) match {
         case ConfigurationKeys.CACHED_EAGER =>
           new CachedEagerAvroSchemaManager(ConnectorFactory.connector(config), endianness)
-        case ConfigurationKeys.CACHED_LAZY =>
+        case ConfigurationKeys.CACHED_LAZY  =>
           new CachedLazyAvroSchemaManager(ConnectorFactory.connector(config), endianness)
-        case ConfigurationKeys.LAZY =>
+        case ConfigurationKeys.LAZY         =>
           new LazyAvroSchemaManager(ConnectorFactory.connector(config), endianness)
-        case _ => throw new IllegalArgumentException(s"No valid manager can be created for" +
-          s" ${ConfigurationKeys.MANAGER_TYPE} key ${config.getString(ConfigurationKeys.MANAGER_TYPE)}")
+        case _                              =>
+          throw new IllegalArgumentException(
+            s"No valid manager can be created for" +
+              s" ${ConfigurationKeys.MANAGER_TYPE} key ${config.getString(ConfigurationKeys.MANAGER_TYPE)}"
+          )
       }
       log.debug("AvroSchemaManager instance created")
       result
@@ -55,9 +58,12 @@ object AvroSchemaManagerFactory extends Logging {
     * @return the initialized instance of AvroSchemaManager
     */
   def getInstance(config: Config): AvroSchemaManager = {
-    _instancePool.getOrElse(configKey(config),
-      throw new IllegalArgumentException(s"No valid manager can be found for" +
-        s" ${ConfigurationKeys.MANAGER_TYPE} key ${config.getString(ConfigurationKeys.MANAGER_TYPE)}")
+    _instancePool.getOrElse(
+      configKey(config),
+      throw new IllegalArgumentException(
+        s"No valid manager can be found for" +
+          s" ${ConfigurationKeys.MANAGER_TYPE} key ${config.getString(ConfigurationKeys.MANAGER_TYPE)}"
+      )
     )
   }
 

@@ -11,7 +11,8 @@ import org.scalatest.matchers.should.Matchers
 
 class MockConnectorSpec extends AnyFlatSpec with Matchers {
 
-  private val p = Paths.get(".")
+  private val p = Paths
+    .get(".")
     .resolve("mock-connector")
     .resolve("src")
     .resolve("test")
@@ -36,9 +37,9 @@ class MockConnectorSpec extends AnyFlatSpec with Matchers {
   it should "load the schema automatically from files" in {
     val connector = new MockConnectorCreator().create(ConfigFactory.parseMap {
       new java.util.HashMap[String, Object] {
-        put(ConfigurationKeys.FILES, util.Arrays.asList(
-          p.resolve("MockClassAlone.avsc").toString,
-          p.resolve("MockClassParent.avsc").toString)
+        put(
+          ConfigurationKeys.FILES,
+          util.Arrays.asList(p.resolve("MockClassAlone.avsc").toString, p.resolve("MockClassParent.avsc").toString)
         )
       }
     })
@@ -48,10 +49,13 @@ class MockConnectorSpec extends AnyFlatSpec with Matchers {
   it should "not throw any exception in case of missing file in permissive mode" in {
     val connector = new MockConnectorCreator().create(ConfigFactory.parseMap {
       new java.util.HashMap[String, Object] {
-        put(ConfigurationKeys.FILES, util.Arrays.asList(
-          p.resolve("DoesNotExists.avsc").toString,
-          p.resolve("MockClassAlone.avsc").toString,
-          p.resolve("MockClassParent.avsc").toString)
+        put(
+          ConfigurationKeys.FILES,
+          util.Arrays.asList(
+            p.resolve("DoesNotExists.avsc").toString,
+            p.resolve("MockClassAlone.avsc").toString,
+            p.resolve("MockClassParent.avsc").toString
+          )
         )
         put(ConfigurationKeys.MODE, "permissive")
       }
@@ -61,15 +65,20 @@ class MockConnectorSpec extends AnyFlatSpec with Matchers {
 
   it should "throw an exception in case of missing file in strict mode" in {
     intercept[MockConnectorException] {
-      new MockConnectorCreator().create(ConfigFactory.parseMap {
-        new java.util.HashMap[String, Object] {
-          put(ConfigurationKeys.FILES, util.Arrays.asList(
-            p.resolve("DoesNotExists.avsc").toString,
-            p.resolve("MockClassAlone.avsc").toString,
-            p.resolve("MockClassParent.avsc").toString)
-          )
-        }
-      }).fullLoad()
+      new MockConnectorCreator()
+        .create(ConfigFactory.parseMap {
+          new java.util.HashMap[String, Object] {
+            put(
+              ConfigurationKeys.FILES,
+              util.Arrays.asList(
+                p.resolve("DoesNotExists.avsc").toString,
+                p.resolve("MockClassAlone.avsc").toString,
+                p.resolve("MockClassParent.avsc").toString
+              )
+            )
+          }
+        })
+        .fullLoad()
     }
   }
 

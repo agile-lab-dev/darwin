@@ -11,12 +11,16 @@ import org.apache.avro.Schema
   * number of accesses to the storage.
   */
 abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrder)
-  extends AvroSchemaManager(connector, endianness) {
+    extends AvroSchemaManager(connector, endianness) {
   protected val _cache: AtomicReference[Option[AvroSchemaCache]] = new AtomicReference[Option[AvroSchemaCache]](None)
 
   def cache: AvroSchemaCache = _cache.get
-    .getOrElse(throw new IllegalAccessException("Cache not loaded: accesses are allowed only if the cache has been " +
-      "loaded"))
+    .getOrElse(
+      throw new IllegalAccessException(
+        "Cache not loaded: accesses are allowed only if the cache has been " +
+          "loaded"
+      )
+    )
 
   initialize()
 
@@ -41,14 +45,13 @@ abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrd
   override def registerAll(schemas: Seq[Schema]): Seq[(Long, Schema)] = {
     log.debug(s"registering ${schemas.size} schemas...")
     val (alreadyInCache, notInCache) = schemas.map(s => (cache.contains(s), s)).partition(_._1._1)
-    val inserted = notInCache.map(e => e._1._2 -> e._2)
+    val inserted                     = notInCache.map(e => e._1._2 -> e._2)
     connector.insert(inserted)
-    val allSchemas = alreadyInCache.map(e => e._1._2 -> e._2) ++ inserted
+    val allSchemas                   = alreadyInCache.map(e => e._1._2 -> e._2) ++ inserted
     _cache.set(Some(cache.insert(inserted))) //TODO review
     log.debug(s"${allSchemas.size} schemas registered")
     allSchemas
   }
-
 
   /**
     * Retrieves all registered schemas

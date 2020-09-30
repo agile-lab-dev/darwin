@@ -10,20 +10,19 @@ import com.typesafe.config.Config
 import it.agilelab.darwin.common.Logging
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
+import scala.concurrent.{ Await, ExecutionContext, ExecutionContextExecutor }
 
-class HttpApp(config: Config, services: Service*)
-             (implicit system: ActorSystem, materializer: ActorMaterializer) extends Logging {
+class HttpApp(config: Config, services: Service*)(implicit system: ActorSystem, materializer: ActorMaterializer)
+    extends Logging {
   def run(): Unit = {
     val interface = config.getString("interface")
-    val port = config.getInt("port")
-
+    val port      = config.getInt("port")
 
     val route = RouteConcatenation.concat(services.map(_.route): _*)
 
     log.info("Starting http server on {}:{}", interface, port)
     val eventuallyBinding = Http().bindAndHandle(route, interface, port)
-    val binding = Await.result(eventuallyBinding, Duration.Inf)
+    val binding           = Await.result(eventuallyBinding, Duration.Inf)
     log.info("Started http server on {}:{}", interface, port)
 
     val shutdownThread = new Thread(new Runnable {
@@ -32,7 +31,7 @@ class HttpApp(config: Config, services: Service*)
         log.info("Received shutdown hook")
 
         val termination = for {
-          _ <- binding.unbind()
+          _          <- binding.unbind()
           terminated <- system.terminate()
         } yield terminated
 
@@ -48,13 +47,15 @@ class HttpApp(config: Config, services: Service*)
     log.info("registered shutdown hook")
   }
 
-
   private def newSameThreadExecutor: ExecutionContextExecutor = ExecutionContext.fromExecutor(new Executor {
     override def execute(command: Runnable): Unit = command.run()
   })
 }
 
 object HttpApp {
-  def apply(config:Config, services: Service*)(implicit system: ActorSystem, materializer: ActorMaterializer): HttpApp =
+  def apply(config: Config, services: Service*)(implicit
+    system: ActorSystem,
+    materializer: ActorMaterializer
+  ): HttpApp =
     new HttpApp(config, services: _*)
 }

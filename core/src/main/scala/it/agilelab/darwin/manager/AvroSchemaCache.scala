@@ -38,5 +38,5 @@ abstract class AvroSchemaCache(schemas: Seq[(Long, Schema)]) {
     *
     * @return A Sequence of (ID, Schema)
     */
-  def getAll : Seq[(Long, Schema)]
+  def getAll: Seq[(Long, Schema)]
 }

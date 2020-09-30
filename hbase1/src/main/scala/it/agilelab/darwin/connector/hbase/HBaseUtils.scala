@@ -1,6 +1,6 @@
 package it.agilelab.darwin.connector.hbase
 
-import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
+import org.apache.hadoop.hbase.{ HColumnDescriptor, HTableDescriptor, TableName }
 import org.apache.hadoop.hbase.client.Admin
 
 object HBaseUtils {

@@ -29,7 +29,6 @@ object ConnectorFactory extends Logging {
     */
   def creator(): Option[ConnectorCreator] = creators().headOption
 
-
   /**
     * @return the ConnectorCreator identified by the name given as input
     */
@@ -49,7 +48,8 @@ object ConnectorFactory extends Logging {
   }
 
   def connector(config: Config): Connector = {
-    val cnt = creator(config).map(_.create(config))
+    val cnt = creator(config)
+      .map(_.create(config))
       .getOrElse(throw new ConnectorNotFoundException(config))
     if (config.hasPath(ConfigurationKeys.CREATE_TABLE) && config.getBoolean(ConfigurationKeys.CREATE_TABLE)) {
       cnt.createTable()
@@ -59,6 +59,5 @@ object ConnectorFactory extends Logging {
     }
     cnt
   }
-
 
 }

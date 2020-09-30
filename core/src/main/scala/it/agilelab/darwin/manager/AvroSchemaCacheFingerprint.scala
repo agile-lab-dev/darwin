@@ -1,7 +1,7 @@
 package it.agilelab.darwin.manager
 
 import it.agilelab.darwin.common.Logging
-import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.avro.{ Schema, SchemaNormalization }
 
 /**
   * Implementation of [[AvroSchemaCache]] that uses Fingerprint64 as IDs.

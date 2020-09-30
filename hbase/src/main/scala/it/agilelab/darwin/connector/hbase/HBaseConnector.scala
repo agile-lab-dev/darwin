@@ -2,7 +2,7 @@ package it.agilelab.darwin.connector.hbase
 
 import com.typesafe.config.Config
 import it.agilelab.darwin.common.compat._
-import it.agilelab.darwin.common.{Connector, Logging, using}
+import it.agilelab.darwin.common.{ using, Connector, Logging }
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.commons.io.IOUtils
@@ -49,10 +49,10 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
 
   lazy val TABLE_NAME: TableName = TableName.valueOf(Bytes.toBytes(NAMESPACE_STRING), Bytes.toBytes(TABLE_NAME_STRING))
 
-  val CF_STRING = "0"
-  val CF: Array[Byte] = Bytes.toBytes(CF_STRING)
-  val QUALIFIER_SCHEMA: Array[Byte] = Bytes.toBytes("schema")
-  val QUALIFIER_NAME: Array[Byte] = Bytes.toBytes("name")
+  val CF_STRING                        = "0"
+  val CF: Array[Byte]                  = Bytes.toBytes(CF_STRING)
+  val QUALIFIER_SCHEMA: Array[Byte]    = Bytes.toBytes("schema")
+  val QUALIFIER_NAME: Array[Byte]      = Bytes.toBytes("name")
   val QUALIFIER_NAMESPACE: Array[Byte] = Bytes.toBytes("namespace")
 
   log.debug("Creating default HBaseConfiguration")
@@ -66,7 +66,6 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     configuration.addResource(new Path(config.getString(ConfigurationKeys.HBASE_SITE)))
   }
 
-
   private def addResourceMessage(s: String) = {
     val ADDING_RESOURCE = "Adding resource: "
     ADDING_RESOURCE + s
@@ -76,19 +75,26 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     log.debug(s"Calling UserGroupInformation.setConfiguration()")
     UserGroupInformation.setConfiguration(configuration)
 
-    log.debug(s"Calling UserGroupInformation.loginUserFromKeytab(${config.getString(ConfigurationKeys.PRINCIPAL)}, " +
-      s"${config.getString(ConfigurationKeys.KEYTAB_PATH)})")
-    val ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(
-      config.getString(ConfigurationKeys.PRINCIPAL), config.getString(ConfigurationKeys.KEYTAB_PATH)
+    log.debug(
+      s"Calling UserGroupInformation.loginUserFromKeytab(${config.getString(ConfigurationKeys.PRINCIPAL)}, " +
+        s"${config.getString(ConfigurationKeys.KEYTAB_PATH)})"
+    )
+    val ugi  = UserGroupInformation.loginUserFromKeytabAndReturnUGI(
+      config.getString(ConfigurationKeys.PRINCIPAL),
+      config.getString(ConfigurationKeys.KEYTAB_PATH)
     )
     UserGroupInformation.setLoginUser(ugi)
     val user = User.create(ugi)
-    log.trace(s"initialization of HBase connection with configuration:\n " +
-      s"${configuration.iterator().toScala().map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
+    log.trace(
+      s"initialization of HBase connection with configuration:\n " +
+        s"${configuration.iterator().toScala().map { entry => entry.getKey -> entry.getValue }.mkString("\n")}"
+    )
     ConnectionFactory.createConnection(configuration, user)
   } else {
-    log.trace(s"initialization of HBase connection with configuration:\n " +
-      s"${configuration.iterator().toScala().map { entry => entry.getKey -> entry.getValue }.mkString("\n")}")
+    log.trace(
+      s"initialization of HBase connection with configuration:\n " +
+        s"${configuration.iterator().toScala().map { entry => entry.getKey -> entry.getValue }.mkString("\n")}"
+    )
     ConnectionFactory.createConnection(configuration)
   }
 
@@ -106,8 +112,8 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
   override def fullLoad(): Seq[(Long, Schema)] = {
     log.debug(s"loading all schemas from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
     val scanner: Iterable[Result] = connection.getTable(TABLE_NAME).getScanner(CF, QUALIFIER_SCHEMA).toScala()
-    val schemas = scanner.map { result =>
-      val key = Bytes.toLong(result.getRow)
+    val schemas                   = scanner.map { result =>
+      val key   = Bytes.toLong(result.getRow)
       val value = Bytes.toString(result.getValue(CF, QUALIFIER_SCHEMA))
       key -> parser.parse(value)
     }.toSeq
@@ -147,8 +153,6 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     }
   }
 
-
-
   override def tableExists(): Boolean = {
     using(connection.getAdmin) { admin =>
       admin.tableExists(TABLE_NAME)
@@ -163,11 +167,11 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
 
   override def findSchema(id: Long): Option[Schema] = {
     log.debug(s"loading a schema with id = $id from table $NAMESPACE_STRING:$TABLE_NAME_STRING")
-    val get: Get = new Get(Bytes.toBytes(id))
+    val get: Get                   = new Get(Bytes.toBytes(id))
     get.addColumn(CF, QUALIFIER_SCHEMA)
-    val result: Result = connection.getTable(TABLE_NAME).get(get)
+    val result: Result             = connection.getTable(TABLE_NAME).get(get)
     val value: Option[Array[Byte]] = Option(result.getValue(CF, QUALIFIER_SCHEMA))
-    val schema: Option[Schema] = value.map(v => parser.parse(Bytes.toString(v)))
+    val schema: Option[Schema]     = value.map(v => parser.parse(Bytes.toString(v)))
     log.debug(s"$schema loaded from HBase for id = $id")
     schema
   }

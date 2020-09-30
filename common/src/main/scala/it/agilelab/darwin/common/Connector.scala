@@ -19,7 +19,6 @@ trait Connector extends Serializable {
   def tableExists(): Boolean
 
   /**
-    *
     * @return a message indicating the user what he/she should do to create the table him/herself
     */
   def tableCreationHint(): String

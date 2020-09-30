@@ -14,23 +14,25 @@ class DarwinConcurrentHashMapSpec extends AnyFlatSpec with Matchers with BeforeA
   }
 
   def test(): Unit = {
-    val threadNumber = 1000
-    val map = DarwinConcurrentHashMap.empty[String, Int]
-    var counter = 0
+    val threadNumber  = 1000
+    val map           = DarwinConcurrentHashMap.empty[String, Int]
+    var counter       = 0
     val threadCounter = new AtomicInteger(0)
-    val runnables = for (_ <- 1 to threadNumber) yield {
+    val runnables     = for (_ <- 1 to threadNumber) yield {
       new Runnable {
         override def run(): Unit = {
           threadCounter.incrementAndGet()
-          val res = map.getOrElseUpdate("A", {
-            counter += 1
-            counter
-          })
+          val res = map.getOrElseUpdate(
+            "A", {
+              counter += 1
+              counter
+            }
+          )
           res should be(1)
         }
       }
     }
-    val threads = for (r <- runnables) yield {
+    val threads       = for (r <- runnables) yield {
       val t = new Thread(r)
       t
     }
@@ -42,7 +44,6 @@ class DarwinConcurrentHashMapSpec extends AnyFlatSpec with Matchers with BeforeA
     }
     threadCounter.get() should be(threadNumber)
   }
-
 
   it should "not evaluate the value if the key is present JAVA 8" in {
     test()

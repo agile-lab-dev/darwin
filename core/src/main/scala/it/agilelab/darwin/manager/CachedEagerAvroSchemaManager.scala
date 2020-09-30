@@ -10,6 +10,6 @@ import org.apache.avro.Schema
   * perform any other accesses to the storage: each retrieve is performed onto the cache.
   */
 class CachedEagerAvroSchemaManager(connector: Connector, endianness: ByteOrder)
-  extends CachedAvroSchemaManager(connector, endianness) {
+    extends CachedAvroSchemaManager(connector, endianness) {
   override def getSchema(id: Long): Option[Schema] = cache.getSchema(id)
 }

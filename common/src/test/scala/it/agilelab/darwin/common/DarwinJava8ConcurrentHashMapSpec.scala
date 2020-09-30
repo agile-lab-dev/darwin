@@ -5,8 +5,8 @@ import it.agilelab.darwin.common.DarwinConcurrentHashMap.DarwinJava8ConcurrentHa
 class DarwinJava8ConcurrentHashMapSpec extends DarwinJava8ConcurrentHashMapRunner[String, Int] {
 
   private def defaultWithSideEffect: Int = throw new DefaultException
-  private val aKey = "aKey"
-  private val aValue = 1
+  private val aKey                       = "aKey"
+  private val aValue                     = 1
 
   it should "not evaluate the default param when key found - getOrElse" in {
     val sut = anEmptySut
@@ -38,6 +38,5 @@ class DarwinJava8ConcurrentHashMapSpec extends DarwinJava8ConcurrentHashMapRunne
     sut shouldBe a[DarwinJava8ConcurrentHashMap[_, _]]
     an[NullPointerException] should be thrownBy res
   }
-
 
 }
