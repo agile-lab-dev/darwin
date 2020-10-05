@@ -71,7 +71,7 @@ object Settings {
     javacOptions ++= javacOptionsVersion(scalaVersion.value),
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
     scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value),
-    useCoursier := false
+    useCoursier := true
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
