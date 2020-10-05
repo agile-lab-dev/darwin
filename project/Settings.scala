@@ -95,6 +95,7 @@ object Settings {
     //needed to run tests over hbase minicluster
     transitiveClassifiers in Test := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
     libraryDependencies ++= Dependencies.hbaseTestDependencies
+    dependencyOverrides += "com.google.guava" % "guava:" % "12.0.1"
   }
 
   lazy val hbase2TestSettings: SettingsDefinition = {
