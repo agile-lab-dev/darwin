@@ -6,11 +6,10 @@ import org.apache.avro.{ Schema, SchemaParseException }
 
 object SchemaReader {
 
-  def readFromResources(p: String): Schema = {
+  def readFromResources(p: String): Schema =
     using(getClass.getClassLoader.getResourceAsStream(p)) { stream =>
       read(stream)
     }
-  }
 
   def read(f: File): Schema = {
     val parser = new Schema.Parser()
@@ -30,54 +29,44 @@ object SchemaReader {
     parser.parse(is)
   }
 
-  def safeReadFromResources(p: String): Either[SchemaReaderError, Schema] = {
+  def safeReadFromResources(p: String): Either[SchemaReaderError, Schema] =
     Option(getClass.getClassLoader.getResourceAsStream(p)).fold[Either[SchemaReaderError, Schema]](
       Left(ResourceNotFoundError(s"Cannot find resource: $p"))
     ) { stream =>
-      try {
-        safeRead(stream)
-      } catch {
+      try safeRead(stream)
+      catch {
         case e: SchemaParseException => Left(SchemaParserError(e))
         case e: IOException          => Left(IOError(e))
         case e: Throwable            => Left(UnknownError(e))
-      } finally {
-        stream.close()
-      }
+      } finally stream.close()
     }
-  }
 
-  def safeRead(f: File): Either[SchemaReaderError, Schema] = {
-    try {
-      Right(new Schema.Parser().parse(f))
-    } catch {
+  def safeRead(f: File): Either[SchemaReaderError, Schema] =
+    try Right(new Schema.Parser().parse(f))
+    catch {
       case e: SchemaParseException => Left(SchemaParserError(e))
       case e: IOException          => Left(IOError(e))
       case e: Throwable            => Left(UnknownError(e))
     }
-  }
 
-  def safeRead(s: String): Either[SchemaReaderError, Schema] = {
-    try {
-      Right(new Schema.Parser().parse(s))
-    } catch {
+  def safeRead(s: String): Either[SchemaReaderError, Schema] =
+    try Right(new Schema.Parser().parse(s))
+    catch {
       case e: SchemaParseException => Left(SchemaParserError(e))
       case e: IOException          => Left(IOError(e))
       case e: Throwable            => Left(UnknownError(e))
     }
-  }
 
   /**
     * Does not close the InputStream
     */
-  def safeRead(is: InputStream): Either[SchemaReaderError, Schema] = {
-    try {
-      Right(new Schema.Parser().parse(is))
-    } catch {
+  def safeRead(is: InputStream): Either[SchemaReaderError, Schema] =
+    try Right(new Schema.Parser().parse(is))
+    catch {
       case e: SchemaParseException => Left(SchemaParserError(e))
       case e: IOException          => Left(IOError(e))
       case e: Throwable            => Left(UnknownError(e))
     }
-  }
 
   sealed trait SchemaReaderError
 

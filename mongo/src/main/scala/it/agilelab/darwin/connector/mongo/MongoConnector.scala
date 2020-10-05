@@ -44,7 +44,7 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
     schemas.map(_.get)
   }
 
-  private def extract[A](d: Document, fieldName: String, f: BsonValue => A): Try[A] = {
+  private def extract[A](d: Document, fieldName: String, f: BsonValue => A): Try[A] =
     d.filterKeys(k => k == fieldName)
       .headOption
       .fold[Try[A]](Failure(new RuntimeException(s"Cannot find $fieldName field in document"))) { case (_, value) =>
@@ -52,7 +52,6 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
           Failure(new RuntimeException(s"$fieldName was not of expected type", t))
         }
       }
-  }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
 
@@ -70,9 +69,8 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
   }
 
   private def insertIfNotExists(collection: MongoCollection[Document], document: BsonDocument): Unit = {
-    try {
-      Await.result(collection.insertOne(document).toFuture(), mongoConfig.timeout)
-    } catch {
+    try Await.result(collection.insertOne(document).toFuture(), mongoConfig.timeout)
+    catch {
       case ex: MongoWriteException if ex.getError.getCategory == ErrorCategory.DUPLICATE_KEY =>
         log.info("document already present, doing nothing")
     }
@@ -92,7 +90,7 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
     }
   }
 
-  override def tableExists(): Boolean = {
+  override def tableExists(): Boolean =
     Await.result(
       mongoClient
         .getDatabase(mongoConfig.database)
@@ -102,13 +100,11 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
         .map(_.size),
       mongoConfig.timeout
     ) == 1
-  }
 
-  override def tableCreationHint(): String = {
+  override def tableCreationHint(): String =
     s"""To create the collection from shell perform the following command:
        |db.createCollection(${mongoConfig.collection})
      """.stripMargin
-  }
 
   override def findSchema(id: Long): Option[Schema] = {
 

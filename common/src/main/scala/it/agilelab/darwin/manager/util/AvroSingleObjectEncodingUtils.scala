@@ -19,12 +19,11 @@ object AvroSingleObjectEncodingUtils {
   /**
     * Exception that can be thrown if the data is not single-object encoded
     */
-  private[manager] def parseException(): DarwinException = {
+  private[manager] def parseException(): DarwinException =
     new DarwinException(
       s"Byte array is not in correct format." +
         s" First ${V1_HEADER.length} bytes are not equal to ${byteArray2HexString(V1_HEADER)}"
     )
-  }
 
   /**
     * Checks if a byte array is Avro Single-Object encoded (
@@ -52,7 +51,7 @@ object AvroSingleObjectEncodingUtils {
     * @param data a ByteBuffer that will not be altered position wise by this method
     * @return true if the input byte array is Single-Object encoded
     */
-  def isAvroSingleObjectEncoded(data: ByteBuffer): Boolean = {
+  def isAvroSingleObjectEncoded(data: ByteBuffer): Boolean =
     try {
       val originalPosition = data.position()
       val buffer           = new Array[Byte](V1_HEADER.length)
@@ -67,7 +66,6 @@ object AvroSingleObjectEncodingUtils {
           indexOutOfBoundsException
         )
     }
-  }
 
   /**
     * Create an array that creates a Single-Object encoded byte array.
@@ -79,9 +77,8 @@ object AvroSingleObjectEncodingUtils {
     * @param endianness  a byte order to drive endianness of schemaId
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long, endianness: ByteOrder): Array[Byte] = {
+  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long, endianness: ByteOrder): Array[Byte] =
     Array.concat(V1_HEADER, schemaId.longToByteArray(endianness), avroPayload)
-  }
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header and returns the OutputStream
@@ -144,9 +141,8 @@ object AvroSingleObjectEncodingUtils {
     *                                it won't affect how avro payload is read, that is up to the darwin user
     * @return the schema ID extracted from the input data
     */
-  def extractId(avroSingleObjectEncoded: Array[Byte], endianness: ByteOrder): Long = {
+  def extractId(avroSingleObjectEncoded: Array[Byte], endianness: ByteOrder): Long =
     extractId(ByteBuffer.wrap(avroSingleObjectEncoded), endianness)
-  }
 
   /**
     * Extracts the schema ID from the avro single-object encoded ByteBuffer, the ByteBuffer position will be after the
@@ -157,7 +153,7 @@ object AvroSingleObjectEncodingUtils {
     *                                it won't affect how avro payload is read, that is up to the darwin user
     * @return the schema ID extracted from the input data
     */
-  def extractId(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder): Long = {
+  def extractId(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder): Long =
     if (avroSingleObjectEncoded.remaining() < HEADER_LENGTH) {
       throw new IllegalArgumentException(
         s"At least ${V1_HEADER.length} bytes " +
@@ -167,7 +163,6 @@ object AvroSingleObjectEncodingUtils {
       avroSingleObjectEncoded.position(avroSingleObjectEncoded.position() + V1_HEADER.length)
       readLong(avroSingleObjectEncoded, endianness)
     }
-  }
 
   /**
     * Reads the content of the byte buffer honoring the input endianness and returns it.
@@ -175,7 +170,7 @@ object AvroSingleObjectEncodingUtils {
     * the values of endianness and buf.order() are.
     */
   @inline
-  def readLong(buf: ByteBuffer, endianness: ByteOrder): Long = {
+  def readLong(buf: ByteBuffer, endianness: ByteOrder): Long =
     if (buf.order() == endianness) {
       buf.getLong
     } else {
@@ -185,7 +180,6 @@ object AvroSingleObjectEncodingUtils {
       buf.order(lastEndianness)
       toRet
     }
-  }
 
   /**
     * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
@@ -237,9 +231,8 @@ object AvroSingleObjectEncodingUtils {
     * @param avroSingleObjectEncoded avro single-object encoded byte array
     * @return the payload without the avro single-object encoded header
     */
-  def dropHeader(avroSingleObjectEncoded: Array[Byte]): Array[Byte] = {
+  def dropHeader(avroSingleObjectEncoded: Array[Byte]): Array[Byte] =
     avroSingleObjectEncoded.drop(HEADER_LENGTH)
-  }
 
   /**
     * Extracts the ID from a Schema.
@@ -247,9 +240,8 @@ object AvroSingleObjectEncodingUtils {
     * @param schema     a Schema with unknown ID
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema): Long = {
+  def getId(schema: Schema): Long =
     schemaMap.getOrElseUpdate(schema, SchemaNormalization.parsingFingerprint64(schema))
-  }
 
   /**
     * Converts a byte array into its hexadecimal string representation
@@ -258,7 +250,6 @@ object AvroSingleObjectEncodingUtils {
     * @param bytes a byte array
     * @return the hexadecimal string representation of the input byte array
     */
-  def byteArray2HexString(bytes: Array[Byte]): String = {
+  def byteArray2HexString(bytes: Array[Byte]): String =
     bytes.map("%02X".format(_)).mkString("[", " ", "]")
-  }
 }

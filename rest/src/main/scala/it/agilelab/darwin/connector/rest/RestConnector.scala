@@ -7,9 +7,8 @@ import scalaj.http.Http
 
 class RestConnector(options: RestConnectorOptions, config: Config) extends Connector with JsonProtocol {
 
-  override def fullLoad(): Seq[(Long, Schema)] = {
+  override def fullLoad(): Seq[(Long, Schema)] =
     Http(options.endpoint("schemas/")).execute(toSeqOfIdSchema).body
-  }
 
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
 
@@ -26,7 +25,7 @@ class RestConnector(options: RestConnectorOptions, config: Config) extends Conne
 
   override def createTable(): Unit = {}
 
-  override def tableExists(): Boolean = true
+  override def tableExists(): Boolean          = true
 
   override def tableCreationHint(): String = ""
 

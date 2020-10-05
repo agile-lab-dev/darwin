@@ -32,20 +32,18 @@ object ConnectorFactory extends Logging {
   /**
     * @return the ConnectorCreator identified by the name given as input
     */
-  def creator(name: String): Option[ConnectorCreator] = {
+  def creator(name: String): Option[ConnectorCreator] =
     creators().find(_.name() == name)
-  }
 
   /**
     * @return the ConnectorCreator identified by the name given as input
     */
-  def creator(conf: Config): Option[ConnectorCreator] = {
+  def creator(conf: Config): Option[ConnectorCreator] =
     if (conf.hasPath(ConfigurationKeys.CONNECTOR)) {
       creator(conf.getString(ConfigurationKeys.CONNECTOR))
     } else {
       creator()
     }
-  }
 
   def connector(config: Config): Connector = {
     val cnt = creator(config)

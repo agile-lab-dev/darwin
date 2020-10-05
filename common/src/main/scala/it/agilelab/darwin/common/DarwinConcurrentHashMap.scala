@@ -23,14 +23,13 @@ object DarwinConcurrentHashMap {
   private[common] class DarwinJava8ConcurrentHashMap[K, V] extends DarwinConcurrentHashMap[K, V] {
     private val innerMap = new java.util.concurrent.ConcurrentHashMap[K, V]()
 
-    override def getOrElseUpdate(k: K, newValue: => V): V = {
+    override def getOrElseUpdate(k: K, newValue: => V): V =
       innerMap.computeIfAbsent(
         k,
         new JFunction[K, V]() {
           override def apply(t: K): V = newValue
         }
       )
-    }
 
     override def getOrElse(k: K, default: => V): V =
       Option(innerMap.get(k)).getOrElse(default)
@@ -46,11 +45,10 @@ object DarwinConcurrentHashMap {
 
   private val isJavaAtLeast8 = JavaVersion.current() >= 8
 
-  def empty[K, V]: DarwinConcurrentHashMap[K, V] = {
+  def empty[K, V]: DarwinConcurrentHashMap[K, V] =
     if (isJavaAtLeast8) {
       new DarwinJava8ConcurrentHashMap()
     } else {
       new DarwinTrieConcurrentHashMap()
     }
-  }
 }

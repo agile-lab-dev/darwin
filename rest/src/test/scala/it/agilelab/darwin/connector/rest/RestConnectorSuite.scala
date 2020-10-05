@@ -19,13 +19,11 @@ class RestConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with Option
                                                                | basePath: "/"
       """.stripMargin)
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     wireMockServer.start()
-  }
 
-  override def afterEach(): Unit = {
+  override def afterEach(): Unit =
     wireMockServer.stop()
-  }
 
   "rest connector" should "get all schemas" in {
 

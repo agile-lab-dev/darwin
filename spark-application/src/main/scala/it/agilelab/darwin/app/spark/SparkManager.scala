@@ -53,7 +53,7 @@ trait SparkManager {
     * @return the default Spark parallelism given the sparkSession and the config.
     *         It tries to infer it from the SparkSession, if it is not possible, it gathers it from the Config
     */
-  protected def defaultParallelism(implicit sparkSession: SparkSession, config: Config): Int = {
+  protected def defaultParallelism(implicit sparkSession: SparkSession, config: Config): Int =
     sparkSession.conf.getOption(SparkConfigurationKeys.SPARK_EXECUTOR_INSTANCES) match {
       case Some(instances) =>
         sparkSession.conf.getOption(SparkConfigurationKeys.SPARK_CORES).getOrElse("1").toInt * instances.toInt
@@ -70,5 +70,4 @@ trait SparkManager {
           sparkSession.sparkContext.defaultParallelism
         }
     }
-  }
 }

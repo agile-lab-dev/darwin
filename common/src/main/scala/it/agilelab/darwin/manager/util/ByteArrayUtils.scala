@@ -12,18 +12,17 @@ private[darwin] object ByteArrayUtils {
     /**
       * Converts Long to Array[Byte] honoring the input endianness
       */
-    def longToByteArray(endianness: ByteOrder): Array[Byte] = {
+    def longToByteArray(endianness: ByteOrder): Array[Byte] =
       ByteBuffer
         .allocate(LONG_SIZE)
         .order(endianness)
         .putLong(l)
         .array()
-    }
 
     /**
       * Writes to the stream the enriched long honoring the input endianness
       */
-    def writeToStream(os: OutputStream, endianness: ByteOrder): Unit = {
+    def writeToStream(os: OutputStream, endianness: ByteOrder): Unit =
       endianness match {
         case ByteOrder.BIG_ENDIAN    =>
           os.write((l >>> 56).asInstanceOf[Int])
@@ -44,7 +43,6 @@ private[darwin] object ByteArrayUtils {
           os.write((l >>> 48).asInstanceOf[Int])
           os.write((l >>> 56).asInstanceOf[Int])
       }
-    }
   }
 
   def arrayEquals(b1: Array[Byte], b2: Array[Byte], start1: Int, start2: Int, length: Int): Boolean = {

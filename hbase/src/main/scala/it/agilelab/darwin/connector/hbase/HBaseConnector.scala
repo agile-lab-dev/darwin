@@ -87,13 +87,13 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     val user = User.create(ugi)
     log.trace(
       s"initialization of HBase connection with configuration:\n " +
-        s"${configuration.iterator().toScala().map { entry => entry.getKey -> entry.getValue }.mkString("\n")}"
+        s"${configuration.iterator().toScala().map(entry => entry.getKey -> entry.getValue).mkString("\n")}"
     )
     ConnectionFactory.createConnection(configuration, user)
   } else {
     log.trace(
       s"initialization of HBase connection with configuration:\n " +
-        s"${configuration.iterator().toScala().map { entry => entry.getKey -> entry.getValue }.mkString("\n")}"
+        s"${configuration.iterator().toScala().map(entry => entry.getKey -> entry.getValue).mkString("\n")}"
     )
     ConnectionFactory.createConnection(configuration)
   }
@@ -121,7 +121,7 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     schemas
   }
 
-  override def insert(schemas: Seq[(Long, Schema)]): Unit = {
+  override def insert(schemas: Seq[(Long, Schema)]): Unit =
     if (schemas.nonEmpty) {
 
       log.debug(s"inserting ${schemas.size} schemas in HBase table $NAMESPACE_STRING:$TABLE_NAME_STRING")
@@ -138,9 +138,7 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
       }
     }
 
-  }
-
-  override def createTable(): Unit = {
+  override def createTable(): Unit =
     using(connection.getAdmin) { admin =>
       if (!admin.listNamespaceDescriptors().exists(_.getName == NAMESPACE_STRING)) {
         log.info(s"Namespace $NAMESPACE_STRING does not exists, creating it")
@@ -151,19 +149,16 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
         HBaseUtils.createTable(admin, TABLE_NAME, CF)
       }
     }
-  }
 
-  override def tableExists(): Boolean = {
+  override def tableExists(): Boolean =
     using(connection.getAdmin) { admin =>
       admin.tableExists(TABLE_NAME)
     }
-  }
 
-  override def tableCreationHint(): String = {
+  override def tableCreationHint(): String =
     s"""To create namespace and table from an HBase shell issue:
        |  create_namespace '$NAMESPACE_STRING'
        |  create '$NAMESPACE_STRING:$TABLE_NAME_STRING', '$CF_STRING'""".stripMargin
-  }
 
   override def findSchema(id: Long): Option[Schema] = {
     log.debug(s"loading a schema with id = $id from table $NAMESPACE_STRING:$TABLE_NAME_STRING")

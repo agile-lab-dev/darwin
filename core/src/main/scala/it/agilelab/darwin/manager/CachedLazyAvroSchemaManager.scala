@@ -12,13 +12,12 @@ import org.apache.avro.Schema
 class CachedLazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
     extends CachedAvroSchemaManager(connector, endianness) {
 
-  override def getSchema(id: Long): Option[Schema] = {
+  override def getSchema(id: Long): Option[Schema] =
     cache.getSchema(id).orElse {
       val schema: Option[Schema] = connector.findSchema(id)
       schema.foreach(s => _cache.set(Some(cache.insert(Seq(getId(s) -> s)))))
       schema
     }
-  }
 
   override def getAll: Seq[(Long, Schema)] = {
     _cache.set(Some(cache.insert(connector.fullLoad())))

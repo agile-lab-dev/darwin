@@ -14,7 +14,7 @@ object Settings {
   val SCALA_212 = Some((2L, 12L))
   val SCALA_213 = Some((2L, 13L))
 
-  def scalacOptionsVersion(scalaVersion: String): Seq[String] = {
+  def scalacOptionsVersion(scalaVersion: String): Seq[String] =
     Seq(
       "-deprecation",
       "-feature",
@@ -37,18 +37,16 @@ object Settings {
           throw new Exception(s"Unknown scala version: $version")
       }
     }
-  }
 
-  def scalaDocOptionsVersion(scalaVersion: String): Seq[String] = {
+  def scalaDocOptionsVersion(scalaVersion: String): Seq[String] =
     CrossVersion.partialVersion(scalaVersion) match {
       case SCALA_210 | SCALA_211         => scalacOptionsVersion(scalaVersion)
       case SCALA_212                     => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
       case SCALA_213                     => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
       case version: Option[(Long, Long)] => throw new Exception(s"Unknown scala version: $version")
     }
-  }
 
-  def javacOptionsVersion(scalaVersion: String): Seq[String] = {
+  def javacOptionsVersion(scalaVersion: String): Seq[String] =
     CrossVersion.partialVersion(scalaVersion) match {
       case SCALA_210                     =>
         Seq("-source", "1.7", "-target", "1.7")
@@ -61,7 +59,6 @@ object Settings {
       case version: Option[(Long, Long)] =>
         throw new Exception(s"Unknown scala version: $version")
     }
-  }
 
   lazy val projectSettings = Seq(
     organization := "it.agilelab",

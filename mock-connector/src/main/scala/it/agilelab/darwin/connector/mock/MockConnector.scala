@@ -30,9 +30,8 @@ class MockConnector(config: Config) extends Connector with Logging {
 
   private def files = if (config.hasPath(ConfigurationKeys.FILES)) {
     config.getStringList(ConfigurationKeys.FILES).toScala().map { s =>
-      try {
-        SchemaReader.safeRead(new java.io.File(s))
-      } catch {
+      try SchemaReader.safeRead(new java.io.File(s))
+      catch {
         case t: Throwable => Left(SchemaReader.UnknownError(t))
       }
     }
@@ -42,9 +41,8 @@ class MockConnector(config: Config) extends Connector with Logging {
 
   private def resources = if (config.hasPath(ConfigurationKeys.RESOURCES)) {
     config.getStringList(ConfigurationKeys.RESOURCES).toScala().map { s =>
-      try {
-        SchemaReader.safeReadFromResources(s)
-      } catch {
+      try SchemaReader.safeReadFromResources(s)
+      catch {
         case t: Throwable => Left(SchemaReader.UnknownError(t))
       }
     }
@@ -52,7 +50,7 @@ class MockConnector(config: Config) extends Connector with Logging {
     Nil
   }
 
-  private def handleError(error: SchemaReader.SchemaReaderError): Unit = {
+  private def handleError(error: SchemaReader.SchemaReaderError): Unit =
     mode match {
       case ConfigurationKeys.Strict     =>
         error match {
@@ -70,7 +68,6 @@ class MockConnector(config: Config) extends Connector with Logging {
           case SchemaReader.UnknownError(t)              => log.warn(t.getMessage, t)
         }
     }
-  }
 
   private val table: mutable.Map[Long, Schema] = mutable.Map.empty[Long, Schema]
 
@@ -82,11 +79,10 @@ class MockConnector(config: Config) extends Connector with Logging {
     table.toSeq
   }
 
-  override def insert(schemas: Seq[(Long, Schema)]): Unit = {
+  override def insert(schemas: Seq[(Long, Schema)]): Unit =
     schemas.foreach { case (id, schema) =>
       table(id) = schema
     }
-  }
 
   override def findSchema(id: Long): Option[Schema] = {
     if (!loaded) {

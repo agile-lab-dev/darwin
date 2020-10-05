@@ -16,9 +16,8 @@ object AvroSchemaManagerFactory extends Logging {
   private val _instancePool: DarwinConcurrentHashMap[String, AvroSchemaManager] =
     DarwinConcurrentHashMap.empty[String, AvroSchemaManager]
 
-  private def configKey(c: Config): String = {
+  private def configKey(c: Config): String =
     ConfigUtil.printConfig(c)
-  }
 
   /**
     * Returns an instance of AvroSchemaManager that can be used to register and retrieve schemas.
@@ -57,7 +56,7 @@ object AvroSchemaManagerFactory extends Logging {
     *
     * @return the initialized instance of AvroSchemaManager
     */
-  def getInstance(config: Config): AvroSchemaManager = {
+  def getInstance(config: Config): AvroSchemaManager =
     _instancePool.getOrElse(
       configKey(config),
       throw new IllegalArgumentException(
@@ -65,6 +64,5 @@ object AvroSchemaManagerFactory extends Logging {
           s" ${ConfigurationKeys.MANAGER_TYPE} key ${config.getString(ConfigurationKeys.MANAGER_TYPE)}"
       )
     )
-  }
 
 }

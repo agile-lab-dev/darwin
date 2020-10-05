@@ -52,7 +52,6 @@ object SchemaManagerSparkApp extends GenericMainClass with SparkManager {
     10
   }
 
-  override protected def handleException(exception: Throwable, applicationSettings: Config): Unit = {
+  override protected def handleException(exception: Throwable, applicationSettings: Config): Unit =
     mainLogger.error(exception.getMessage)
-  }
 }

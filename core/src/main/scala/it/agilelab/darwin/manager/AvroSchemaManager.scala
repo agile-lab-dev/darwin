@@ -64,18 +64,16 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param schemas all the Schema that should be registered
     * @return a sequence of pairs of the input schemas associated with their IDs
     */
-  def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] = {
+  def registerAll(schemas: java.lang.Iterable[Schema]): java.lang.Iterable[IdSchemaPair] =
     registerAll(schemas.toScala().toSeq).map { case (id, schema) => IdSchemaPair.create(id, schema) }.toJava()
-  }
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header and returns the OutputStream
     *
     * @return the input OutputStream
     */
-  def writeHeaderToStream(byteStream: OutputStream, schemaId: Long): OutputStream = {
+  def writeHeaderToStream(byteStream: OutputStream, schemaId: Long): OutputStream        =
     AvroSingleObjectEncodingUtils.writeHeaderToStream(byteStream, schemaId, endianness)
-  }
 
   /**
     * Create an array that creates a Single-Object encoded byte array.
@@ -86,9 +84,8 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param schema      the schema used to encode the payload
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema): Array[Byte] = {
+  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema): Array[Byte] =
     AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(avroPayload, getId(schema), endianness)
-  }
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header then the avroValue and returns the OutputStream
@@ -102,9 +99,8 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     byteStream: OutputStream,
     avroValue: Array[Byte],
     schemaId: Long
-  ): OutputStream = {
+  ): OutputStream =
     AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(byteStream, avroValue, schemaId, endianness)
-  }
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header then calls the avroWriter function to
@@ -117,9 +113,8 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     */
   def generateAvroSingleObjectEncoded(byteStream: OutputStream, schemaId: Long)(
     avroWriter: OutputStream => OutputStream
-  ): OutputStream = {
+  ): OutputStream =
     AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(byteStream, schemaId, endianness)(avroWriter)
-  }
 
   /**
     * Extracts a Tuple2 that contains the Schema and the Avro-encoded payload
@@ -127,7 +122,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
     * @return a pair containing the Schema and the payload of the input array
     */
-  def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) = {
+  def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: Array[Byte]): (Schema, Array[Byte]) =
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
       val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
@@ -139,7 +134,6 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     } else {
       throw AvroSingleObjectEncodingUtils.parseException()
     }
-  }
 
   /**
     * Extracts the Schema from the ByteBuffer after the method call the ByteBuffer position will be right after the
@@ -148,7 +142,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param avroSingleObjectEncoded a ByteBuffer of a Single-Object encoded payload
     * @return the avro Schema
     */
-  def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: ByteBuffer): Schema = {
+  def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: ByteBuffer): Schema =
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
       val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
@@ -158,7 +152,6 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     } else {
       throw AvroSingleObjectEncodingUtils.parseException()
     }
-  }
 
   /**
     * Extracts the schema from the avro single-object encoded at the head of this input stream.
@@ -169,11 +162,10 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param inputStream avro single-object encoded input stream
     * @return the schema ID extracted from the input data
     */
-  def extractSchema(inputStream: InputStream): Either[Array[Byte], Schema] = {
+  def extractSchema(inputStream: InputStream): Either[Array[Byte], Schema] =
     AvroSingleObjectEncodingUtils.extractId(inputStream, endianness).rightMap { id =>
       getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
-  }
 
   /**
     * Extracts the schema from the avro single-object encoded in the input array.
@@ -181,7 +173,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @param array avro single-object encoded array
     * @return the schema ID extracted from the input data
     */
-  def extractSchema(array: Array[Byte]): Either[Exception, Schema] = {
+  def extractSchema(array: Array[Byte]): Either[Exception, Schema] =
     try {
       val id = AvroSingleObjectEncodingUtils.extractId(array, endianness)
       getSchema(id)
@@ -189,7 +181,6 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     } catch {
       case ie: IllegalArgumentException => Left(ie)
     }
-  }
 
   /**
     * Extracts a [[SchemaPayloadPair]] that contains the Schema and the Avro-encoded payload

@@ -10,13 +10,12 @@ object ConfigurationKeys {
   trait Mode
 
   object Mode {
-    def parse(string: String): Mode = {
+    def parse(string: String): Mode =
       string.toLowerCase match {
         case STRICT        => Strict
         case PERMISSIVE    => Permissive
         case other: String => throw new IllegalArgumentException(s"Unknown mode: $other")
       }
-    }
   }
 
   case object Strict extends Mode

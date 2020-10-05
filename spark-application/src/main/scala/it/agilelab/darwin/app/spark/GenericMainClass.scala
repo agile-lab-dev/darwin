@@ -14,13 +14,12 @@ trait GenericMainClass {
 
   val genericMainClassLogger: Logger = LoggerFactory.getLogger("SparkManager")
 
-  private def makeFileSystem(session: SparkSession): FileSystem = {
+  private def makeFileSystem(session: SparkSession): FileSystem =
     if (session.sparkContext.isLocal) {
       FileSystem.getLocal(session.sparkContext.hadoopConfiguration)
     } else {
       FileSystem.get(session.sparkContext.hadoopConfiguration)
     }
-  }
 
   /**
     * @param settings     configuration loaded from multiple ".conf" files: the default ones as per typesafe Config and

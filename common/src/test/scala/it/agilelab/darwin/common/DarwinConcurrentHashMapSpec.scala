@@ -18,30 +18,26 @@ class DarwinConcurrentHashMapSpec extends AnyFlatSpec with Matchers with BeforeA
     val map           = DarwinConcurrentHashMap.empty[String, Int]
     var counter       = 0
     val threadCounter = new AtomicInteger(0)
-    val runnables     = for (_ <- 1 to threadNumber) yield {
-      new Runnable {
-        override def run(): Unit = {
-          threadCounter.incrementAndGet()
-          val res = map.getOrElseUpdate(
-            "A", {
-              counter += 1
-              counter
-            }
-          )
-          res should be(1)
-        }
+    val runnables     = for (_ <- 1 to threadNumber) yield new Runnable {
+      override def run(): Unit = {
+        threadCounter.incrementAndGet()
+        val res = map.getOrElseUpdate(
+          "A", {
+            counter += 1
+            counter
+          }
+        )
+        res should be(1)
       }
     }
     val threads       = for (r <- runnables) yield {
       val t = new Thread(r)
       t
     }
-    for (t <- threads) {
+    for (t <- threads)
       t.start()
-    }
-    for (t <- threads) {
+    for (t <- threads)
       t.join()
-    }
     threadCounter.get() should be(threadNumber)
   }
 

@@ -45,7 +45,7 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
 
   private val INSERT_STMT = s"INSERT INTO $TABLE_NAME (id, schema, name, namespace) VALUES (?,?,?,?)"
 
-  override def fullLoad(): Seq[(Long, Schema)] = {
+  override def fullLoad(): Seq[(Long, Schema)] =
     using(getConnection) { connection =>
       val schemas   = Seq.newBuilder[(Long, Schema)]
       val statement = connection.createStatement()
@@ -58,16 +58,14 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
         schemas.result()
       }
     }
-  }
 
-  override def insert(schemas: Seq[(Long, Schema)]): Unit = {
+  override def insert(schemas: Seq[(Long, Schema)]): Unit =
     if (schemas.nonEmpty) {
       MODE match {
         case ExceptionDriven => insertExceptionDriven(schemas)
         case OneTransaction  => insertOneTransaction(schemas)
       }
     }
-  }
 
   private def insertExceptionDriven(schemas: Seq[(Long, Schema)]): Unit = {
     val INS_ID: Int        = 1
@@ -148,8 +146,7 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
     }
   }
 
-  private def findSchemas(connection: Connection, ids: Seq[(Long, Schema)]): Map[Long, Schema] = {
-
+  private def findSchemas(connection: Connection, ids: Seq[(Long, Schema)]): Map[Long, Schema] =
     if (ids.nonEmpty) {
       val withIdx = ids.zipWithIndex
       using(
@@ -174,9 +171,8 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
     } else {
       Map.empty
     }
-  }
 
-  override def findSchema(id: Long): Option[Schema] = {
+  override def findSchema(id: Long): Option[Schema] =
     using(getConnection) { connection =>
       val statement = connection.prepareStatement(s"select * from $TABLE_NAME where id = ?")
       statement.setLong(1, id)
@@ -188,21 +184,18 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
         }
       }
     }
-  }
 
-  override def createTable(): Unit = {
+  override def createTable(): Unit =
     using(getConnection) { conn =>
       conn.createStatement().executeUpdate(CREATE_TABLE_STMT)
     }
-  }
 
   override def tableExists(): Boolean = false // FIX IT PLS
 
-  override def tableCreationHint(): String = {
+  override def tableCreationHint(): String =
     s"""To create table perform the following sql query:
        |$CREATE_TABLE_STMT
      """.stripMargin
-  }
 }
 
 sealed abstract class Mode(val value: String)
