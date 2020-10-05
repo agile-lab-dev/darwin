@@ -49,7 +49,6 @@ object Dependencies {
     ("org.apache.hbase"  % "hbase-hadoop2-compat" % "1.2.2") % Test,
     ("org.apache.hbase"  % "hbase-hadoop2-compat" % "1.2.2").classifier("tests") % Test,
     ("org.apache.hbase"  % "hbase-common"         % "1.2.2").classifier("tests") % Test,
-    ("org.apache.hbase" % "hbase" % "1.2.2").classifier("tests") % Test exclude ("org.apache.hbase", "hbase"),
     ("org.apache.hadoop" % "hadoop-hdfs"          % "2.7.7").classifier("tests") % Test,
     ("org.apache.hadoop" % "hadoop-hdfs"          % "2.7.7") % Test
   )
@@ -67,7 +66,6 @@ object Dependencies {
     ("org.apache.hbase"  % "hbase-metrics-api"    % "2.1.10") % Test,
     ("org.apache.hbase"  % "hbase-http"           % "2.1.10") % Test,
     ("org.apache.hbase"  % "hbase-common"         % "2.1.10").classifier("tests") % Test,
-    ("org.apache.hbase" % "hbase" % "2.1.10").classifier("tests") % Test exclude ("org.apache.hbase", "hbase"),
     ("org.apache.hadoop" % "hadoop-hdfs"          % "2.7.7").classifier("tests") % Test,
     ("org.apache.hadoop" % "hadoop-hdfs"          % "2.7.7")  % Test
   )

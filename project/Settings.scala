@@ -85,8 +85,10 @@ object Settings {
     scalaVersion := Versions.scala
   )
 
+//  lazy val coursierSettings = Seq(classpathTypes += "test-jar")
+
   lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++
-    scalastyleSettings
+    scalastyleSettings // ++ coursierSettings
 
   lazy val hbaseTestSettings: SettingsDefinition = {
     //enable resolution of transitive dependencies of jars containing tests
