@@ -8,6 +8,7 @@ script:
   if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 cache:
   directories:
+    - "$HOME/.cache/coursier/v1"
     - "$HOME/.ivy2/cache"
     - "$HOME/.sbt/1.0"
     - "$HOME/.embedpostgresql"
