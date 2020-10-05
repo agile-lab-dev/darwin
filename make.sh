@@ -1,4 +1,7 @@
 #!/bin/bash
 set -ex
-sbt clean scalastyle +test +doc
-sbt darwin-hbase2-connector/clean darwin-hbase2-connector/scalastyle +darwin-hbase2-connector/test +darwin-hbase2-connector/doc
+if [ ! $TRAVIS ]; then
+  sbtn shutdown
+fi
+sbtn "clean; scalastyle; +test; +doc"
+sbtn "darwin-hbase2-connector/clean; darwin-hbase2-connector/scalastyle; +darwin-hbase2-connector/test; +darwin-hbase2-connector/doc"

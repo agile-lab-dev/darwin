@@ -2,6 +2,8 @@ language: scala
 jdk: openjdk8
 os: linux
 dist: xenial
+before_script:
+  - curl -L https://github.com/sbt/sbtn-dist/releases/download/v1.4.0/sbtn-x86_64-pc-linux-1.4.0.tar.gz | tar -xz
 script:
   if [[ ! -z "$TRAVIS_TAG" ]]; then ./publish.sh; else ./make.sh; fi
 cache:
@@ -19,6 +21,8 @@ before_install:
   # https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d; fi
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then tar xvf rings.tar; fi
+env:
+  - PATH=.:${PATH}
 git:
   depth: false
 branches:
