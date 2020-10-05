@@ -22,7 +22,7 @@ before_install:
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_a4f2ea8de7e1_key -iv $encrypted_a4f2ea8de7e1_iv -in rings.tar.enc -out rings.tar -d; fi
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then tar xvf rings.tar; fi
 env:
-  - PATH=$PATH:$HOME/sbtn
+  - PATH=$PATH:./sbtn
 git:
   depth: false
 branches:
