@@ -23,7 +23,8 @@ lazy val root = Project("darwin", file("."))
     mockConnector,
     mockApplication,
     restConnector,
-    mongoConnector
+    mongoConnector,
+    confluentConnector
   )
 
 lazy val core = Project("darwin-core", file("core"))
