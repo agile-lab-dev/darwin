@@ -9,7 +9,7 @@ import sbt.Keys.baseDirectory
  */
 
 lazy val Settings.pgpPass = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
-lazy val root             = Project("darwin", file("."))
+lazy val root = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
   .settings(libraryDependencies ++= Dependencies.core_deps)
   .settings(pgpPassphrase := Settings.pgpPass)
@@ -84,6 +84,19 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
   )
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
   .enablePlugins(JavaAppPackaging)
+
+lazy val confluentConnector = Project("darwin-confluent-connector", file("confluent"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon)
+  .settings(pgpPassphrase := Settings.pgpPass)
+  .settings(
+    libraryDependencies ++= Dependencies.core_deps ++
+      Dependencies.wireMock ++
+      Dependencies.confluentSchemaRegistryDependencies :+ Dependencies.scalatest
+  )
+  .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
+  .enablePlugins(JavaAppPackaging)
+
 
 lazy val restServer = Project("darwin-rest-server", file("rest-server"))
   .settings(Settings.commonSettings: _*)

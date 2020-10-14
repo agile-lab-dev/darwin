@@ -1,8 +1,7 @@
-import sbt.Def
-import sbt.Keys._
-import sbt._
-import org.scalastyle.sbt.ScalastylePlugin.autoImport._
 import com.typesafe.sbt.SbtPgp.autoImport._
+import org.scalastyle.sbt.ScalastylePlugin.autoImport._
+import sbt.Keys._
+import sbt.{Def, _}
 
 /**
   * @author andreaL
@@ -25,13 +24,13 @@ object Settings {
       "UTF-8"
     ) ++ {
       CrossVersion.partialVersion(scalaVersion) match {
-        case SCALA_210                     =>
+        case SCALA_210 =>
           Seq("-target:jvm-1.7", "-Ywarn-inaccessible")
-        case SCALA_211                     =>
+        case SCALA_211 =>
           Seq("-Xfatal-warnings", "-Ywarn-inaccessible", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.7")
-        case SCALA_212                     =>
+        case SCALA_212 =>
           Seq("-Xfatal-warnings", "-Ywarn-inaccessible", "-Ywarn-unused-import", "-Ywarn-infer-any", "-target:jvm-1.8")
-        case SCALA_213                     =>
+        case SCALA_213 =>
           Seq("-Xfatal-warnings", "-Xlint:inaccessible", "-Ywarn-unused:imports", "-Xlint:infer-any", "-target:jvm-1.8")
         case version: Option[(Long, Long)] =>
           throw new Exception(s"Unknown scala version: $version")
@@ -41,22 +40,22 @@ object Settings {
 
   def scalaDocOptionsVersion(scalaVersion: String): Seq[String] = {
     CrossVersion.partialVersion(scalaVersion) match {
-      case SCALA_210 | SCALA_211         => scalacOptionsVersion(scalaVersion)
-      case SCALA_212                     => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
-      case SCALA_213                     => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
+      case SCALA_210 | SCALA_211 => scalacOptionsVersion(scalaVersion)
+      case SCALA_212 => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
+      case SCALA_213 => scalacOptionsVersion(scalaVersion) ++ Seq("-no-java-comments")
       case version: Option[(Long, Long)] => throw new Exception(s"Unknown scala version: $version")
     }
   }
 
   def javacOptionsVersion(scalaVersion: String): Seq[String] = {
     CrossVersion.partialVersion(scalaVersion) match {
-      case SCALA_210                     =>
+      case SCALA_210 =>
         Seq("-source", "1.7", "-target", "1.7")
-      case SCALA_211                     =>
+      case SCALA_211 =>
         Seq("-source", "1.7", "-target", "1.7")
-      case SCALA_212                     =>
+      case SCALA_212 =>
         Seq("-source", "1.8", "-target", "1.8")
-      case SCALA_213                     =>
+      case SCALA_213 =>
         Seq("-source", "1.8", "-target", "1.8")
       case version: Option[(Long, Long)] =>
         throw new Exception(s"Unknown scala version: $version")
@@ -75,15 +74,23 @@ object Settings {
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
+  val confluent = "confluent" at "https://packages.confluent.io/maven/"
 
   lazy val customResolvers = Seq(
-    clouderaHadoopReleaseRepo
+    clouderaHadoopReleaseRepo,
+    confluent
   )
 
-  lazy val buildSettings = Seq(
-    resolvers ++= customResolvers,
-    scalaVersion := Versions.scala
-  )
+  lazy val buildSettings: Seq[SettingsDefinition] = {
+    //this is an hack to resolve correctly rs-api
+    // [warn] [FAILED     ] javax.ws.rs#javax.ws.rs-api;2.1!javax.ws.rs-api.${packaging.type}:  (0ms)
+    // https://github.com/sbt/sbt/issues/3618
+    sys.props += "packaging.type" -> "jar"
+    Seq(
+      resolvers ++= customResolvers,
+      scalaVersion := Versions.scala
+    )
+  }
 
   lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++
     scalastyleSettings
@@ -123,7 +130,7 @@ object Settings {
 
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
 
-//  lazy val testSettings = Seq(parallelExecution in Test := false)
+  //  lazy val testSettings = Seq(parallelExecution in Test := false)
 
   lazy val publishSettings = Seq(
     publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),
