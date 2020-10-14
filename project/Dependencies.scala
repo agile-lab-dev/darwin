@@ -72,6 +72,10 @@ object Dependencies {
     ("org.apache.hadoop" % "hadoop-hdfs"          % "2.7.7")  % Test
   )
 
+  lazy val confluentSchemaRegistryDependencies = Seq(
+      "io.confluent" % "kafka-schema-registry-client" % "5.5.1"
+  )
+
   lazy val httpClient = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   lazy val wireMock          =
@@ -86,4 +90,5 @@ object Dependencies {
   lazy val postgres_conn_dep = core_deps :+ postgres_conn :+ postgres_embedded
   lazy val spark_app         = mock_app_dep ++ Seq(spark_core, spark_sql, hbase_common)
   lazy val mongo_conn        = core_deps ++ Seq(mongo, mongoTest)
+
 }
