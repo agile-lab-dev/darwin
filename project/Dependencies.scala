@@ -1,5 +1,4 @@
 import sbt._
-import Keys._
 
 /**
   * @author andreaL
@@ -73,7 +72,8 @@ object Dependencies {
   )
 
   lazy val confluentSchemaRegistryDependencies = Seq(
-      "io.confluent" % "kafka-schema-registry-client" % "5.5.1"
+    "io.confluent" % "kafka-schema-registry-client" % "5.5.1",
+    logback
   )
 
   lazy val httpClient = "org.scalaj" %% "scalaj-http" % "2.4.2"

@@ -1,5 +1,6 @@
 package it.agilelab.darwin.connector.confluent
 
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
@@ -52,7 +53,7 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     * @param schemas a sequence of pairs (ID, schema) Schema entities to insert in the storage.
     */
   override def insert(schemas: Seq[(Long, Schema)]): Unit = {
-    schemas.foreach { case (id, schema) => client.register(options.subject, schema) }
+    //registration happens during fingerprinting
   }
 
   /**
@@ -62,6 +63,13 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
   override def findSchema(id: Long): Option[Schema] = {
-    Option(client.getByID(id.toInt))
+    Option(client.getSchemaById(id.toInt)).flatMap {
+      case x: AvroSchema => Some(x.rawSchema())
+      case _             => None
+    }
+  }
+
+  override def fingerprint(schema: Schema): Long = {
+    client.register(options.subject, new AvroSchema(schema))
   }
 }

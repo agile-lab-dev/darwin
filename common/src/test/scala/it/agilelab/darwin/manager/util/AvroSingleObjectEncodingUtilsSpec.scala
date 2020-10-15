@@ -1,13 +1,13 @@
 package it.agilelab.darwin.manager.util
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
-import java.nio.{ BufferUnderflowException, ByteBuffer, ByteOrder }
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.nio.{BufferUnderflowException, ByteBuffer, ByteOrder}
 import java.util
 
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
-import org.apache.avro.Schema
-import org.apache.avro.generic.{ GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord }
-import org.apache.avro.io.{ DecoderFactory, EncoderFactory }
+import org.apache.avro.{Schema, SchemaNormalization}
+import org.apache.avro.generic.{GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord}
+import org.apache.avro.io.{DecoderFactory, EncoderFactory}
 import org.apache.avro.util.ByteBufferInputStream
 
 import scala.util.Random
@@ -182,7 +182,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
 
   "getId" should "return the testId" in {
 
-    AvroSingleObjectEncodingUtils.getId(schema) should be(testId)
+    AvroSingleObjectEncodingUtils.getId(schema, SchemaNormalization.parsingFingerprint64) should be(testId)
   }
 
   "AvroSingleObjectEncodingUtils" should "encode using streams" in {
@@ -194,7 +194,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
     val encoder = EncoderFactory.get.binaryEncoder(stream, null)
     val writer  = new GenericDatumWriter[GenericRecord](schema)
     AvroSingleObjectEncodingUtils
-      .generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema), endianness) { os =>
+      .generateAvroSingleObjectEncoded(stream, AvroSingleObjectEncodingUtils.getId(schema,SchemaNormalization.parsingFingerprint64), endianness) { os =>
         writer.write(record, encoder)
         writer.write(record, encoder)
         os
@@ -224,7 +224,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
     val writer  = new GenericDatumWriter[GenericRecord](schema)
     AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(
       stream,
-      AvroSingleObjectEncodingUtils.getId(schema),
+      AvroSingleObjectEncodingUtils.getId(schema,SchemaNormalization.parsingFingerprint64),
       endianness
     ) { os =>
       writer.write(record, encoder)

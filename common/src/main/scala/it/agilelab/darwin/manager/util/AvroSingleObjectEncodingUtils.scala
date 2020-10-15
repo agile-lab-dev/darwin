@@ -1,13 +1,13 @@
 package it.agilelab.darwin.manager.util
 
-import java.io.{ InputStream, OutputStream }
-import java.nio.{ ByteBuffer, ByteOrder }
+import java.io.{InputStream, OutputStream}
+import java.nio.{ByteBuffer, ByteOrder}
 import java.util
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap
 import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
-import org.apache.avro.{ Schema, SchemaNormalization }
+import org.apache.avro.Schema
 
 object AvroSingleObjectEncodingUtils {
   private val V1_HEADER     = Array[Byte](0xc3.toByte, 0x01.toByte)
@@ -247,8 +247,8 @@ object AvroSingleObjectEncodingUtils {
     * @param schema     a Schema with unknown ID
     * @return the ID associated with the input schema
     */
-  def getId(schema: Schema): Long = {
-    schemaMap.getOrElseUpdate(schema, SchemaNormalization.parsingFingerprint64(schema))
+  def getId(schema: Schema, fingerprinter: Schema => Long): Long = {
+    schemaMap.getOrElseUpdate(schema, fingerprinter(schema))
   }
 
   /**
