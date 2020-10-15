@@ -2,9 +2,8 @@ package it.agilelab.darwin.connector.confluent
 
 import com.typesafe.config.Config
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
+import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.common.{ Connector, ConnectorCreator, Logging }
-
-import scala.collection.JavaConverters._
 
 class ConfluentConnectorCreator extends ConnectorCreator with Logging {
 
@@ -15,9 +14,9 @@ class ConfluentConnectorCreator extends ConnectorCreator with Logging {
     log.info("confluent options are {}", confluentOptions)
 
     val client = new CachedSchemaRegistryClient(
-      confluentOptions.endpoints.asJava,
+      confluentOptions.endpoints.toJavaList(),
       confluentOptions.maxCachedSchemas,
-      confluentOptions.config.asJava
+      confluentOptions.config.toJava()
     )
 
     val rest = new ConfluentConnector(confluentOptions, client)

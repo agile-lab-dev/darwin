@@ -2,7 +2,7 @@ package it.agilelab.darwin.connector.confluent
 
 import com.typesafe.config.Config
 
-import scala.collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
 
 case class ConfluentConnectorOptions(
   endpoints: List[String],
@@ -13,9 +13,9 @@ case class ConfluentConnectorOptions(
 object ConfluentConnectorOptions {
   def fromConfig(config: Config): ConfluentConnectorOptions = {
 
-    val endpoints        = config.getStringList("endpoints").asScala.toList
+    val endpoints        = config.getStringList("endpoints").toScala().toList
     val maxCachedSchemas = config.getInt("max-cached-schemas")
-    val other            = config.root().unwrapped().asScala.toMap
+    val other            = config.root().unwrapped().toScala().toMap
 
     ConfluentConnectorOptions(endpoints, other, maxCachedSchemas)
 
