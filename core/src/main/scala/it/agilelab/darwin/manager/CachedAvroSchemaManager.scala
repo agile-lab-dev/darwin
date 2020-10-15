@@ -26,7 +26,7 @@ abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrd
 
   private def initialize(): Unit = {
     log.debug("cache initialization...")
-    _cache.compareAndSet(None, Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
+    _cache.compareAndSet(None, Some(AvroSchemaCacheFingerprint(connector.fullLoad(), connector.fingerprint)))
     log.debug("cache initialized")
   }
 
@@ -37,7 +37,7 @@ abstract class CachedAvroSchemaManager(connector: Connector, endianness: ByteOrd
     */
   override def reload(): AvroSchemaManager = {
     log.debug("reloading cache...")
-    _cache.set(Some(AvroSchemaCacheFingerprint(connector.fullLoad())))
+    _cache.set(Some(AvroSchemaCacheFingerprint(connector.fullLoad(), connector.fingerprint)))
     log.debug("cache reloaded")
     this
   }

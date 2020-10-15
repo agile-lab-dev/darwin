@@ -1,6 +1,6 @@
 package it.agilelab.darwin.common
 
-import org.apache.avro.Schema
+import org.apache.avro.{ Schema, SchemaNormalization }
 
 /**
   * Generic abstraction of a component capable of reading and writing Schema entities in an external storage.
@@ -49,4 +49,14 @@ trait Connector extends Serializable {
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
   def findSchema(id: Long): Option[Schema]
+
+  /**
+    * Generate a fingerprint for a schema, the default implementation is SchemaNormalization.parsingFingerprint64
+    *
+    * @param schema the schema to fingerprint
+    * @return the schema id
+    */
+  def fingerprint(schema: Schema): Long = {
+    SchemaNormalization.parsingFingerprint64(schema)
+  }
 }
