@@ -4,8 +4,7 @@ import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
-
-import scala.collection.JavaConverters.{ asScalaBufferConverter, collectionAsScalaIterableConverter }
+import it.agilelab.darwin.common.compat._
 
 class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegistryClient) extends Connector {
 
@@ -33,8 +32,8 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     */
   override def fullLoad(): Seq[(Long, Schema)] = {
 
-    client.getAllSubjects.asScala.toList.flatMap { subject =>
-      val versions = client.getAllVersions(subject).asScala.toList
+    client.getAllSubjects.toScala().toList.flatMap { subject =>
+      val versions = client.getAllVersions(subject).toScala().toList
 
       versions.map { version =>
         val metadata = client.getSchemaMetadata(subject, version)

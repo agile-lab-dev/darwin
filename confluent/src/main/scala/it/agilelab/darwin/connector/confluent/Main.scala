@@ -1,9 +1,8 @@
 package it.agilelab.darwin.connector.confluent
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
+import it.agilelab.darwin.common.compat._
 import org.apache.avro.{ Schema, SchemaBuilder }
-
-import scala.collection.JavaConverters._
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -13,9 +12,9 @@ object Main {
     val options    = ConfluentConnectorOptions(List("http://localhost:8081"), Map.empty, maxSchemas)
 
     val client    = new CachedSchemaRegistryClient(
-      options.endpoints.asJava,
+      options.endpoints.toJavaList(),
       options.maxCachedSchemas,
-      options.config.asJava
+      options.config.toJava()
     )
     val connector = new ConfluentConnector(options, client)
 
