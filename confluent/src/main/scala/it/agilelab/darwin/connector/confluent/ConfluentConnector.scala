@@ -5,7 +5,7 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import it.agilelab.darwin.common.Connector
 import org.apache.avro.Schema
 
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.JavaConverters.{ asScalaBufferConverter, collectionAsScalaIterableConverter }
 
 class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegistryClient) extends Connector {
 
@@ -32,15 +32,18 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     * @return a sequence of all the pairs (ID, schema) found on the storage
     */
   override def fullLoad(): Seq[(Long, Schema)] = {
-    val versions = client.getAllVersions(options.subject).asScala.toList
 
-    versions.map { version =>
-      val metadata = client.getSchemaMetadata(options.subject, version)
+    client.getAllSubjects.asScala.toList.flatMap { subject =>
+      val versions = client.getAllVersions(subject).asScala.toList
 
-      val id: Long       = metadata.getId.toLong
-      val schema: Schema = new Schema.Parser().parse(metadata.getSchema)
+      versions.map { version =>
+        val metadata = client.getSchemaMetadata(subject, version)
 
-      (id, schema)
+        val id: Long       = metadata.getId.toLong
+        val schema: Schema = new Schema.Parser().parse(metadata.getSchema)
+
+        (id, schema)
+      }
     }
   }
 
@@ -70,6 +73,6 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
   }
 
   override def fingerprint(schema: Schema): Long = {
-    client.register(options.subject, new AvroSchema(schema))
+    client.register(schema.getProp("x-darwin-subject"), new AvroSchema(schema))
   }
 }

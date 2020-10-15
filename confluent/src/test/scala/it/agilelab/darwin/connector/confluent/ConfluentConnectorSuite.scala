@@ -14,11 +14,13 @@ class ConfluentConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with O
     val mockRegistryClient = new MockSchemaRegistryClient()
     val maxCachedSchemas   = 1000
     val connector          = new ConfluentConnector(
-      options = ConfluentConnectorOptions(List.empty, "subject", Map.empty, maxCachedSchemas),
+      options = ConfluentConnectorOptions(List.empty, Map.empty, maxCachedSchemas),
       client = mockRegistryClient
     )
 
     val expected = SchemaBuilder.array().items(Schema.create(Schema.Type.STRING))
+
+    expected.addProp("x-darwin-subject", "prova")
 
     val id = connector.fingerprint(expected)
 
@@ -31,17 +33,19 @@ class ConfluentConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with O
   "confluent connector" should "be able to preload schemas" in {
 
     val expected  = SchemaBuilder.array().items(Schema.create(Schema.Type.STRING))
+    expected.addProp("x-darwin-subject", "prova")
     val expected2 = SchemaBuilder.array().items(Schema.create(Schema.Type.INT))
+    expected2.addProp("x-darwin-subject", "prova2")
 
     val mockRegistryClient = new MockSchemaRegistryClient()
 
-    mockRegistryClient.register("subject", new AvroSchema(expected))
-    mockRegistryClient.register("subject", new AvroSchema(expected2))
+    mockRegistryClient.register("prova", new AvroSchema(expected))
+    mockRegistryClient.register("prova2", new AvroSchema(expected2))
 
     val maxCachedSchemas = 1000
 
-    val connector          = new ConfluentConnector(
-      options = ConfluentConnectorOptions(List.empty, "subject", Map.empty, maxCachedSchemas),
+    val connector = new ConfluentConnector(
+      options = ConfluentConnectorOptions(List.empty, Map.empty, maxCachedSchemas),
       client = mockRegistryClient
     )
 
