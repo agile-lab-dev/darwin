@@ -72,9 +72,8 @@ object Dependencies {
   )
 
   lazy val confluentSchemaRegistryDependencies = Seq(
-    "io.confluent"     % "kafka-schema-registry-client" % "5.5.1",
-    "org.apache.kafka" % "kafka-clients"                % "5.5.1-ce" % Provided,
-    logback
+    "io.confluent"     % "kafka-schema-registry-client" % "4.1.4", //this version is compatible with java7
+    "org.apache.kafka" % "kafka-clients"                % "2.2.2-cp3" % Provided
   )
 
   lazy val httpClient = "org.scalaj" %% "scalaj-http" % "2.4.2"
