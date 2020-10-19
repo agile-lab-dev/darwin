@@ -16,7 +16,7 @@ class ConfluentConnectorCreator extends ConnectorCreator with Logging {
     val client = new CachedSchemaRegistryClient(
       confluentOptions.endpoints.toJavaList(),
       confluentOptions.maxCachedSchemas,
-      confluentOptions.config.toJava()
+      confluentOptions.config
     )
 
     val rest = new ConfluentConnector(confluentOptions, client)

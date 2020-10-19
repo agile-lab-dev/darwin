@@ -1,10 +1,9 @@
 package it.agilelab.darwin.connector.confluent
 
-import io.confluent.kafka.schemaregistry.avro.AvroSchema
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.{ SchemaMetadata, SchemaRegistryClient }
 import it.agilelab.darwin.common.Connector
-import org.apache.avro.Schema
 import it.agilelab.darwin.common.compat._
+import org.apache.avro.Schema
 
 class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegistryClient) extends Connector {
 
@@ -65,13 +64,27 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
   override def findSchema(id: Long): Option[Schema] = {
-    Option(client.getSchemaById(id.toInt)).flatMap {
-      case x: AvroSchema => Some(x.rawSchema())
-      case _             => None
-    }
+    Option(client.getById(id.toInt))
   }
 
   override def fingerprint(schema: Schema): Long = {
-    client.register(schema.getProp("x-darwin-subject"), new AvroSchema(schema))
+    val subject = Option(schema.getProp("x-darwin-subject"))
+
+    client.register(
+      subject.getOrElse(throw new IllegalArgumentException("Schema does not contain the [x-darwin-subject] extension")),
+      schema
+    )
+  }
+
+  def findVersionsForSubject(subject: String): Seq[Integer] = {
+    client.getAllVersions(subject).toScala().toList
+  }
+
+  def findIdForSubjectVersion(subject: String, version: Int): SchemaMetadata = {
+    client.getSchemaMetadata(subject, version)
+  }
+
+  def findIdForSubjectLatestVersion(subject: String): SchemaMetadata = {
+    client.getLatestSchemaMetadata(subject)
   }
 }
