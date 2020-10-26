@@ -3,7 +3,7 @@ package it.agilelab.darwin.manager.util
 import java.io.OutputStream
 import java.nio.{ ByteBuffer, ByteOrder }
 
-import it.agilelab.darwin.common.LONG_SIZE
+import it.agilelab.darwin.common.{ INT_SIZE, LONG_SIZE }
 
 private[darwin] object ByteArrayUtils {
 
@@ -17,6 +17,14 @@ private[darwin] object ByteArrayUtils {
         .allocate(LONG_SIZE)
         .order(endianness)
         .putLong(l)
+        .array()
+    }
+
+    def truncateIntToByteArray(endianess: ByteOrder): Array[Byte] = {
+      ByteBuffer
+        .allocate(INT_SIZE)
+        .order(endianess)
+        .putInt(l.toInt)
         .array()
     }
 
