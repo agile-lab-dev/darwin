@@ -1,7 +1,7 @@
-package it.agilelab.darwin.manager.util
+package it.agilelab.darwin.connector.confluent
 
-import java.io.{InputStream, OutputStream}
-import java.nio.{ByteBuffer, ByteOrder}
+import java.io.{ InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
 import java.util
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap
@@ -9,9 +9,9 @@ import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import org.apache.avro.Schema
 
-object AvroSingleObjectEncodingUtils {
-  private val V1_HEADER     = Array[Byte](0xc3.toByte, 0x01.toByte)
-  private val ID_SIZE       = 8
+object ConfluentSingleObjectEncoding {
+  private val V1_HEADER     = Array[Byte](0x00.toByte)
+  private val ID_SIZE       = 4
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
   private val schemaMap = DarwinConcurrentHashMap.empty[Schema, Long]
@@ -79,8 +79,12 @@ object AvroSingleObjectEncodingUtils {
     * @param endianness  a byte order to drive endianness of schemaId
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long, endianness: ByteOrder): Array[Byte] = {
-    Array.concat(V1_HEADER, schemaId.longToByteArray(endianness), avroPayload)
+  def generateAvroSingleObjectEncoded(
+    avroPayload: Array[Byte],
+    schemaId: Long,
+    endianness: ByteOrder
+  ): Array[Byte] = {
+    Array.concat(V1_HEADER, schemaId.truncateIntToByteArray(endianness), avroPayload)
   }
 
   /**
@@ -165,7 +169,7 @@ object AvroSingleObjectEncodingUtils {
       )
     } else {
       avroSingleObjectEncoded.position(avroSingleObjectEncoded.position() + V1_HEADER.length)
-      readLong(avroSingleObjectEncoded, endianness)
+      readInt(avroSingleObjectEncoded, endianness)
     }
   }
 
@@ -175,13 +179,13 @@ object AvroSingleObjectEncodingUtils {
     * the values of endianness and buf.order() are.
     */
   @inline
-  def readLong(buf: ByteBuffer, endianness: ByteOrder): Long = {
+  def readInt(buf: ByteBuffer, endianness: ByteOrder): Long = {
     if (buf.order() == endianness) {
-      buf.getLong
+      buf.getInt
     } else {
       val lastEndianness = buf.order()
       buf.order(endianness)
-      val toRet          = buf.getLong
+      val toRet          = buf.getInt()
       buf.order(lastEndianness)
       toRet
     }
@@ -205,7 +209,7 @@ object AvroSingleObjectEncodingUtils {
     }
     val bytesReadMagicBytes = inputStream.read(buffer, 0, V1_HEADER.length)
     if (bytesReadMagicBytes == 2) {
-      if (ByteArrayUtils.arrayEquals(buffer, V1_HEADER, 0, 0, 2)) {
+      if (arrayEquals(buffer, V1_HEADER, 0, 0, 2)) {
         val bytesReadFingerPrint = inputStream.read(buffer, 2, ID_SIZE)
         if (bytesReadFingerPrint + bytesReadMagicBytes == HEADER_LENGTH) {
           val buf = ByteBuffer.wrap(buffer, 0, HEADER_LENGTH)
