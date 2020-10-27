@@ -85,8 +85,13 @@ trait Connector extends Serializable {
     * @param schema      the schema used to encode the payload
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema, endianness: ByteOrder): Array[Byte] = {
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(avroPayload, fingerprint(schema), endianness)
+  def generateAvroSingleObjectEncoded(
+    avroPayload: Array[Byte],
+    schema: Schema,
+    endianness: ByteOrder,
+    getId: Schema => Long
+  ): Array[Byte] = {
+    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(avroPayload, getId(schema), endianness)
   }
 
   /**
@@ -130,7 +135,7 @@ trait Connector extends Serializable {
   def retrieveSchemaAndAvroPayload(
     avroSingleObjectEncoded: Array[Byte],
     endianness: ByteOrder,
-    getSchema : Long => Option[Schema]
+    getSchema: Long => Option[Schema]
   ): (Schema, Array[Byte]) = {
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
       val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
@@ -152,8 +157,11 @@ trait Connector extends Serializable {
     * @param avroSingleObjectEncoded a ByteBuffer of a Single-Object encoded payload
     * @return the avro Schema
     */
-  def retrieveSchemaAndAvroPayload(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder,
-                                   getSchema : Long => Option[Schema]): Schema = {
+  def retrieveSchemaAndAvroPayload(
+    avroSingleObjectEncoded: ByteBuffer,
+    endianness: ByteOrder,
+    getSchema: Long => Option[Schema]
+  ): Schema = {
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
       val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
@@ -174,8 +182,11 @@ trait Connector extends Serializable {
     * @param inputStream avro single-object encoded input stream
     * @return the schema ID extracted from the input data
     */
-  def extractSchema(inputStream: InputStream, endianness: ByteOrder,
-                    getSchema : Long => Option[Schema]): Either[Array[Byte], Schema] = {
+  def extractSchema(
+    inputStream: InputStream,
+    endianness: ByteOrder,
+    getSchema: Long => Option[Schema]
+  ): Either[Array[Byte], Schema] = {
     AvroSingleObjectEncodingUtils.extractId(inputStream, endianness).rightMap { id =>
       getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
@@ -187,8 +198,11 @@ trait Connector extends Serializable {
     * @param array avro single-object encoded array
     * @return the schema ID extracted from the input data
     */
-  def extractSchema(array: Array[Byte], endianness: ByteOrder,
-                    getSchema : Long => Option[Schema]): Either[Exception, Schema] = {
+  def extractSchema(
+    array: Array[Byte],
+    endianness: ByteOrder,
+    getSchema: Long => Option[Schema]
+  ): Either[Exception, Schema] = {
     try {
       val id = AvroSingleObjectEncodingUtils.extractId(array, endianness)
       getSchema(id)
@@ -204,9 +218,12 @@ trait Connector extends Serializable {
     * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
     * @return a SchemaPayloadPair containing the Schema and the payload of the input array
     */
-  def retrieveSchemaAndPayload(avroSingleObjectEncoded: Array[Byte], endianness: ByteOrder,
-                               getSchema : Long => Option[Schema]): SchemaPayloadPair = {
-    val (schema, payload) = retrieveSchemaAndAvroPayload(avroSingleObjectEncoded, endianness,getSchema)
+  def retrieveSchemaAndPayload(
+    avroSingleObjectEncoded: Array[Byte],
+    endianness: ByteOrder,
+    getSchema: Long => Option[Schema]
+  ): SchemaPayloadPair = {
+    val (schema, payload) = retrieveSchemaAndAvroPayload(avroSingleObjectEncoded, endianness, getSchema)
     SchemaPayloadPair.create(schema, payload)
   }
 }
