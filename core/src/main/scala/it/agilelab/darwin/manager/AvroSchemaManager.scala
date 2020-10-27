@@ -1,10 +1,10 @@
 package it.agilelab.darwin.manager
 
-import java.io.{InputStream, OutputStream}
-import java.nio.{ByteBuffer, ByteOrder}
+import java.io.{ InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
 
 import it.agilelab.darwin.common.compat._
-import it.agilelab.darwin.common.{Connector, Logging}
+import it.agilelab.darwin.common.{ Connector, Logging }
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import org.apache.avro.Schema
 
@@ -86,7 +86,7 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
     * @return a Single-Object encoded byte array
     */
   def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schema: Schema): Array[Byte] = {
-    connector.generateAvroSingleObjectEncoded(avroPayload, schema, endianness)
+    connector.generateAvroSingleObjectEncoded(avroPayload, schema, endianness, getId)
   }
 
   /**

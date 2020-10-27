@@ -6,7 +6,8 @@ import java.util
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap
 import it.agilelab.darwin.manager.exception.DarwinException
-import it.agilelab.darwin.manager.util.ByteArrayUtils._
+import it.agilelab.darwin.manager.util.ByteArrayUtils
+import it.agilelab.darwin.manager.util.ByteArrayUtils.EnrichedInt
 import org.apache.avro.Schema
 
 object ConfluentSingleObjectEncoding {
@@ -84,7 +85,7 @@ object ConfluentSingleObjectEncoding {
     schemaId: Long,
     endianness: ByteOrder
   ): Array[Byte] = {
-    Array.concat(V1_HEADER, schemaId.truncateIntToByteArray(endianness), avroPayload)
+    Array.concat(V1_HEADER, schemaId.toInt.intToByteArray(endianness), avroPayload)
   }
 
   /**
@@ -96,7 +97,7 @@ object ConfluentSingleObjectEncoding {
     */
   def writeHeaderToStream(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder): OutputStream = {
     byteStream.write(V1_HEADER)
-    schemaId.writeToStream(byteStream, endianness)
+    schemaId.toInt.writeIntToStream(byteStream, endianness)
     byteStream
   }
 
@@ -136,7 +137,7 @@ object ConfluentSingleObjectEncoding {
     avroWriter: OutputStream => OutputStream
   ): OutputStream = {
     byteStream.write(V1_HEADER)
-    schemaId.writeToStream(byteStream, endianness)
+    schemaId.toInt.writeIntToStream(byteStream, endianness)
     avroWriter(byteStream)
   }
 
@@ -205,12 +206,12 @@ object ConfluentSingleObjectEncoding {
   def extractId(inputStream: InputStream, endianness: ByteOrder): Either[Array[Byte], Long] = {
     val buffer              = new Array[Byte](HEADER_LENGTH)
     if (inputStream.markSupported()) {
-      inputStream.mark(2)
+      inputStream.mark(1)
     }
     val bytesReadMagicBytes = inputStream.read(buffer, 0, V1_HEADER.length)
-    if (bytesReadMagicBytes == 2) {
-      if (arrayEquals(buffer, V1_HEADER, 0, 0, 2)) {
-        val bytesReadFingerPrint = inputStream.read(buffer, 2, ID_SIZE)
+    if (bytesReadMagicBytes == 1) {
+      if (ByteArrayUtils.arrayEquals(buffer, V1_HEADER, 0, 0, 1)) {
+        val bytesReadFingerPrint = inputStream.read(buffer, 1, ID_SIZE)
         if (bytesReadFingerPrint + bytesReadMagicBytes == HEADER_LENGTH) {
           val buf = ByteBuffer.wrap(buffer, 0, HEADER_LENGTH)
           // This cannot fail because the buffer length and start are already checked before and every 64 bits can

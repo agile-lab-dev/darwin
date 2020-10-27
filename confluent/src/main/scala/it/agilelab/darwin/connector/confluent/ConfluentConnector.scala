@@ -114,9 +114,10 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
   override def generateAvroSingleObjectEncoded(
     avroPayload: Array[Byte],
     schema: Schema,
-    endianness: ByteOrder
+    endianness: ByteOrder,
+    getId: Schema => Long
   ): Array[Byte] = {
-    ConfluentSingleObjectEncoding.generateAvroSingleObjectEncoded(avroPayload, fingerprint(schema), endianness)
+    ConfluentSingleObjectEncoding.generateAvroSingleObjectEncoded(avroPayload, getId(schema), endianness)
   }
 
   /**
