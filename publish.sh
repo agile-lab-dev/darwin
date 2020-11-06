@@ -1,7 +1,15 @@
 #!/bin/bash
 set -ex
-if [ ! $TRAVIS ]; then
-  sbtn shutdown
+COMMAND=sbtn
+if ! command -v $COMMAND &> /dev/null
+then
+    echo "$COMMAND could not be found"
+    echo "using sbt"
+    COMMAND="sbt"
+else
+  if [ ! $TRAVIS ]; then
+    sbtn shutdown
+  fi
 fi
-sbtn "clean; scalastyle; +test; +publishSigned"
-sbtn "darwin-hbase2-connector/clean; darwin-hbase2-connector/scalastyle; +darwin-hbase2-connector/test; +darwin-hbase2-connector/publishSigned"
+$COMMAND "clean; scalastyle; +test; +publishSigned"
+$COMMAND "darwin-hbase2-connector/clean; darwin-hbase2-connector/scalastyle; +darwin-hbase2-connector/test; +darwin-hbase2-connector/publishSigned"

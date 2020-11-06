@@ -65,21 +65,13 @@ lazy val hbaseConnector2 = Project("darwin-hbase2-connector", file("hbase2"))
   .settings(Settings.hbase2TestSettings)
   .enablePlugins(JavaAppPackaging)
 
+
 lazy val postgresConnector = Project("darwin-postgres-connector", file("postgres"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)
   .settings(pgpPassphrase := Settings.pgpPass)
   .settings(libraryDependencies ++= Dependencies.postgres_conn_dep)
   .settings(crossScalaVersions := Versions.crossScalaVersions)
-  .enablePlugins(JavaAppPackaging)
-
-lazy val igniteConnector = Project("darwin-ignite-connector", file("ignite"))
-  .settings(Settings.commonSettings: _*)
-  .dependsOn(coreCommon)
-  .settings(pgpPassphrase := Settings.pgpPass)
-  .settings(libraryDependencies ++= Dependencies.core_deps)
-  .settings(crossScalaVersions := Versions.crossScalaVersions)
-  .settings(Settings.notPublishSettings)
   .enablePlugins(JavaAppPackaging)
 
 lazy val restConnector = Project("darwin-rest-connector", file("rest"))
