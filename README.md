@@ -20,6 +20,7 @@ Table of contents
   - [HBase](#hbase)
   - [PostgreSql](#postgresql)
   - [REST](#rest)
+  - [Confluent](#confluent)
 ---
 
 Overview
@@ -129,6 +130,26 @@ libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.0.15-SNAPSH
   <version>1.0.15-SNAPSHOT</version>
 </dependency>
 ```
+
+
+### Confluent schema registry Connector
+
+Darwin can be used as a *facade* over confluent schema registry.
+
+### sbt
+
+```scala
+libraryDependencies += "it.agilelab" %% "darwin-confluent-connector" % "1.0.15-SNAPSHOT"
+``` 
+#### maven
+```xml
+<dependency>
+  <groupId>it.agilelab</groupId>
+  <artifactId>darwin-confluent-connector_2.11</artifactId>
+  <version>1.0.15-SNAPSHOT</version>
+</dependency>
+```
+
 
 Background
 -------------
@@ -399,6 +420,93 @@ darwin {
 darwin-rest {
   interface = "localhost"
   port = 8080
+}
+```
+
+## Confluent
+
+Darwin can be used as a `facade` over the `Confluent schema registry`.
+
+Connecting to the confluent schema registry will help all applications currently using darwin to function correctly
+when running over confluent platform.
+
+The connector can be used even if the only confluent component used is the schema registry.
+
+When using the confluent connector a the avro single object encoding will be performed using the *Confluent* flavour.
+
+### Confluent Single object encoding
+
+The schema registry will assign globally unique ids to schemas, each avro message is encoded as following
+
+```
+0x00                       |   1 byte magic number representing confluent encoded avro
+0xXX 0xXX 0xXX 0xXX        |   4 byte schema identifier interpreted as an integer
+...                        |   avro encoded payload without schema (raw avro bytes not prepended with the json schema)
+```
+
+### Subject
+
+Confluent schema registry supports attaching schemas to a `subject`, the subject is the granularity at which schema
+compatibility is enforced, schemas can be registered with 3 subject strategies
+
+* topic: The subject is the name of the topic (topic contains a single avro data type)
+* record: The subject is the fully qualified name of the topic (multiple topics can contain the same avro data type)
+* topic-record: The subject is derived from topic and record fqdn (a topic can have multiple data types, compatibility on 
+same avro data type will be enforced for each topic instead of globally)
+
+In order to support this scheme avro schemas registered via darwin should have a custom extension (`x-darwin-subject`)
+like in this example
+
+```json
+{
+  "type" : "record",
+  "name" : "record",
+  "fields" : [ {
+    "name" : "stringField",
+    "type" : "string"
+  }, {
+    "name" : "stringField2",
+    "type" : [ "string", "null" ],
+    "default" : "default-for-nullable"
+  } ],
+  "x-darwin-subject" : "subject-string"
+}
+```
+
+## Configuration
+
+```hocon
+darwin {
+  type = "lazy"
+  connector = "confluent"
+
+  endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]
+  max-cached-schemas: 1000
+  kafka.schemaregistry.standard-property-1: 1
+  kafka.schemaregistry.standard-property-2: "default" 
+}
+
+```
+
+The confluent connector can be used by declaring `confluent` as connector.
+
+The `endpoints` configuration is a list of url to the confluent schema registry
+
+the `max-cached-schemas` configures how many schemas are internally cached by the confluent schema registry connector
+
+all other properties will be injected in the confluent schema registry client configuration.
+
+For example if confluent schema registry declares a property `kafka.schemaregistry.auth` this property can simply be
+added to the darwin configuration like this
+
+```hocon
+darwin {
+  type = "lazy"
+  connector = "confluent"
+
+  endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]
+  max-cached-schemas: 1000
+  kafka.schemaregistry.auth: "true"
 }
 ```
 
