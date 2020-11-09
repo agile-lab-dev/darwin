@@ -95,7 +95,7 @@ lazy val confluentConnector = Project("darwin-confluent-connector", file("conflu
       Dependencies.wireMock ++
       Dependencies.confluentSchemaRegistryDependencies :+ Dependencies.scalatest
   )
-  .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
   .enablePlugins(JavaAppPackaging)
 
 lazy val restServer = Project("darwin-rest-server", file("rest-server"))

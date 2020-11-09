@@ -81,7 +81,7 @@ abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) 
   "writeHeaderToStream" should "write the header in the stream" in {
     val os = new ByteArrayOutputStream()
     ConfluentSingleObjectEncoding.writeHeaderToStream(os, testId, endianness)
-    os.toByteArray.sameElements(Array(testId.longToByteArray(endianness)))
+    os.toByteArray.sameElements(Array(testId.intToByteArray(endianness)))
   }
 
   "extractId(ByteBuffer)" should "return id = 77 and consume the buffer" in {

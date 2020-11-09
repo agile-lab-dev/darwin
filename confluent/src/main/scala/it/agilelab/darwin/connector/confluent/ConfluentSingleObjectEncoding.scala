@@ -28,9 +28,8 @@ object ConfluentSingleObjectEncoding {
   }
 
   /**
-    * Checks if a byte array is Avro Single-Object encoded (
-    * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
-    * Documentation</a>)
+    * Checks if a byte array is Avro Single-Object encoded in the
+    * Confluent way (i.e. byte 0 then an int)
     *
     * @param data a byte array
     * @return true if the input byte array is Single-Object encoded
@@ -46,9 +45,8 @@ object ConfluentSingleObjectEncoding {
   }
 
   /**
-    * Checks if a byte array is Avro Single-Object encoded (
-    * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
-    * Documentation</a>)
+    * Checks if a byte array is Avro Single-Object encoded in the
+    * Confluent way (i.e. byte 0 then an int)
     *
     * @param data a ByteBuffer that will not be altered position wise by this method
     * @return true if the input byte array is Single-Object encoded
@@ -195,7 +193,7 @@ object ConfluentSingleObjectEncoding {
   /**
     * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
     * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
-    * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
+    * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first byte will
     * be consumed and returned in the Left part of the Either.
     *
     * @param inputStream avro single-object encoded input stream
@@ -237,7 +235,7 @@ object ConfluentSingleObjectEncoding {
   }
 
   /**
-    * Extract the payload from an avro single-object encoded byte array, removing the header (the first 10 bytes)
+    * Extract the payload from an avro single-object encoded byte array, removing the header (the first 5 bytes)
     *
     * @param avroSingleObjectEncoded avro single-object encoded byte array
     * @return the payload without the avro single-object encoded header

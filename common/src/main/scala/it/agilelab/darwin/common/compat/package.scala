@@ -32,10 +32,11 @@ package object compat {
     builder.result()
   }
 
-  def toJava[A](iterable: scala.collection.Iterable[A]): java.lang.Iterable[A] = {
-    iterable.foldLeft(new java.util.ArrayList[A]()) { (z, x) =>
-      z.add(x)
-      z
+  def toJava[A](iterable: scala.collection.Iterable[A]): java.lang.Iterable[A] = new java.lang.Iterable[A] {
+    override def iterator(): util.Iterator[A] = new util.Iterator[A] {
+      private val it                = iterable.iterator
+      override def hasNext: Boolean = it.hasNext
+      override def next(): A        = it.next()
     }
   }
 
@@ -84,7 +85,7 @@ package object compat {
     }
   }
 
-  implicit class MapConverter[A,B](jmap: java.util.Map[A,B]) {
+  implicit class MapConverter[A, B](jmap: java.util.Map[A, B]) {
     def toScala(): collection.Map[A, B] = {
       compat.toScala(jmap)
     }
