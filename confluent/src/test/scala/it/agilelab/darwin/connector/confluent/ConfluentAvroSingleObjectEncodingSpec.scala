@@ -195,7 +195,7 @@ abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) 
     ConfluentSingleObjectEncoding
       .generateAvroSingleObjectEncoded(
         stream,
-        ConfluentSingleObjectEncoding.getId(schema, s=> testId),
+        ConfluentSingleObjectEncoding.getId(schema, s => testId),
         endianness
       ) { os =>
         writer.write(record, encoder)

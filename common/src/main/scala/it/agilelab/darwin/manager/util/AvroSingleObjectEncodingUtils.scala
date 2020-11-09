@@ -1,7 +1,7 @@
 package it.agilelab.darwin.manager.util
 
-import java.io.{InputStream, OutputStream}
-import java.nio.{ByteBuffer, ByteOrder}
+import java.io.{ InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
 import java.util
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap

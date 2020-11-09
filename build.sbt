@@ -66,7 +66,6 @@ lazy val hbaseConnector2 = Project("darwin-hbase2-connector", file("hbase2"))
   .settings(Settings.hbase2TestSettings)
   .enablePlugins(JavaAppPackaging)
 
-
 lazy val postgresConnector = Project("darwin-postgres-connector", file("postgres"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)

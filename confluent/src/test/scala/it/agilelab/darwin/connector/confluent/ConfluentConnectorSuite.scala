@@ -127,5 +127,3 @@ class ConfluentConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with O
 
   }
 }
-
-
