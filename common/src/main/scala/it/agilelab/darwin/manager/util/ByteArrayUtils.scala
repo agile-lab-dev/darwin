@@ -3,7 +3,7 @@ package it.agilelab.darwin.manager.util
 import java.io.OutputStream
 import java.nio.{ ByteBuffer, ByteOrder }
 
-import it.agilelab.darwin.common.LONG_SIZE
+import it.agilelab.darwin.common.{ INT_SIZE, LONG_SIZE }
 
 private[darwin] object ByteArrayUtils {
 
@@ -17,6 +17,14 @@ private[darwin] object ByteArrayUtils {
         .allocate(LONG_SIZE)
         .order(endianness)
         .putLong(l)
+        .array()
+    }
+
+    def truncateIntToByteArray(endianess: ByteOrder): Array[Byte] = {
+      ByteBuffer
+        .allocate(INT_SIZE)
+        .order(endianess)
+        .putInt(l.toInt)
         .array()
     }
 
@@ -43,6 +51,35 @@ private[darwin] object ByteArrayUtils {
           os.write((l >>> 40).asInstanceOf[Int])
           os.write((l >>> 48).asInstanceOf[Int])
           os.write((l >>> 56).asInstanceOf[Int])
+      }
+    }
+  }
+
+  implicit class EnrichedInt(val l: Int) extends AnyVal {
+
+    def intToByteArray(endianess: ByteOrder): Array[Byte] = {
+      ByteBuffer
+        .allocate(INT_SIZE)
+        .order(endianess)
+        .putInt(l.toInt)
+        .array()
+    }
+
+    /**
+      * Writes to the stream the enriched long honoring the input endianness
+      */
+    def writeIntToStream(os: OutputStream, endianness: ByteOrder): Unit = {
+      endianness match {
+        case ByteOrder.BIG_ENDIAN    =>
+          os.write((l >>> 24))
+          os.write((l >>> 16))
+          os.write((l >>> 8))
+          os.write((l >>> 0))
+        case ByteOrder.LITTLE_ENDIAN =>
+          os.write((l >>> 0))
+          os.write((l >>> 8))
+          os.write((l >>> 16))
+          os.write((l >>> 24))
       }
     }
   }

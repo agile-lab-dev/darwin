@@ -23,7 +23,8 @@ lazy val root             = Project("darwin", file("."))
     mockConnector,
     mockApplication,
     restConnector,
-    mongoConnector
+    mongoConnector,
+    confluentConnector
   )
 
 lazy val core = Project("darwin-core", file("core"))
@@ -65,7 +66,6 @@ lazy val hbaseConnector2 = Project("darwin-hbase2-connector", file("hbase2"))
   .settings(Settings.hbase2TestSettings)
   .enablePlugins(JavaAppPackaging)
 
-
 lazy val postgresConnector = Project("darwin-postgres-connector", file("postgres"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)
@@ -83,6 +83,18 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
       Dependencies.httpClient
   )
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
+  .enablePlugins(JavaAppPackaging)
+
+lazy val confluentConnector = Project("darwin-confluent-connector", file("confluent"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon)
+  .settings(pgpPassphrase := Settings.pgpPass)
+  .settings(
+    libraryDependencies ++= Dependencies.core_deps ++
+      Dependencies.wireMock ++
+      Dependencies.confluentSchemaRegistryDependencies :+ Dependencies.scalatest
+  )
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
   .enablePlugins(JavaAppPackaging)
 
 lazy val restServer = Project("darwin-rest-server", file("rest-server"))

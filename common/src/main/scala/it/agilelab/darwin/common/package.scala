@@ -11,4 +11,6 @@ package object common {
   }
 
   final val LONG_SIZE = 8
+  final val INT_SIZE  = 4
+
 }

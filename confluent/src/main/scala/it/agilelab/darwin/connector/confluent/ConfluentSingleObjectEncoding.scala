@@ -1,4 +1,4 @@
-package it.agilelab.darwin.manager.util
+package it.agilelab.darwin.connector.confluent
 
 import java.io.{ InputStream, OutputStream }
 import java.nio.{ ByteBuffer, ByteOrder }
@@ -6,12 +6,13 @@ import java.util
 
 import it.agilelab.darwin.common.DarwinConcurrentHashMap
 import it.agilelab.darwin.manager.exception.DarwinException
-import it.agilelab.darwin.manager.util.ByteArrayUtils._
+import it.agilelab.darwin.manager.util.ByteArrayUtils
+import it.agilelab.darwin.manager.util.ByteArrayUtils.EnrichedInt
 import org.apache.avro.Schema
 
-object AvroSingleObjectEncodingUtils {
-  private val V1_HEADER     = Array[Byte](0xc3.toByte, 0x01.toByte)
-  private val ID_SIZE       = 8
+object ConfluentSingleObjectEncoding {
+  private val V1_HEADER     = Array[Byte](0x00.toByte)
+  private val ID_SIZE       = 4
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
   private val schemaMap = DarwinConcurrentHashMap.empty[Schema, Long]
@@ -27,9 +28,8 @@ object AvroSingleObjectEncodingUtils {
   }
 
   /**
-    * Checks if a byte array is Avro Single-Object encoded (
-    * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
-    * Documentation</a>)
+    * Checks if a byte array is Avro Single-Object encoded in the
+    * Confluent way (i.e. byte 0 then an int)
     *
     * @param data a byte array
     * @return true if the input byte array is Single-Object encoded
@@ -45,9 +45,8 @@ object AvroSingleObjectEncodingUtils {
   }
 
   /**
-    * Checks if a byte array is Avro Single-Object encoded (
-    * <a href="https://avro.apache.org/docs/current/spec.html#single_object_encoding">Single-Object Encoding
-    * Documentation</a>)
+    * Checks if a byte array is Avro Single-Object encoded in the
+    * Confluent way (i.e. byte 0 then an int)
     *
     * @param data a ByteBuffer that will not be altered position wise by this method
     * @return true if the input byte array is Single-Object encoded
@@ -79,8 +78,12 @@ object AvroSingleObjectEncodingUtils {
     * @param endianness  a byte order to drive endianness of schemaId
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(avroPayload: Array[Byte], schemaId: Long, endianness: ByteOrder): Array[Byte] = {
-    Array.concat(V1_HEADER, schemaId.longToByteArray(endianness), avroPayload)
+  def generateAvroSingleObjectEncoded(
+    avroPayload: Array[Byte],
+    schemaId: Long,
+    endianness: ByteOrder
+  ): Array[Byte] = {
+    Array.concat(V1_HEADER, schemaId.toInt.intToByteArray(endianness), avroPayload)
   }
 
   /**
@@ -92,7 +95,7 @@ object AvroSingleObjectEncodingUtils {
     */
   def writeHeaderToStream(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder): OutputStream = {
     byteStream.write(V1_HEADER)
-    schemaId.writeToStream(byteStream, endianness)
+    schemaId.toInt.writeIntToStream(byteStream, endianness)
     byteStream
   }
 
@@ -132,7 +135,7 @@ object AvroSingleObjectEncodingUtils {
     avroWriter: OutputStream => OutputStream
   ): OutputStream = {
     byteStream.write(V1_HEADER)
-    schemaId.writeToStream(byteStream, endianness)
+    schemaId.toInt.writeIntToStream(byteStream, endianness)
     avroWriter(byteStream)
   }
 
@@ -165,7 +168,7 @@ object AvroSingleObjectEncodingUtils {
       )
     } else {
       avroSingleObjectEncoded.position(avroSingleObjectEncoded.position() + V1_HEADER.length)
-      readLong(avroSingleObjectEncoded, endianness)
+      readInt(avroSingleObjectEncoded, endianness)
     }
   }
 
@@ -175,13 +178,13 @@ object AvroSingleObjectEncodingUtils {
     * the values of endianness and buf.order() are.
     */
   @inline
-  def readLong(buf: ByteBuffer, endianness: ByteOrder): Long = {
+  def readInt(buf: ByteBuffer, endianness: ByteOrder): Long = {
     if (buf.order() == endianness) {
-      buf.getLong
+      buf.getInt
     } else {
       val lastEndianness = buf.order()
       buf.order(endianness)
-      val toRet          = buf.getLong
+      val toRet          = buf.getInt()
       buf.order(lastEndianness)
       toRet
     }
@@ -190,7 +193,7 @@ object AvroSingleObjectEncodingUtils {
   /**
     * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
     * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
-    * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
+    * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first byte will
     * be consumed and returned in the Left part of the Either.
     *
     * @param inputStream avro single-object encoded input stream
@@ -201,12 +204,12 @@ object AvroSingleObjectEncodingUtils {
   def extractId(inputStream: InputStream, endianness: ByteOrder): Either[Array[Byte], Long] = {
     val buffer              = new Array[Byte](HEADER_LENGTH)
     if (inputStream.markSupported()) {
-      inputStream.mark(2)
+      inputStream.mark(1)
     }
     val bytesReadMagicBytes = inputStream.read(buffer, 0, V1_HEADER.length)
-    if (bytesReadMagicBytes == 2) {
-      if (ByteArrayUtils.arrayEquals(buffer, V1_HEADER, 0, 0, 2)) {
-        val bytesReadFingerPrint = inputStream.read(buffer, 2, ID_SIZE)
+    if (bytesReadMagicBytes == 1) {
+      if (ByteArrayUtils.arrayEquals(buffer, V1_HEADER, 0, 0, 1)) {
+        val bytesReadFingerPrint = inputStream.read(buffer, 1, ID_SIZE)
         if (bytesReadFingerPrint + bytesReadMagicBytes == HEADER_LENGTH) {
           val buf = ByteBuffer.wrap(buffer, 0, HEADER_LENGTH)
           // This cannot fail because the buffer length and start are already checked before and every 64 bits can
@@ -232,7 +235,7 @@ object AvroSingleObjectEncodingUtils {
   }
 
   /**
-    * Extract the payload from an avro single-object encoded byte array, removing the header (the first 10 bytes)
+    * Extract the payload from an avro single-object encoded byte array, removing the header (the first 5 bytes)
     *
     * @param avroSingleObjectEncoded avro single-object encoded byte array
     * @return the payload without the avro single-object encoded header

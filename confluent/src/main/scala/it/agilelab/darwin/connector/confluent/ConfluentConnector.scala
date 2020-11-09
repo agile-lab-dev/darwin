@@ -1,34 +1,31 @@
-package it.agilelab.darwin.common
+package it.agilelab.darwin.connector.confluent
 
 import java.io.{ InputStream, OutputStream }
 import java.nio.{ ByteBuffer, ByteOrder }
 
-import it.agilelab.darwin.common.compat.RightBiasedEither
+import io.confluent.kafka.schemaregistry.client.{ SchemaMetadata, SchemaRegistryClient }
+import it.agilelab.darwin.common.Connector
+import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.manager.SchemaPayloadPair
 import it.agilelab.darwin.manager.exception.DarwinException
-import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
-import org.apache.avro.{ Schema, SchemaNormalization }
+import org.apache.avro.Schema
 
-/**
-  * Generic abstraction of a component capable of reading and writing Schema entities in an external storage.
-  * The external storage should keep at least the ID (Long) and the schema (Schema) for each entry.
-  */
-trait Connector extends Serializable {
+class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegistryClient) extends Connector {
 
   /**
     * Creates the configured table, if the table already exists, does nothing
     */
-  def createTable(): Unit
+  override def createTable(): Unit = {}
 
   /**
     * Returns whether or not the configured table exists
     */
-  def tableExists(): Boolean
+  override def tableExists(): Boolean = true
 
   /**
     * @return a message indicating the user what he/she should do to create the table him/herself
     */
-  def tableCreationHint(): String
+  override def tableCreationHint(): String = "No need to create a table"
 
   /**
     * Loads all schemas found on the storage.
@@ -37,7 +34,21 @@ trait Connector extends Serializable {
     *
     * @return a sequence of all the pairs (ID, schema) found on the storage
     */
-  def fullLoad(): Seq[(Long, Schema)]
+  override def fullLoad(): Seq[(Long, Schema)] = {
+
+    client.getAllSubjects.toScala().toList.flatMap { subject =>
+      val versions = client.getAllVersions(subject).toScala().toList
+
+      versions.map { version =>
+        val metadata = client.getSchemaMetadata(subject, version)
+
+        val id: Long       = metadata.getId.toLong
+        val schema: Schema = new Schema.Parser().parse(metadata.getSchema)
+
+        (id, schema)
+      }
+    }
+  }
 
   /**
     * Inserts all the schema passed as parameters in the storage.
@@ -47,7 +58,9 @@ trait Connector extends Serializable {
     *
     * @param schemas a sequence of pairs (ID, schema) Schema entities to insert in the storage.
     */
-  def insert(schemas: Seq[(Long, Schema)]): Unit
+  override def insert(schemas: Seq[(Long, Schema)]): Unit = {
+    //registration happens during fingerprinting
+  }
 
   /**
     * Retrieves a single schema using its ID from the storage.
@@ -55,16 +68,29 @@ trait Connector extends Serializable {
     * @param id the ID of the schema
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
-  def findSchema(id: Long): Option[Schema]
+  override def findSchema(id: Long): Option[Schema] = {
+    Option(client.getById(id.toInt))
+  }
 
-  /**
-    * Generate a fingerprint for a schema, the default implementation is SchemaNormalization.parsingFingerprint64
-    *
-    * @param schema the schema to fingerprint
-    * @return the schema id
-    */
-  def fingerprint(schema: Schema): Long = {
-    SchemaNormalization.parsingFingerprint64(schema)
+  override def fingerprint(schema: Schema): Long = {
+    val subject = Option(schema.getProp("x-darwin-subject"))
+
+    client.register(
+      subject.getOrElse(throw new IllegalArgumentException("Schema does not contain the [x-darwin-subject] extension")),
+      schema
+    )
+  }
+
+  def findVersionsForSubject(subject: String): Seq[Integer] = {
+    client.getAllVersions(subject).toScala().toList
+  }
+
+  def findIdForSubjectVersion(subject: String, version: Int): SchemaMetadata = {
+    client.getSchemaMetadata(subject, version)
+  }
+
+  def findIdForSubjectLatestVersion(subject: String): SchemaMetadata = {
+    client.getLatestSchemaMetadata(subject)
   }
 
   /**
@@ -72,8 +98,8 @@ trait Connector extends Serializable {
     *
     * @return the input OutputStream
     */
-  def writeHeaderToStream(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder): OutputStream = {
-    AvroSingleObjectEncodingUtils.writeHeaderToStream(byteStream, schemaId, endianness)
+  override def writeHeaderToStream(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder): OutputStream = {
+    ConfluentSingleObjectEncoding.writeHeaderToStream(byteStream, schemaId, endianness)
   }
 
   /**
@@ -85,13 +111,13 @@ trait Connector extends Serializable {
     * @param schema      the schema used to encode the payload
     * @return a Single-Object encoded byte array
     */
-  def generateAvroSingleObjectEncoded(
+  override def generateAvroSingleObjectEncoded(
     avroPayload: Array[Byte],
     schema: Schema,
     endianness: ByteOrder,
     getId: Schema => Long
   ): Array[Byte] = {
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(avroPayload, getId(schema), endianness)
+    ConfluentSingleObjectEncoding.generateAvroSingleObjectEncoded(avroPayload, getId(schema), endianness)
   }
 
   /**
@@ -102,13 +128,13 @@ trait Connector extends Serializable {
     * @param schemaId   id of the schema used to encode the payload
     * @return the input OutputStream
     */
-  def generateAvroSingleObjectEncoded(
+  override def generateAvroSingleObjectEncoded(
     byteStream: OutputStream,
     avroValue: Array[Byte],
     schemaId: Long,
     endianness: ByteOrder
   ): OutputStream = {
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(byteStream, avroValue, schemaId, endianness)
+    ConfluentSingleObjectEncoding.generateAvroSingleObjectEncoded(byteStream, avroValue, schemaId, endianness)
   }
 
   /**
@@ -120,10 +146,10 @@ trait Connector extends Serializable {
     * @param avroWriter function that will be called to add user generated avro to the stream
     * @return the input OutputStream
     */
-  def generateAvroSingleObjectEncoded(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder)(
+  override def generateAvroSingleObjectEncoded(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder)(
     avroWriter: OutputStream => OutputStream
   ): OutputStream = {
-    AvroSingleObjectEncodingUtils.generateAvroSingleObjectEncoded(byteStream, schemaId, endianness)(avroWriter)
+    ConfluentSingleObjectEncoding.generateAvroSingleObjectEncoded(byteStream, schemaId, endianness)(avroWriter)
   }
 
   /**
@@ -132,21 +158,21 @@ trait Connector extends Serializable {
     * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
     * @return a pair containing the Schema and the payload of the input array
     */
-  def retrieveSchemaAndAvroPayload(
+  override def retrieveSchemaAndAvroPayload(
     avroSingleObjectEncoded: Array[Byte],
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
   ): (Schema, Array[Byte]) = {
-    if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
+    if (ConfluentSingleObjectEncoding.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
+      val id = ConfluentSingleObjectEncoding.extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
         case Some(schema) =>
-          schema -> AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
+          schema -> ConfluentSingleObjectEncoding.dropHeader(avroSingleObjectEncoded)
         case _            =>
           throw new DarwinException(s"No schema found for ID $id")
       }
     } else {
-      throw AvroSingleObjectEncodingUtils.parseException()
+      throw ConfluentSingleObjectEncoding.parseException()
     }
   }
 
@@ -157,19 +183,19 @@ trait Connector extends Serializable {
     * @param avroSingleObjectEncoded a ByteBuffer of a Single-Object encoded payload
     * @return the avro Schema
     */
-  def retrieveSchemaAndAvroPayload(
+  override def retrieveSchemaAndAvroPayload(
     avroSingleObjectEncoded: ByteBuffer,
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
   ): Schema = {
-    if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
+    if (ConfluentSingleObjectEncoding.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
+      val id = ConfluentSingleObjectEncoding.extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
         case Some(schema) => schema
         case _            => throw new DarwinException(s"No schema found for ID $id")
       }
     } else {
-      throw AvroSingleObjectEncodingUtils.parseException()
+      throw ConfluentSingleObjectEncoding.parseException()
     }
   }
 
@@ -182,12 +208,12 @@ trait Connector extends Serializable {
     * @param inputStream avro single-object encoded input stream
     * @return the schema ID extracted from the input data
     */
-  def extractSchema(
+  override def extractSchema(
     inputStream: InputStream,
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
   ): Either[Array[Byte], Schema] = {
-    AvroSingleObjectEncodingUtils.extractId(inputStream, endianness).rightMap { id =>
+    ConfluentSingleObjectEncoding.extractId(inputStream, endianness).rightMap { id =>
       getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
   }
@@ -198,13 +224,13 @@ trait Connector extends Serializable {
     * @param array avro single-object encoded array
     * @return the schema ID extracted from the input data
     */
-  def extractSchema(
+  override def extractSchema(
     array: Array[Byte],
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
   ): Either[Exception, Schema] = {
     try {
-      val id = AvroSingleObjectEncodingUtils.extractId(array, endianness)
+      val id = ConfluentSingleObjectEncoding.extractId(array, endianness)
       getSchema(id)
         .toRight(new RuntimeException(s"Cannot find schema with id $id"))
     } catch {
@@ -218,7 +244,7 @@ trait Connector extends Serializable {
     * @param avroSingleObjectEncoded a byte array of a Single-Object encoded payload
     * @return a SchemaPayloadPair containing the Schema and the payload of the input array
     */
-  def retrieveSchemaAndPayload(
+  override def retrieveSchemaAndPayload(
     avroSingleObjectEncoded: Array[Byte],
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
