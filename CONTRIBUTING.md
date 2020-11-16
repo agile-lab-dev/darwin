@@ -3,18 +3,18 @@
 We are always very happy to have contributions, whether for trivial cleanups or big new features.
 
 If you don't know Java or Scala you can still contribute to the project. 
-Code the only way to contribute to the project. We strongly value documentation and gladly accept improvements to the documentation.
+Code is not the only way to contribute to the project. We strongly value documentation and gladly accept improvements to the documentation.
 
 # REPORTING AN ISSUE
 
-Reporting potential issues as github issues is more than welcome as a significant contribution to the project. But please be aware that github issues should not be used for FAQs: 
+Reporting potential issues as Github issues is more than welcome as a significant contribution to the project. But please be aware that Github issues should not be used for FAQs: 
 if you have a question or are simply not sure if it is really an issue or not, please contact us ([through gitter](https://gitter.im/agile-lab-darwin/community)) first before you create a new issue.
  
 # CONTRIBUTING A CODE CHANGE
 
 To submit a change for inclusion, please do the following:
 - If the change is non-trivial please include some unit tests that cover the new functionality.
-- If you are introducing a completely new feature or API it is a good idea to start a markdown description in the github issue itselft an get consensus on the basic design first.
+- If you are introducing a completely new feature or API it is a good idea to start a markdown description in the Github issue itself and get consensus on the basic design first.
 - Make sure you have observed the recommendations in the style guide. (scalastyle:check should pass with no errors or warnings)
 - Follow the detailed instructions in Contributing Code Changes.
 
@@ -28,9 +28,9 @@ Generally, Darwin uses:
 
 ### Github issues
 
-- Find the existing githib issue that the change pertains to.
+- Find the existing Github issue that the change pertains to.
 - Do not create a new issue if creating a change to address an existing issue in Github; add to the existing discussion and work instead.
-- To avoid conflicts, assign the github issue to yourself if you plan to work on it.
+- To avoid conflicts, assign the Github issue to yourself if you plan to work on it.
 - Look for existing pull requests that are linked to the issue, to understand if someone is already working on it.
 - If required, create a new issue (below shows some critical fields to fill-in):
   - Provide a descriptive Title. "Update web UI" or "Problem in scheduler" is not sufficient. "Support NiFi SchemaRegistry interface and add meta-connector" is good.
@@ -47,7 +47,7 @@ Generally, Darwin uses:
 - Consider whether documentation or tests need to be added or updated as part of the change, and add them as needed (doc changes should be submitted along with code change in the same PR).
 - Run all tests using `make.sh` script.
 - Open a pull request against the develop branch.
-- The PR title should usually be of the form [#issue-number]: Title, where [#issue number] is the relevant github issue number and Title may be the issue tile or a more specific title describing the PR itself.
+- The PR title should usually be of the form [#issue-number]: Title, where [#issue number] is the relevant Github issue number and Title may be the issue title or a more specific title describing the PR itself.
 - If the pull request is still a work in progress, and so is not ready to be merged, but needs to be pushed to Github to facilitate review, use the draft mode of Github PR..
 - Consider identifying committers or other contributors who have worked on the code being changed. The easiest is to simply follow GitHub's automatic suggestions. You can add @username in the PR description to ping them immediately.
 - Once ready, the PR `checks` box will be updated.
@@ -73,4 +73,4 @@ Generally, Darwin uses:
 - If a pull request has gotten little or no attention, consider improving the description or the change itself and ping likely reviewers again after a few days. Consider proposing a change that's easier to include, like a smaller and/or less invasive change.
 - If a pull request is closed because it is deemed not the right approach to resolve an issue, then leave the issue open. However if the review makes it clear that the issue identified in the issue is not going to be resolved by any pull request (not a problem, won't fix) then also resolve the issue. 
 
-This document is heavily inspired by Kafka/Apache contribution guidelines.
+*This document is heavily inspired by Kafka/Apache contribution guidelines.*
