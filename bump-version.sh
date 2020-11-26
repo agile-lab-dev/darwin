@@ -21,7 +21,7 @@ echo "Running on $machine.."
 
 OLD_VERSION=$1
 NEW_VERSION=$2
-FILES_TO_CHANGE=$(git grep -l "$OLD_VERSION" | grep -v ".*\.ai") # there is an ai file that always matches...
+FILES_TO_CHANGE=$(git grep -l "$OLD_VERSION" | grep -v ".*\.ai\|.*\.svg\|.*\.xml") # there is an ai file that always matches...
 
 if [ -z "$FILES_TO_CHANGE" ]; then
   echo "No files to change..."
