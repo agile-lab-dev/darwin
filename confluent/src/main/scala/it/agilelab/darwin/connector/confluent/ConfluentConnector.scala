@@ -164,7 +164,7 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     getSchema: Long => Option[Schema]
   ): (Schema, Array[Byte]) = {
     if (ConfluentSingleObjectEncoding.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      val id = ConfluentSingleObjectEncoding.extractId(avroSingleObjectEncoded, endianness)
+      val id = extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
         case Some(schema) =>
           schema -> ConfluentSingleObjectEncoding.dropHeader(avroSingleObjectEncoded)
@@ -189,7 +189,7 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     getSchema: Long => Option[Schema]
   ): Schema = {
     if (ConfluentSingleObjectEncoding.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      val id = ConfluentSingleObjectEncoding.extractId(avroSingleObjectEncoded, endianness)
+      val id = extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
         case Some(schema) => schema
         case _            => throw new DarwinException(s"No schema found for ID $id")
@@ -213,7 +213,7 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
   ): Either[Array[Byte], Schema] = {
-    ConfluentSingleObjectEncoding.extractId(inputStream, endianness).rightMap { id =>
+    extractId(inputStream, endianness).rightMap { id =>
       getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
   }
@@ -230,7 +230,7 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
     getSchema: Long => Option[Schema]
   ): Either[Exception, Schema] = {
     try {
-      val id = ConfluentSingleObjectEncoding.extractId(array, endianness)
+      val id = extractId(array, endianness)
       getSchema(id)
         .toRight(new RuntimeException(s"Cannot find schema with id $id"))
     } catch {
@@ -251,5 +251,17 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
   ): SchemaPayloadPair = {
     val (schema, payload) = retrieveSchemaAndAvroPayload(avroSingleObjectEncoded, endianness, getSchema)
     SchemaPayloadPair.create(schema, payload)
+  }
+
+  override def extractId(array: Array[Byte], endianness: ByteOrder): Long = {
+    ConfluentSingleObjectEncoding.extractId(array, endianness)
+  }
+
+  override def extractId(inputStream: InputStream, endianness: ByteOrder): Either[Array[Byte], Long] = {
+    ConfluentSingleObjectEncoding.extractId(inputStream, endianness)
+  }
+
+  override def extractId(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder): Long = {
+    ConfluentSingleObjectEncoding.extractId(avroSingleObjectEncoded, endianness)
   }
 }

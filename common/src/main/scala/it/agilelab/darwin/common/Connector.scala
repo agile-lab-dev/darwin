@@ -138,7 +138,7 @@ trait Connector extends Serializable {
     getSchema: Long => Option[Schema]
   ): (Schema, Array[Byte]) = {
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
+      val id = extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
         case Some(schema) =>
           schema -> AvroSingleObjectEncodingUtils.dropHeader(avroSingleObjectEncoded)
@@ -163,7 +163,7 @@ trait Connector extends Serializable {
     getSchema: Long => Option[Schema]
   ): Schema = {
     if (AvroSingleObjectEncodingUtils.isAvroSingleObjectEncoded(avroSingleObjectEncoded)) {
-      val id = AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
+      val id = extractId(avroSingleObjectEncoded, endianness)
       getSchema(id) match {
         case Some(schema) => schema
         case _            => throw new DarwinException(s"No schema found for ID $id")
@@ -187,7 +187,7 @@ trait Connector extends Serializable {
     endianness: ByteOrder,
     getSchema: Long => Option[Schema]
   ): Either[Array[Byte], Schema] = {
-    AvroSingleObjectEncodingUtils.extractId(inputStream, endianness).rightMap { id =>
+    extractId(inputStream, endianness).rightMap { id =>
       getSchema(id).getOrElse(throw new DarwinException(s"No schema found for ID $id"))
     }
   }
@@ -204,12 +204,52 @@ trait Connector extends Serializable {
     getSchema: Long => Option[Schema]
   ): Either[Exception, Schema] = {
     try {
-      val id = AvroSingleObjectEncodingUtils.extractId(array, endianness)
+      val id = extractId(array, endianness)
       getSchema(id)
         .toRight(new RuntimeException(s"Cannot find schema with id $id"))
     } catch {
       case ie: IllegalArgumentException => Left(ie)
     }
+  }
+
+  /**
+   * Extracts the schema ID from the avro single-object encoded byte array
+   *
+   * @param array avro single-object encoded byte array
+   * @param endianness              the endianness that will be used to read fingerprint bytes,
+   *                                it won't affect how avro payload is read, that is up to the darwin user
+   * @return the schema ID extracted from the input data
+   */
+  def extractId(array: Array[Byte], endianness: ByteOrder): Long = {
+    AvroSingleObjectEncodingUtils.extractId(array, endianness)
+  }
+
+  /**
+   * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
+   * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
+   * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
+   * be consumed and returned in the Left part of the Either.
+   *
+   * @param inputStream avro single-object encoded input stream
+   * @param endianness  the endianness that will be used to read fingerprint bytes,
+   *                    it won't affect how avro payload is read, that is up to the darwin user
+   * @return the schema ID extracted from the input data
+   */
+  def extractId(inputStream: InputStream, endianness: ByteOrder): Either[Array[Byte], Long] = {
+    AvroSingleObjectEncodingUtils.extractId(inputStream, endianness)
+  }
+
+  /**
+   * Extracts the schema ID from the avro single-object encoded ByteBuffer, the ByteBuffer position will be after the
+   * header when this method returns
+   *
+   * @param avroSingleObjectEncoded avro single-object encoded byte array
+   * @param endianness              the endianness that will be used to read fingerprint bytes,
+   *                                it won't affect how avro payload is read, that is up to the darwin user
+   * @return the schema ID extracted from the input data
+   */
+  def extractId(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder): Long = {
+    AvroSingleObjectEncodingUtils.extractId(avroSingleObjectEncoded, endianness)
   }
 
   /**
