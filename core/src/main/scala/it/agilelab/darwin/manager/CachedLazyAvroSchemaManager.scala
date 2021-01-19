@@ -15,7 +15,7 @@ class CachedLazyAvroSchemaManager(connector: Connector, endianness: ByteOrder)
   override def getSchema(id: Long): Option[Schema] = {
     cache.getSchema(id).orElse {
       val schema: Option[Schema] = connector.findSchema(id)
-      schema.foreach(s => _cache.set(Some(cache.insert(Seq(getId(s) -> s)))))
+      schema.foreach(s => _cache.set(Some(cache.insert(Seq(id -> s)))))
       schema
     }
   }

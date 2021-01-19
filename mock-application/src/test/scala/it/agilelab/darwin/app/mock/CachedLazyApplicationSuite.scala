@@ -1,19 +1,19 @@
 package it.agilelab.darwin.app.mock
 
-import java.lang.reflect.Modifier
-import java.nio.ByteOrder
-
 import com.typesafe.config.{ Config, ConfigFactory }
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{ MyClass, MyNestedClass, NewClass, OneField }
+import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.common.{ Connector, ConnectorFactory, SchemaReader }
 import it.agilelab.darwin.manager.{ AvroSchemaManager, CachedLazyAvroSchemaManager }
-import org.apache.avro.{ Schema, SchemaNormalization }
 import org.apache.avro.reflect.ReflectData
+import org.apache.avro.{ Schema, SchemaNormalization }
 import org.reflections.Reflections
-import it.agilelab.darwin.common.compat._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.lang.reflect.Modifier
+import java.nio.ByteOrder
 
 class BigEndianCachedLazyApplicationSuite extends CachedLazyApplicationSuite(ByteOrder.BIG_ENDIAN)
 
@@ -79,5 +79,28 @@ abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends Any
     connector.insert(Seq(newId -> newSchema))
     assert(manager.getSchema(newId).isDefined)
     assert(manager.getSchema(newId).get == newSchema)
+  }
+
+  it should "not call getId when retrieving a schema out of the cache" in {
+    val oneFieldSchema = ReflectData.get().getSchema(classOf[OneField])
+    var calls          = 0
+    val manager        = new CachedLazyAvroSchemaManager(
+      new Connector {
+        override def createTable(): Unit                        = ()
+        override def tableExists(): Boolean                     = true
+        override def tableCreationHint(): String                = ""
+        override def fullLoad(): Seq[(Long, Schema)]            = Seq.empty
+        override def insert(schemas: Seq[(Long, Schema)]): Unit = ()
+        override def findSchema(id: Long): Option[Schema]       = Some(oneFieldSchema)
+      },
+      endianness
+    ) {
+      override def getId(schema: Schema): Long = {
+        calls += 1
+        super.getId(schema)
+      }
+    }
+    manager.getSchema(3L) shouldNot be(null) // scalastyle:ignore
+    calls shouldBe 0
   }
 }
