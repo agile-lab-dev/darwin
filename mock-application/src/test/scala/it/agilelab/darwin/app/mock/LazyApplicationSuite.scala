@@ -79,4 +79,27 @@ abstract class LazyApplicationSuite(endianness: ByteOrder) extends AnyFlatSpec w
     assert(manager.getSchema(newId).isDefined)
     assert(manager.getSchema(newId).get == newSchema)
   }
+
+  it should "not call getId when retrieving a schema out of the cache" in {
+    val oneFieldSchema = ReflectData.get().getSchema(classOf[OneField])
+    var calls          = 0
+    val manager        = new LazyAvroSchemaManager(
+      new Connector {
+        override def createTable(): Unit                        = ()
+        override def tableExists(): Boolean                     = true
+        override def tableCreationHint(): String                = ""
+        override def fullLoad(): Seq[(Long, Schema)]            = Seq.empty
+        override def insert(schemas: Seq[(Long, Schema)]): Unit = ()
+        override def findSchema(id: Long): Option[Schema]       = Some(oneFieldSchema)
+      },
+      endianness
+    ) {
+      override def getId(schema: Schema): Long = {
+        calls += 1
+        super.getId(schema)
+      }
+    }
+    manager.getSchema(3L) shouldNot be(null) // scalastyle:ignore
+    calls shouldBe 0
+  }
 }
