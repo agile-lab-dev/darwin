@@ -1,4 +1,3 @@
-import com.typesafe.sbt.SbtPgp.autoImport._
 import org.scalastyle.sbt.ScalastylePlugin.autoImport._
 import sbt.Keys._
 import sbt.{ Def, _ }
@@ -111,33 +110,9 @@ object Settings {
 
   lazy val notPublishSettings = Seq(skip in publish := true)
 
-  lazy val myCredentials = Credentials(
-    "Bintray API Realm",
-    "api.bintray.com",
-    System.getenv().get("BINTRAY_USERNAME"),
-    System.getenv().get("BINTRAY_API_KEY")
-  )
-
-  lazy val ciPublishSettings = {
-    if (System.getenv().containsKey("TRAVIS")) {
-      Seq(pgpSecretRing := file("./secring.asc"), pgpPublicRing := file("./pubring.asc"))
-    } else {
-      Seq.empty
-    }
-  }
-
-  lazy val pgpPass: Option[Array[Char]] = Option(System.getenv().get("PGP_PASS")).map(_.toArray)
-
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
 
-  //  lazy val testSettings = Seq(parallelExecution in Test := false)
-
   lazy val publishSettings = Seq(
-    publishTo := Some("bintray" at "https://api.bintray.com/maven/agile-lab-dev/Darwin/darwin/;publish=1"),
-    credentials += myCredentials,
-    publishMavenStyle := true,
-    updateOptions := updateOptions.value.withGigahorse(false),
-    useGpg := false,
     pomExtra := <scm>
       <connection>
         scm:git:git://github.com/agile-lab-dev/darwin.git
@@ -188,5 +163,5 @@ object Settings {
           <email>andrea.fonti@agilelab.it</email>
         </developer>
       </developers>
-  ) ++ ciPublishSettings
+  )
 }
