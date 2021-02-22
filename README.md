@@ -1,5 +1,6 @@
 # Darwin
 
+[![CI](https://github.com/agile-lab-dev/darwin/actions/workflows/ci.yml/badge.svg)](https://github.com/agile-lab-dev/darwin/actions/workflows/ci.yml)
 [![Gitter](https://badges.gitter.im/agile-lab-darwin/community.svg)](https://gitter.im/agile-lab-darwin/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 <img align="right" height="260" src="docs/img/logo/darwin-icon.svg">

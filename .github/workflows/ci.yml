@@ -1,10 +1,9 @@
-name: Release
+name: CI 
 on:
-  push:
-    branches: [master, main]
-    tags: ["*"]
+  - push
+  - pull_request
 jobs:
-  publish:
+  ci:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.4
@@ -19,6 +18,7 @@ jobs:
           key: ${{ runner.os }}-sbt
       - uses: olafurpg/setup-scala@v10
       - uses: olafurpg/setup-gpg@v3
+      - run: ./make.sh
       - run: ./publish.sh
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
