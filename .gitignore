@@ -208,3 +208,4 @@ metals.sbt
 project/.bloop/*
 # End of https://www.gitignore.io/api/osx,sbt,java,linux,maven,scala,windows,intellij
 .bsp/
+.vscode/settings.json
