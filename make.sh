@@ -1,15 +1,2 @@
 #!/bin/bash
-set -ex
-COMMAND=sbtn
-if ! command -v $COMMAND &> /dev/null
-then
-    echo "$COMMAND could not be found"
-    echo "using sbt"
-    COMMAND="sbt"
-else
-  if [ ! $TRAVIS ]; then
-    sbtn shutdown
-  fi
-fi
-$COMMAND "clean; scalastyle; +test; +doc"
-$COMMAND "darwin-hbase2-connector/clean; darwin-hbase2-connector/scalastyle; +darwin-hbase2-connector/test; +darwin-hbase2-connector/doc"
+sbt clean scalastyle +test +doc darwin-hbase2-connector/clean darwin-hbase2-connector/scalastyle +darwin-hbase2-connector/test +darwin-hbase2-connector/doc
