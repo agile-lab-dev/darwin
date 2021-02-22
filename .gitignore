@@ -209,3 +209,6 @@ project/.bloop/*
 # End of https://www.gitignore.io/api/osx,sbt,java,linux,maven,scala,windows,intellij
 .bsp/
 .vscode/settings.json
+project/project/.bloop/bloop.settings.json
+.gitignore
+project/project/.bloop/darwin-build-build.json

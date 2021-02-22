@@ -69,7 +69,17 @@ object Settings {
     javacOptions ++= javacOptionsVersion(scalaVersion.value),
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
     scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value),
-    useCoursier := false
+    useCoursier := false,
+    developers := List(
+      Developer("amurgia", "Antonio Murgia", "antonio.murgia@agilelab.it", url("https://github.com/tmnd1991")),
+      Developer("lpirazzini", "Lorenzo Pirazzini", "lorenzo.pirazzini@agilelab.it", url("https://github.com/SpyQuel")),
+      Developer("rcoluccio", "Roberto Coluccio", "roberto.coluccio@agilelab.it", url("https://github.com/erond")),
+      Developer("alatella", "Andrea Latella", "andrea.latella@agilelab.it", url("https://github.com/andr3a87")),
+      Developer("cventrella", "Carlo Ventrella", "carlo.ventrella@agilelab.it", url("https://www.agilelab.it")),
+      Developer("dicardi", "Davide Icardi", "davide.icardi@agilelab.it", url("https://github.com/davideicardi")),
+      Developer("nbidotti", "Nicolò Bidotti", "nicolo.bidotti@agilelab.it", url("https://github.com/nicolobidotti")),
+      Developer("andrea-rockt", "Andrea Fonti", "andrea.fonti@agilelab.it", url("https://github.com/andrea-rockt"))
+    )
   )
 
   val clouderaHadoopReleaseRepo = "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
@@ -91,8 +101,7 @@ object Settings {
     )
   }
 
-  lazy val commonSettings: Seq[Def.SettingsDefinition] = projectSettings ++ buildSettings ++ publishSettings ++
-    scalastyleSettings
+  lazy val commonSettings = projectSettings ++ buildSettings ++ scalastyleSettings
 
   lazy val hbaseTestSettings: SettingsDefinition = {
     //enable resolution of transitive dependencies of jars containing tests
@@ -111,57 +120,4 @@ object Settings {
   lazy val notPublishSettings = Seq(skip in publish := true)
 
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
-
-  lazy val publishSettings = Seq(
-    pomExtra := <scm>
-      <connection>
-        scm:git:git://github.com/agile-lab-dev/darwin.git
-      </connection>
-      <url>
-        https://github.com/agile-lab-dev/darwin
-      </url>
-    </scm>
-      <developers>
-        <developer>
-          <id>amurgia</id>
-          <name>Antonio Murgia</name>
-          <email>antonio.murgia@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>lpirazzini</id>
-          <name>Lorenzo Pirazzini</name>
-          <email>lorenzo.pirazzini@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>rcoluccio</id>
-          <name>Roberto Coluccio</name>
-          <email>roberto.coluccio@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>alatella</id>
-          <name>Andrea Latella</name>
-          <email>andrea.latella@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>cventrella</id>
-          <name>Carlo Ventrella</name>
-          <email>carlo.ventrella@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>dicardi</id>
-          <name>Davide Icardi</name>
-          <email>davide.icardi@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>nbidotti</id>
-          <name>Nicolò Bidotti</name>
-          <email>nicolo.bidotti@agilelab.it</email>
-        </developer>
-        <developer>
-          <id>andrea-rockt</id>
-          <name>Andrea Fonti</name>
-          <email>andrea.fonti@agilelab.it</email>
-        </developer>
-      </developers>
-  )
 }
