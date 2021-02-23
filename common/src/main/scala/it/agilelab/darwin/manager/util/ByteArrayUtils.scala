@@ -51,6 +51,8 @@ private[darwin] object ByteArrayUtils {
           os.write((l >>> 40).asInstanceOf[Int])
           os.write((l >>> 48).asInstanceOf[Int])
           os.write((l >>> 56).asInstanceOf[Int])
+        case other: Any =>
+          throw new IllegalArgumentException("Unknown ByteOrder: " + other)
       }
     }
   }
@@ -80,6 +82,8 @@ private[darwin] object ByteArrayUtils {
           os.write((l >>> 8))
           os.write((l >>> 16))
           os.write((l >>> 24))
+        case other: Any =>
+          throw new IllegalArgumentException("Unknown ByteOrder: " + other)
       }
     }
   }

@@ -7,7 +7,7 @@ object ConfigurationKeys {
   val STRICT     = "strict"
   val PERMISSIVE = "permissive"
 
-  trait Mode
+  sealed trait Mode
 
   object Mode {
     def parse(string: String): Mode = {
