@@ -1,12 +1,12 @@
 package it.agilelab.darwin.manager
 
-import java.io.{ InputStream, OutputStream }
-import java.nio.{ ByteBuffer, ByteOrder }
-
 import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.common.{ Connector, Logging }
 import it.agilelab.darwin.manager.util.AvroSingleObjectEncodingUtils
 import org.apache.avro.Schema
+
+import java.io.{ InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
 
 /**
   * The main entry point of the Darwin library.
@@ -180,37 +180,45 @@ abstract class AvroSchemaManager(connector: Connector, endianness: ByteOrder) ex
   def reload(): AvroSchemaManager
 
   /**
-   * Extracts the schema ID from the avro single-object encoded byte array
-   *
-   * @param array avro single-object encoded byte array
-   * @return the schema ID extracted from the input data
-   */
+    * Extracts the schema ID from the avro single-object encoded byte array
+    *
+    * @param array avro single-object encoded byte array
+    * @return the schema ID extracted from the input data
+    */
   def extractId(array: Array[Byte]): Long = {
     connector.extractId(array, endianness)
   }
 
   /**
-   * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
-   * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
-   * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
-   * be consumed and returned in the Left part of the Either.
-   *
-   * @param inputStream avro single-object encoded input stream
-   * @return the schema ID extracted from the input data
-   */
+    * Extracts the schema ID from the avro single-object encoded at the head of this input stream.
+    * The input stream will have 10 bytes consumed if the first two bytes correspond to the single object encoded
+    * header, or zero bytes consumed if the InputStream supports marking; if it doesn't, the first bytes (up to 2) will
+    * be consumed and returned in the Left part of the Either.
+    *
+    * @param inputStream avro single-object encoded input stream
+    * @return the schema ID extracted from the input data
+    */
   def extractId(inputStream: InputStream): Either[Array[Byte], Long] = {
     connector.extractId(inputStream, endianness)
   }
 
   /**
-   * Extracts the schema ID from the avro single-object encoded ByteBuffer, the ByteBuffer position will be after the
-   * header when this method returns
-   *
-   * @param avroSingleObjectEncoded avro single-object encoded byte array
-   * @return the schema ID extracted from the input data
-   */
+    * Extracts the schema ID from the avro single-object encoded ByteBuffer, the ByteBuffer position will be after the
+    * header when this method returns
+    *
+    * @param avroSingleObjectEncoded avro single-object encoded byte array
+    * @return the schema ID extracted from the input data
+    */
   def extractId(avroSingleObjectEncoded: ByteBuffer): Long = {
     connector.extractId(avroSingleObjectEncoded, endianness)
+  }
+
+  /**
+    * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+    * This API might not be implemented by all connectors, which should return None
+    */
+  def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = {
+    connector.retrieveLatestSchema(identifier)
   }
 
 }

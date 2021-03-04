@@ -1,14 +1,15 @@
 package it.agilelab.darwin.connector.confluent
 
-import java.io.{ InputStream, OutputStream }
-import java.nio.{ ByteBuffer, ByteOrder }
-
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.client.{ SchemaMetadata, SchemaRegistryClient }
 import it.agilelab.darwin.common.Connector
 import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.manager.SchemaPayloadPair
 import it.agilelab.darwin.manager.exception.DarwinException
 import org.apache.avro.Schema
+
+import java.io.{ IOException, InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
 
 class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegistryClient) extends Connector {
 
@@ -263,5 +264,34 @@ class ConfluentConnector(options: ConfluentConnectorOptions, client: SchemaRegis
 
   override def extractId(avroSingleObjectEncoded: ByteBuffer, endianness: ByteOrder): Long = {
     ConfluentSingleObjectEncoding.extractId(avroSingleObjectEncoded, endianness)
+  }
+
+  override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = {
+    def safeGet(): Option[SchemaMetadata] = {
+      try {
+        Option(client.getLatestSchemaMetadata(identifier))
+      } catch {
+        // this is the mock connector case
+        case io: IOException         =>
+          if (io.getMessage == "No schema registered under subject!") {
+            None
+          } else {
+            throw io
+          }
+        // this is the *real* case tested with server 5.x
+        case re: RestClientException =>
+          if (re.getErrorCode == 40401) {
+            None
+          } else {
+            throw re
+          }
+      }
+    }
+
+    for {
+      metadata <- safeGet()
+      id        = metadata.getId.toLong
+      schema    = new Schema.Parser().parse(metadata.getSchema)
+    } yield (id, schema)
   }
 }

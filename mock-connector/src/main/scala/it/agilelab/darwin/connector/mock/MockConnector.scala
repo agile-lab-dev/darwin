@@ -105,4 +105,11 @@ class MockConnector(config: Config) extends Connector with Logging {
   override def tableExists(): Boolean = true
 
   override def tableCreationHint(): String = "No table needs to be created since mock connecto"
+
+  /**
+    * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+    * This API might not be implemented by all connectors, which should return None
+    */
+  override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] =
+    table.find(_._2.getFullName == identifier)
 }

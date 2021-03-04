@@ -86,12 +86,13 @@ abstract class CachedLazyApplicationSuite(val endianness: ByteOrder) extends Any
     var calls          = 0
     val manager        = new CachedLazyAvroSchemaManager(
       new Connector {
-        override def createTable(): Unit                        = ()
-        override def tableExists(): Boolean                     = true
-        override def tableCreationHint(): String                = ""
-        override def fullLoad(): Seq[(Long, Schema)]            = Seq.empty
-        override def insert(schemas: Seq[(Long, Schema)]): Unit = ()
-        override def findSchema(id: Long): Option[Schema]       = Some(oneFieldSchema)
+        override def createTable(): Unit                                              = ()
+        override def tableExists(): Boolean                                           = true
+        override def tableCreationHint(): String                                      = ""
+        override def fullLoad(): Seq[(Long, Schema)]                                  = Seq.empty
+        override def insert(schemas: Seq[(Long, Schema)]): Unit                       = ()
+        override def findSchema(id: Long): Option[Schema]                             = Some(oneFieldSchema)
+        override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = Some(1L -> oneFieldSchema)
       },
       endianness
     ) {

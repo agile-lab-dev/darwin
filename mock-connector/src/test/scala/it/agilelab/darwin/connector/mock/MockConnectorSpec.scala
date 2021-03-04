@@ -1,13 +1,13 @@
 package it.agilelab.darwin.connector.mock
 
-import java.nio.file.Paths
-import java.util
-
 import com.typesafe.config.ConfigFactory
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Type
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.nio.file.Paths
+import java.util
 
 class MockConnectorSpec extends AnyFlatSpec with Matchers {
 
@@ -80,6 +80,46 @@ class MockConnectorSpec extends AnyFlatSpec with Matchers {
         })
         .fullLoad()
     }
+  }
+
+  it should "return Some schema if asked for the latest schema" in {
+    val connector =
+      new MockConnectorCreator()
+        .create(ConfigFactory.parseMap {
+          new java.util.HashMap[String, Object] {
+            put(
+              ConfigurationKeys.FILES,
+              util.Arrays.asList(
+                p.resolve("MockClassAlone.avsc").toString,
+                p.resolve("MockClassParent.avsc").toString
+              )
+            )
+          }
+        })
+    val all       = connector.fullLoad()
+    connector.retrieveLatestSchema("it.agilelab.darwin.connector.mock.testclasses.MockClassAlone") shouldBe all.find(
+      _._2.getName == "MockClassAlone"
+    )
+
+  }
+
+  it should "return None schema if asked for the latest schema" in {
+    val connector =
+      new MockConnectorCreator()
+        .create(ConfigFactory.parseMap {
+          new java.util.HashMap[String, Object] {
+            put(
+              ConfigurationKeys.FILES,
+              util.Arrays.asList(
+                p.resolve("MockClassAlone.avsc").toString,
+                p.resolve("MockClassParent.avsc").toString
+              )
+            )
+          }
+        })
+    connector.fullLoad()
+    connector.retrieveLatestSchema("DoesNotExists") shouldBe None
+
   }
 
 }
