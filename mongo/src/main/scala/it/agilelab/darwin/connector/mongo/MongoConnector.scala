@@ -130,4 +130,10 @@ class MongoConnector(mongoClient: MongoClient, mongoConfig: BaseMongoConfig) ext
       } yield field._2.asString().getValue
     schemaValue.headOption.map(parser.parse)
   }
+
+  /**
+   * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+   * This API might not be implemented by all connectors, which should return None
+   */
+  override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = None
 }

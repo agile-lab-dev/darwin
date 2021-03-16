@@ -203,6 +203,12 @@ class PostgresConnector(config: Config) extends Connector with PostgresConnectio
        |$CREATE_TABLE_STMT
      """.stripMargin
   }
+
+  /**
+   * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+   * This API might not be implemented by all connectors, which should return None
+   */
+  override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = None
 }
 
 sealed abstract class Mode(val value: String)

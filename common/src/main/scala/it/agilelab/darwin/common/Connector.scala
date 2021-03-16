@@ -58,6 +58,12 @@ trait Connector extends Serializable {
   def findSchema(id: Long): Option[Schema]
 
   /**
+   * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+   * This API might not be implemented by all connectors, which should return None
+   */
+  def retrieveLatestSchema(identifier: String): Option[(Long, Schema)]
+
+  /**
     * Generate a fingerprint for a schema, the default implementation is SchemaNormalization.parsingFingerprint64
     *
     * @param schema the schema to fingerprint

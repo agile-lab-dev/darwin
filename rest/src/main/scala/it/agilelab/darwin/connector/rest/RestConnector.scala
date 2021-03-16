@@ -40,4 +40,10 @@ class RestConnector(options: RestConnectorOptions, config: Config) extends Conne
       Some(response.body)
     }
   }
+
+  /**
+   * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+   * This API might not be implemented by all connectors, which should return None
+   */
+  override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = None
 }

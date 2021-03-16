@@ -175,4 +175,10 @@ case class HBaseConnector(config: Config) extends Connector with Logging {
     log.debug(s"$schema loaded from HBase for id = $id")
     schema
   }
+
+  /**
+   * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
+   * This API might not be implemented by all connectors, which should return None
+   */
+  override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = None
 }

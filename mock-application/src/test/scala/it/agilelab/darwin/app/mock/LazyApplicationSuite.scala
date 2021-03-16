@@ -1,8 +1,5 @@
 package it.agilelab.darwin.app.mock
 
-import java.lang.reflect.Modifier
-import java.nio.ByteOrder
-
 import com.typesafe.config.{ Config, ConfigFactory }
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{ MyClass, MyNestedClass, NewClass, OneField }
@@ -14,6 +11,9 @@ import org.apache.avro.{ Schema, SchemaNormalization }
 import org.reflections.Reflections
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.lang.reflect.Modifier
+import java.nio.ByteOrder
 
 class BigEndianLazyApplicationSuite extends LazyApplicationSuite(ByteOrder.BIG_ENDIAN)
 
@@ -85,12 +85,13 @@ abstract class LazyApplicationSuite(endianness: ByteOrder) extends AnyFlatSpec w
     var calls          = 0
     val manager        = new LazyAvroSchemaManager(
       new Connector {
-        override def createTable(): Unit                        = ()
-        override def tableExists(): Boolean                     = true
-        override def tableCreationHint(): String                = ""
-        override def fullLoad(): Seq[(Long, Schema)]            = Seq.empty
-        override def insert(schemas: Seq[(Long, Schema)]): Unit = ()
-        override def findSchema(id: Long): Option[Schema]       = Some(oneFieldSchema)
+        override def createTable(): Unit                                              = ()
+        override def tableExists(): Boolean                                           = true
+        override def tableCreationHint(): String                                      = ""
+        override def fullLoad(): Seq[(Long, Schema)]                                  = Seq.empty
+        override def insert(schemas: Seq[(Long, Schema)]): Unit                       = ()
+        override def findSchema(id: Long): Option[Schema]                             = Some(oneFieldSchema)
+        override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = Some(1L -> oneFieldSchema)
       },
       endianness
     ) {

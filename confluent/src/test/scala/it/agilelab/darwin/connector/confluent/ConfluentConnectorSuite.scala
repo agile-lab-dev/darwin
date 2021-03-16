@@ -126,4 +126,18 @@ class ConfluentConnectorSuite extends AnyFlatSpec with BeforeAndAfterEach with O
     exception.getMessage should be("Schema does not contain the [x-darwin-subject] extension")
 
   }
+
+  it should "return None if fetching latest schema of non-existing subject" in {
+
+    val mockRegistryClient = new MockSchemaRegistryClient()
+
+    val maxCachedSchemas = 1000
+
+    val connector = new ConfluentConnector(
+      options = ConfluentConnectorOptions(List.empty, Collections.emptyMap(), maxCachedSchemas),
+      client = mockRegistryClient
+    )
+
+    connector.retrieveLatestSchema("pippo") shouldBe None
+  }
 }

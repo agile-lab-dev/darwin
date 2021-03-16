@@ -1,19 +1,19 @@
 package it.agilelab.darwin.app.mock
 
-import java.lang.reflect.Modifier
-import java.nio.ByteOrder
-
 import com.typesafe.config.{ Config, ConfigFactory }
 import it.agilelab.darwin.annotations.AvroSerde
 import it.agilelab.darwin.app.mock.classes.{ MyClass, MyNestedClass, NewClass, OneField }
+import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.common.{ Connector, ConnectorFactory, SchemaReader }
 import it.agilelab.darwin.manager.{ AvroSchemaManager, CachedEagerAvroSchemaManager }
-import org.apache.avro.{ Schema, SchemaNormalization }
 import org.apache.avro.reflect.ReflectData
+import org.apache.avro.{ Schema, SchemaNormalization }
 import org.reflections.Reflections
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import it.agilelab.darwin.common.compat._
+
+import java.lang.reflect.Modifier
+import java.nio.ByteOrder
 
 class BigEndianCachedEagerApplicationSuite extends CachedEagerApplicationSuite(ByteOrder.BIG_ENDIAN)
 
@@ -88,12 +88,13 @@ abstract class CachedEagerApplicationSuite(val endianness: ByteOrder) extends An
     var calls          = 0
     val manager        = new CachedEagerAvroSchemaManager(
       new Connector {
-        override def createTable(): Unit                        = ()
-        override def tableExists(): Boolean                     = true
-        override def tableCreationHint(): String                = ""
-        override def fullLoad(): Seq[(Long, Schema)]            = Seq.empty
-        override def insert(schemas: Seq[(Long, Schema)]): Unit = ()
-        override def findSchema(id: Long): Option[Schema]       = Some(oneFieldSchema)
+        override def createTable(): Unit                                              = ()
+        override def tableExists(): Boolean                                           = true
+        override def tableCreationHint(): String                                      = ""
+        override def fullLoad(): Seq[(Long, Schema)]                                  = Seq.empty
+        override def insert(schemas: Seq[(Long, Schema)]): Unit                       = ()
+        override def findSchema(id: Long): Option[Schema]                             = Some(oneFieldSchema)
+        override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] = Some(1L -> oneFieldSchema)
       },
       endianness
     ) {
@@ -104,5 +105,15 @@ abstract class CachedEagerApplicationSuite(val endianness: ByteOrder) extends An
     }
     manager.getSchema(3L) shouldNot be(null) // scalastyle:ignore
     calls shouldBe 0
+  }
+
+  it should "not find the latest schema" in {
+    manager.retrieveLatestSchema("asdf") shouldBe None
+  }
+
+  it should "find the latest schema" in {
+    manager.retrieveLatestSchema("it.agilelab.darwin.connector.mock.testclasses.MockClassParent") shouldBe Some(
+      mockClassParentFingerprint -> manager.getSchema(mockClassParentFingerprint).get
+    )
   }
 }
