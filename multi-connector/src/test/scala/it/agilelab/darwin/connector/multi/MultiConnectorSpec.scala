@@ -3,8 +3,8 @@ package it.agilelab.darwin.connector.multi
 import com.typesafe.config.ConfigFactory
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import it.agilelab.darwin.common.ConnectorFactory
-import it.agilelab.darwin.connector.confluent.{ConfluentConnector, ConfluentConnectorOptions}
-import it.agilelab.darwin.connector.mock.{ConfigurationKeys, MockConnector, MockConnectorCreator}
+import it.agilelab.darwin.connector.confluent.{ ConfluentConnector, ConfluentConnectorOptions }
+import it.agilelab.darwin.connector.mock.{ ConfigurationKeys, MockConnector, MockConnectorCreator }
 import it.agilelab.darwin.manager.LazyAvroSchemaManager
 import org.apache.avro.SchemaBuilder
 import org.scalatest.BeforeAndAfterAll
@@ -12,7 +12,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import java.nio.file.Paths
-import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.{ ByteBuffer, ByteOrder }
 import java.util
 import java.util.Collections
 
@@ -72,30 +72,32 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
   }
 
   it should "create with the creator" in {
-    val multiConnectorCreator = ConnectorFactory.creator("multi").get
-    val connector: MultiConnector = multiConnectorCreator.create(
-      ConfigFactory.parseString(
-        s"""
-           |  type = "eager"
-           |  connector = "multi"
-           |  registrator = "mock"
-           |  confluent-single-object-encoding: ["confluent"]
-           |  standard-single-object-encoding: ["mock"]
-           |  confluent {
-           |    endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]
-           |    max-cached-schemas: 1000
-           |  }
-           |  mock {
-           |    ${ConfigurationKeys.FILES} = [
-           |      ${p.resolve("DoesNotExists.avsc").toString},
-           |      ${p.resolve("MockClassAlone.avsc").toString},
-           |      ${p.resolve("MockClassParent.avsc").toString}
-           |    ]
-           |    ${ConfigurationKeys.MODE} = "permissive"
-           |  }
-           |""".stripMargin
+    val multiConnectorCreator     = ConnectorFactory.creator("multi").get
+    val connector: MultiConnector = multiConnectorCreator
+      .create(
+        ConfigFactory.parseString(
+          s"""
+             |  type = "eager"
+             |  connector = "multi"
+             |  registrator = "mock"
+             |  confluent-single-object-encoding: ["confluent"]
+             |  standard-single-object-encoding: ["mock"]
+             |  confluent {
+             |    endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]
+             |    max-cached-schemas: 1000
+             |  }
+             |  mock {
+             |    ${ConfigurationKeys.FILES} = [
+             |      ${p.resolve("DoesNotExists.avsc").toString},
+             |      ${p.resolve("MockClassAlone.avsc").toString},
+             |      ${p.resolve("MockClassParent.avsc").toString}
+             |    ]
+             |    ${ConfigurationKeys.MODE} = "permissive"
+             |  }
+             |""".stripMargin
+        )
       )
-    ).asInstanceOf[MultiConnector]
+      .asInstanceOf[MultiConnector]
     connector.registrator.isInstanceOf[ConfluentConnector]
     connector.confluentConnectors.head.isInstanceOf[ConfluentConnector]
     connector.singleObjectEncodingConnectors.head.isInstanceOf[MockConnector]

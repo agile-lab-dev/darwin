@@ -11,8 +11,8 @@ import java.util
 
 object AvroSingleObjectEncodingUtils {
   val V1_HEADER: Array[Byte] = Array[Byte](0xc3.toByte, 0x01.toByte)
-  private val ID_SIZE       = 8
-  private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
+  private val ID_SIZE        = 8
+  private val HEADER_LENGTH  = V1_HEADER.length + ID_SIZE
 
   private val schemaMap = DarwinConcurrentHashMap.empty[Schema, Long]
 

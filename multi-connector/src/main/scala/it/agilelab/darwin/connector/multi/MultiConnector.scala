@@ -1,6 +1,7 @@
 package it.agilelab.darwin.connector.multi
 
 import it.agilelab.darwin.common.Connector
+import it.agilelab.darwin.common.compat.RightBiasedEither
 import it.agilelab.darwin.manager.SchemaPayloadPair
 import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.{ AvroSingleObjectEncodingUtils, ConfluentSingleObjectEncoding }
@@ -14,6 +15,7 @@ class MultiConnector(
   val confluentConnectors: List[Connector],
   val singleObjectEncodingConnectors: List[Connector]
 ) extends Connector {
+
   override def createTable(): Unit = registrator.createTable()
 
   /**
@@ -237,23 +239,23 @@ class MultiConnector(
   ): Either[Array[Byte], Schema] = {
     ConfluentSingleObjectEncoding
       .extractId(inputStream, endianness)
-      .map(id => id -> (ConfluentSingleObjectEncoded: SingleObjectEncoded))
+      .rightMap(id => id -> (ConfluentSingleObjectEncoded: SingleObjectEncoded))
       .left
       .flatMap { readBytes =>
         if (readBytes.isEmpty) {
           AvroSingleObjectEncodingUtils
             .extractId(inputStream, endianness)
-            .map(_ -> AvroSingleObjectEncoded)
+            .rightMap(_ -> AvroSingleObjectEncoded)
         } else {
           AvroSingleObjectEncodingUtils
             .extractId(
               new SequenceInputStream(new ByteArrayInputStream(readBytes), inputStream),
               endianness
             )
-            .map(_ -> AvroSingleObjectEncoded)
+            .rightMap(_ -> AvroSingleObjectEncoded)
         }
       }
-      .flatMap { case (id, enc) => connectorInstance(enc).findSchema(id).toRight(Array.emptyByteArray) }
+      .rightFlatMap { case (id, enc) => connectorInstance(enc).findSchema(id).toRight(Array.emptyByteArray) }
   }
 
   /**
