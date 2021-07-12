@@ -4,7 +4,7 @@ import com.typesafe.config.Config
 import it.agilelab.darwin.common.{ Connector, ConnectorCreator, ConnectorFactory }
 import it.agilelab.darwin.manager.exception.DarwinException
 
-import scala.collection.JavaConverters._
+import it.agilelab.darwin.common.compat._
 
 object MultiConnectorCreator {
   val REGISTRATOR                      = "registrator"
@@ -23,7 +23,7 @@ class MultiConnectorCreator extends ConnectorCreator {
     conf
       .getConfig(path)
       .entrySet()
-      .asScala
+      .toScala()
       .map(_.getKey)
       .foldLeft(conf)((z, x) => z.withValue(x, conf.getValue(path + "." + x)))
   }
@@ -40,11 +40,11 @@ class MultiConnectorCreator extends ConnectorCreator {
     val confluentConnectorTypes =
       config
         .getStringList(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING)
-        .asScala
+        .toScala()
 
     val standardConnectorTypes = config
       .getStringList(MultiConnectorCreator.STANDARD_SINGLE_OBJECT_ENCODING)
-      .asScala
+      .toScala()
 
     new MultiConnector(
       ConnectorFactory

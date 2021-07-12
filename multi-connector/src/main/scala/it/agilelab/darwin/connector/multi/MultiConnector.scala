@@ -55,17 +55,24 @@ class MultiConnector(
     * @return an option that is empty if no schema was found for the ID or defined if a schema was found
     */
   override def findSchema(id: Long): Option[Schema] =
-    (confluentConnectors.iterator ++ singleObjectEncodingConnectors.iterator)
-      .flatMap(_.findSchema(id))
-      .toStream
-      .headOption
+    headOfIterator(
+      (confluentConnectors.iterator ++ singleObjectEncodingConnectors.iterator)
+        .flatMap(_.findSchema(id))
+    )
+
+  private def headOfIterator[A](it: Iterator[A]): Option[A] =
+    if (it.hasNext) {
+      Some(it.next())
+    } else {
+      None
+    }
 
   /**
     * Retrieves the latest schema for a given string identifier (not to be confused with the fingerprint id).
     * This API might not be implemented by all connectors, which should return None
     */
   override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] =
-    confluentConnectors.iterator.flatMap(_.retrieveLatestSchema(identifier)).toStream.headOption
+    headOfIterator(confluentConnectors.iterator.flatMap(_.retrieveLatestSchema(identifier)))
 
   /**
     * Generate a fingerprint for a schema, the default implementation is SchemaNormalization.parsingFingerprint64
