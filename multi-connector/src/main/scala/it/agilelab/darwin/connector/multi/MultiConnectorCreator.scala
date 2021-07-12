@@ -28,12 +28,6 @@ class MultiConnectorCreator extends ConnectorCreator {
       .foldLeft(conf)((z, x) => z.withValue(x, conf.getValue(path + "." + x)))
   }
 
-  /**
-    * This method should be overridden in each connector module returning its implementation.
-    *
-    * @param config configuration that will be used to create the correct implementation of [[Connector]]
-    * @return the specific instance of [[Connector]]
-    */
   override def create(config: Config): Connector = {
     val registratorName         =
       config.getString(MultiConnectorCreator.REGISTRATOR)
