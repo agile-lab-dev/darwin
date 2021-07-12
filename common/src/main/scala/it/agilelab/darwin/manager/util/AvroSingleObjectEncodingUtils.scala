@@ -1,16 +1,16 @@
 package it.agilelab.darwin.manager.util
 
-import java.io.{ InputStream, OutputStream }
-import java.nio.{ ByteBuffer, ByteOrder }
-import java.util
-
 import it.agilelab.darwin.common.DarwinConcurrentHashMap
 import it.agilelab.darwin.manager.exception.DarwinException
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
 import org.apache.avro.Schema
 
+import java.io.{ InputStream, OutputStream }
+import java.nio.{ ByteBuffer, ByteOrder }
+import java.util
+
 object AvroSingleObjectEncodingUtils {
-  private val V1_HEADER     = Array[Byte](0xc3.toByte, 0x01.toByte)
+  val V1_HEADER: Array[Byte] = Array[Byte](0xc3.toByte, 0x01.toByte)
   private val ID_SIZE       = 8
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
@@ -219,15 +219,19 @@ object AvroSingleObjectEncodingUtils {
         if (inputStream.markSupported()) {
           inputStream.reset()
           inputStream.mark(0)
+          Left(Array.emptyByteArray)
+        } else {
+          Left(buffer.slice(0, V1_HEADER.length))
         }
-        Left(buffer.slice(0, V1_HEADER.length))
       }
     } else {
       if (inputStream.markSupported()) {
         inputStream.reset()
         inputStream.mark(0)
+        Left(Array.emptyByteArray)
+      } else {
+        Left(buffer.slice(0, bytesReadMagicBytes))
       }
-      Left(buffer.slice(0, bytesReadMagicBytes))
     }
   }
 

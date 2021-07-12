@@ -1,19 +1,18 @@
-package it.agilelab.darwin.connector.confluent
+package it.agilelab.darwin.manager.util
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
-import java.nio.{ BufferUnderflowException, ByteBuffer, ByteOrder }
-import java.util
-
+import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.manager.util.ByteArrayUtils._
-import org.apache.avro.{ Schema, SchemaNormalization }
-import org.apache.avro.generic.{ GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord }
-import org.apache.avro.io.{ DecoderFactory, EncoderFactory }
+import org.apache.avro.generic.{GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord}
+import org.apache.avro.io.{DecoderFactory, EncoderFactory}
 import org.apache.avro.util.ByteBufferInputStream
-
-import scala.util.Random
+import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import it.agilelab.darwin.common.compat._
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.nio.{BufferUnderflowException, ByteBuffer, ByteOrder}
+import java.util
+import scala.util.Random
 
 abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) extends AnyFlatSpec with Matchers {
   val sizeOfBuffer = 200
