@@ -546,19 +546,19 @@ darwin {
     max-cached-schemas: 1000
   }
   hbase {
-	  isSecure: false
-		namespace: "DARWIN"
-		table: "REPOSITORY"
-		coreSite: "/etc/hadoop/conf/core-site.xml"
-		hbaseSite: "/etc/hadoop/conf/hbase-site.xml"
+    isSecure: false
+    namespace: "DARWIN"
+    table: "REPOSITORY"
+    coreSite: "/etc/hadoop/conf/core-site.xml"
+    hbaseSite: "/etc/hadoop/conf/hbase-site.xml"
   }
   mongo {
-	  username = "mongo"
-		password = "mongo"
-		host = ["localhost:12345"]
-		database = "test"
-		collection = "collection_test"
-		timeout = 5000
+    username = "mongo"
+    password = "mongo"
+    host = ["localhost:12345"]
+    database = "test"
+    collection = "collection_test"
+    timeout = 5000
   }
 }
 ```
