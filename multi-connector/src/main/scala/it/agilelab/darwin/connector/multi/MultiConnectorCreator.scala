@@ -1,10 +1,9 @@
 package it.agilelab.darwin.connector.multi
 
 import com.typesafe.config.Config
+import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.common.{ Connector, ConnectorCreator, ConnectorFactory }
 import it.agilelab.darwin.manager.exception.DarwinException
-
-import it.agilelab.darwin.common.compat._
 
 object MultiConnectorCreator {
   val REGISTRATOR                      = "registrator"
@@ -29,12 +28,14 @@ class MultiConnectorCreator extends ConnectorCreator {
   }
 
   override def create(config: Config): Connector = {
-    val registratorName         =
+    val registratorName        =
       config.getString(MultiConnectorCreator.REGISTRATOR)
-    val confluentConnectorTypes =
-      config
-        .getStringList(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING)
-        .toScala()
+    val confluentConnectorType =
+      if (config.hasPath(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING)) {
+        Some(config.getString(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING))
+      } else {
+        None
+      }
 
     val standardConnectorTypes = config
       .getStringList(MultiConnectorCreator.STANDARD_SINGLE_OBJECT_ENCODING)
@@ -45,12 +46,12 @@ class MultiConnectorCreator extends ConnectorCreator {
         .creator(registratorName)
         .map(creator => creator.create(mergeConf(config, registratorName)))
         .getOrElse(throw new DarwinException("No connector creator for name " + registratorName)),
-      confluentConnectorTypes.map { cName =>
+      confluentConnectorType.map { cName =>
         ConnectorFactory
           .creator(cName)
           .map(creator => creator.create(mergeConf(config, cName)))
           .getOrElse(throw new DarwinException("No connector creator for name " + cName))
-      }.toList,
+      },
       standardConnectorTypes.map { cName =>
         ConnectorFactory
           .creator(cName)

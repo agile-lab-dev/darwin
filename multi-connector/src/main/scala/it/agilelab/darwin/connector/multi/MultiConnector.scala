@@ -12,7 +12,7 @@ import java.nio.{ ByteBuffer, ByteOrder }
 
 class MultiConnector(
   val registrator: Connector,
-  val confluentConnectors: List[Connector],
+  val confluentConnectors: Option[Connector],
   val singleObjectEncodingConnectors: List[Connector]
 ) extends Connector {
 
@@ -36,7 +36,7 @@ class MultiConnector(
     * @return a sequence of all the pairs (ID, schema) found on the storage
     */
   override def fullLoad(): Seq[(Long, Schema)] =
-    confluentConnectors.flatMap(_.fullLoad()) ++ singleObjectEncodingConnectors.flatMap(_.fullLoad())
+    (confluentConnectors.toSeq.flatMap(_.fullLoad()) ++ singleObjectEncodingConnectors.flatMap(_.fullLoad())).distinct
 
   /**
     * Inserts all the schema passed as parameters in the storage.
@@ -162,7 +162,7 @@ class MultiConnector(
   private def connectorInstance(enc: SingleObjectEncoded) = {
     enc match {
       case ConfluentSingleObjectEncoded =>
-        confluentConnectors.headOption.getOrElse(
+        confluentConnectors.getOrElse(
           throw new DarwinException("Data is confluent encoded but no confluent connectors are configured")
         )
       case AvroSingleObjectEncoded      =>

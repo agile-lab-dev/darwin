@@ -45,7 +45,7 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
     })
     val multiC          = new MultiConnector(
       confluent,
-      List(confluent),
+      Some(confluent),
       List(mock)
     )
     val initiallyLoaded = multiC.fullLoad()
