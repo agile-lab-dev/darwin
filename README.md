@@ -539,7 +539,7 @@ darwin {
   type = "lazy"
   connector = "multi"
   registrator = "hbase"
-  confluent-single-object-encoding: ["confluent"]
+  confluent-single-object-encoding: "confluent"
   standard-single-object-encoding: ["hbase", "mongo"]
   confluent {
     endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]

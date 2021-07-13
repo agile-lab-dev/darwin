@@ -7,7 +7,7 @@ import sbt.Keys.baseDirectory
  * See project/Dependencies.scala for the dependencies definitions.
  * See project/Versions.scala for the versions definitions.
  */
-dynverVTagPrefix in ThisBuild := false
+ThisBuild / dynverVTagPrefix := false
 
 lazy val root             = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
