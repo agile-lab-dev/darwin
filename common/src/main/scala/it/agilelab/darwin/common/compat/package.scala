@@ -98,5 +98,12 @@ package object compat {
         case _        => self.asInstanceOf[Either[L, R1]]
       }
     }
+
+    def rightFlatMap[L1 >: L, R1](f: R => Either[L1, R1]): Either[L1, R1] = {
+      self match {
+        case Right(v) => f(v)
+        case _        => self.asInstanceOf[Either[L1, R1]]
+      }
+    }
   }
 }

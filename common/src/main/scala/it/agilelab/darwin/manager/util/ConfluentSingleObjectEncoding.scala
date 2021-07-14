@@ -1,17 +1,16 @@
-package it.agilelab.darwin.connector.confluent
+package it.agilelab.darwin.manager.util
+
+import it.agilelab.darwin.common.DarwinConcurrentHashMap
+import it.agilelab.darwin.manager.exception.DarwinException
+import it.agilelab.darwin.manager.util.ByteArrayUtils.EnrichedInt
+import org.apache.avro.Schema
 
 import java.io.{ InputStream, OutputStream }
 import java.nio.{ ByteBuffer, ByteOrder }
 import java.util
 
-import it.agilelab.darwin.common.DarwinConcurrentHashMap
-import it.agilelab.darwin.manager.exception.DarwinException
-import it.agilelab.darwin.manager.util.ByteArrayUtils
-import it.agilelab.darwin.manager.util.ByteArrayUtils.EnrichedInt
-import org.apache.avro.Schema
-
 object ConfluentSingleObjectEncoding {
-  private val V1_HEADER     = Array[Byte](0x00.toByte)
+  val V1_HEADER             = Array[Byte](0x00.toByte)
   private val ID_SIZE       = 4
   private val HEADER_LENGTH = V1_HEADER.length + ID_SIZE
 
@@ -222,15 +221,19 @@ object ConfluentSingleObjectEncoding {
         if (inputStream.markSupported()) {
           inputStream.reset()
           inputStream.mark(0)
+          Left(Array.emptyByteArray)
+        } else {
+          Left(buffer.slice(0, V1_HEADER.length))
         }
-        Left(buffer.slice(0, V1_HEADER.length))
       }
     } else {
       if (inputStream.markSupported()) {
         inputStream.reset()
         inputStream.mark(0)
+        Left(Array.emptyByteArray)
+      } else {
+        Left(buffer.slice(0, bytesReadMagicBytes))
       }
-      Left(buffer.slice(0, bytesReadMagicBytes))
     }
   }
 

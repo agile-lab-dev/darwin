@@ -7,7 +7,7 @@ import sbt.Keys.baseDirectory
  * See project/Dependencies.scala for the dependencies definitions.
  * See project/Versions.scala for the versions definitions.
  */
-dynverVTagPrefix in ThisBuild := false
+ThisBuild / dynverVTagPrefix := false
 
 lazy val root             = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
@@ -22,7 +22,8 @@ lazy val root             = Project("darwin", file("."))
     mockApplication,
     restConnector,
     mongoConnector,
-    confluentConnector
+    confluentConnector,
+    multiConnector
   )
 
 lazy val core = Project("darwin-core", file("core"))
@@ -113,3 +114,12 @@ lazy val sparkApplication = Project("darwin-spark-application", file("spark-appl
   .settings(libraryDependencies ++= Dependencies.spark_app)
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211))
   .settings(Settings.notPublishSettings)
+
+lazy val multiConnector = Project("darwin-multi-connector", file("multi-connector"))
+  .settings(Settings.commonSettings: _*)
+  .dependsOn(coreCommon)
+  .dependsOn(core)
+  .dependsOn(mockConnector % Test)
+  .dependsOn(confluentConnector % Test)
+  .settings(crossScalaVersions := Versions.crossScalaVersions)
+  .settings(libraryDependencies += Dependencies.scalatest)

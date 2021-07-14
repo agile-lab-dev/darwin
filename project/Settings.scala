@@ -68,7 +68,7 @@ object Settings {
     description := "Avro Schema Evolution made easy",
     javacOptions ++= javacOptionsVersion(scalaVersion.value),
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
-    scalacOptions.in(Compile, doc) ++= scalaDocOptionsVersion(scalaVersion.value),
+    Compile / doc / scalacOptions ++= scalaDocOptionsVersion(scalaVersion.value),
     useCoursier := false,
     developers := List(
       Developer("amurgia", "Antonio Murgia", "antonio.murgia@agilelab.it", url("https://github.com/tmnd1991")),
@@ -106,18 +106,18 @@ object Settings {
   lazy val hbaseTestSettings: SettingsDefinition = {
     //enable resolution of transitive dependencies of jars containing tests
     //needed to run tests over hbase minicluster
-    transitiveClassifiers in Test := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
+    Test / transitiveClassifiers := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
     libraryDependencies ++= Dependencies.hbaseTestDependencies
   }
 
   lazy val hbase2TestSettings: SettingsDefinition = {
     //enable resolution of transitive dependencies of jars containing tests
     //needed to run tests over hbase minicluster
-    transitiveClassifiers in Test := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
+    Test / transitiveClassifiers := Seq(Artifact.TestsClassifier, Artifact.SourceClassifier)
     libraryDependencies ++= Dependencies.hbase2TestDependencies
   }
 
-  lazy val notPublishSettings = Seq(skip in publish := true)
+  lazy val notPublishSettings = Seq(publish / skip := true)
 
   lazy val scalastyleSettings = Seq(scalastyleFailOnWarning := true)
 }
