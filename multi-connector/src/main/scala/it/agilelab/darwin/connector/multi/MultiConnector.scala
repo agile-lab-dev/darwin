@@ -11,22 +11,22 @@ import java.io.{ ByteArrayInputStream, InputStream, OutputStream, SequenceInputS
 import java.nio.{ ByteBuffer, ByteOrder }
 
 class MultiConnector(
-  private[multi] val registrator: Connector,
+  private[multi] val registrar: Connector,
   private[multi] val confluentConnector: Option[Connector],
   private[multi] val singleObjectEncodingConnectors: List[Connector]
 ) extends Connector {
 
-  override def createTable(): Unit = registrator.createTable()
+  override def createTable(): Unit = registrar.createTable()
 
   /**
     * Returns whether or not the configured table exists
     */
-  override def tableExists(): Boolean = registrator.tableExists()
+  override def tableExists(): Boolean = registrar.tableExists()
 
   /**
     * @return a message indicating the user what he/she should do to create the table him/herself
     */
-  override def tableCreationHint(): String = registrator.tableCreationHint()
+  override def tableCreationHint(): String = registrar.tableCreationHint()
 
   /**
     * Loads all schemas found on the storage.
@@ -46,7 +46,7 @@ class MultiConnector(
     *
     * @param schemas a sequence of pairs (ID, schema) Schema entities to insert in the storage.
     */
-  override def insert(schemas: Seq[(Long, Schema)]): Unit = registrator.insert(schemas)
+  override def insert(schemas: Seq[(Long, Schema)]): Unit = registrar.insert(schemas)
 
   /**
     * Retrieves a single schema using its ID from the storage.
@@ -80,7 +80,7 @@ class MultiConnector(
     * @param schema the schema to fingerprint
     * @return the schema id
     */
-  override def fingerprint(schema: Schema): Long = registrator.fingerprint(schema)
+  override def fingerprint(schema: Schema): Long = registrar.fingerprint(schema)
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header and returns the OutputStream
@@ -88,7 +88,7 @@ class MultiConnector(
     * @return the input OutputStream
     */
   override def writeHeaderToStream(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder): OutputStream =
-    registrator.writeHeaderToStream(byteStream, schemaId, endianness)
+    registrar.writeHeaderToStream(byteStream, schemaId, endianness)
 
   /**
     * Create an array that creates a Single-Object encoded byte array.
@@ -104,7 +104,7 @@ class MultiConnector(
     schema: Schema,
     endianness: ByteOrder,
     getId: Schema => Long
-  ): Array[Byte] = registrator.generateAvroSingleObjectEncoded(avroPayload, schema, endianness, getId)
+  ): Array[Byte] = registrar.generateAvroSingleObjectEncoded(avroPayload, schema, endianness, getId)
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header then the avroValue and returns the OutputStream
@@ -119,7 +119,7 @@ class MultiConnector(
     avroValue: Array[Byte],
     schemaId: Long,
     endianness: ByteOrder
-  ): OutputStream = registrator.generateAvroSingleObjectEncoded(byteStream, avroValue, schemaId, endianness)
+  ): OutputStream = registrar.generateAvroSingleObjectEncoded(byteStream, avroValue, schemaId, endianness)
 
   /**
     * Writes to the given OutputStream the Single Object Encoding header then calls the avroWriter function to
@@ -132,7 +132,7 @@ class MultiConnector(
     */
   override def generateAvroSingleObjectEncoded(byteStream: OutputStream, schemaId: Long, endianness: ByteOrder)(
     avroWriter: OutputStream => OutputStream
-  ): OutputStream = registrator.generateAvroSingleObjectEncoded(byteStream, schemaId, endianness)(avroWriter)
+  ): OutputStream = registrar.generateAvroSingleObjectEncoded(byteStream, schemaId, endianness)(avroWriter)
 
   sealed private trait SingleObjectEncoded
   private case object ConfluentSingleObjectEncoded extends SingleObjectEncoded

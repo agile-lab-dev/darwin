@@ -6,7 +6,7 @@ import it.agilelab.darwin.common.{ Connector, ConnectorCreator, ConnectorFactory
 import it.agilelab.darwin.manager.exception.DarwinException
 
 object MultiConnectorCreator {
-  val REGISTRATOR                      = "registrator"
+  val REGISTRATOR                      = "registrar"
   val CONFLUENT_SINGLE_OBJECT_ENCODING = "confluent-single-object-encoding"
   val STANDARD_SINGLE_OBJECT_ENCODING  = "standard-single-object-encoding"
 }
@@ -28,7 +28,7 @@ class MultiConnectorCreator extends ConnectorCreator {
   }
 
   override def create(config: Config): Connector = {
-    val registratorName        =
+    val registrarName        =
       config.getString(MultiConnectorCreator.REGISTRATOR)
     val confluentConnectorType =
       if (config.hasPath(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING)) {
@@ -43,9 +43,9 @@ class MultiConnectorCreator extends ConnectorCreator {
 
     new MultiConnector(
       ConnectorFactory
-        .creator(registratorName)
-        .map(creator => creator.create(mergeConf(config, registratorName)))
-        .getOrElse(throw new DarwinException("No connector creator for name " + registratorName)),
+        .creator(registrarName)
+        .map(creator => creator.create(mergeConf(config, registrarName)))
+        .getOrElse(throw new DarwinException("No connector creator for name " + registrarName)),
       confluentConnectorType.map { cName =>
         ConnectorFactory
           .creator(cName)

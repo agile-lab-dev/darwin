@@ -79,7 +79,7 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
           s"""
              |  type = "eager"
              |  connector = "multi"
-             |  registrator = "confluent"
+             |  registrar = "confluent"
              |  confluent-single-object-encoding: "confluent"
              |  standard-single-object-encoding: ["mock"]
              |  confluent {
@@ -98,7 +98,7 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
         )
       )
       .asInstanceOf[MultiConnector]
-    assert(connector.registrator.isInstanceOf[ConfluentConnector])
+    assert(connector.registrar.isInstanceOf[ConfluentConnector])
     assert(connector.confluentConnector.exists(_.isInstanceOf[ConfluentConnector]))
     assert(connector.singleObjectEncodingConnectors.forall(_.isInstanceOf[MockConnector]))
   }
@@ -111,7 +111,7 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
           s"""
              |  type = "eager"
              |  connector = "multi"
-             |  registrator = "mock"
+             |  registrar = "mock"
              |  standard-single-object-encoding: ["mock"]
              |  mock {
              |    ${ConfigurationKeys.FILES} = [
@@ -126,7 +126,7 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
       )
       .asInstanceOf[MultiConnector]
     connector.confluentConnector shouldBe empty
-    assert(connector.registrator.isInstanceOf[MockConnector])
+    assert(connector.registrar.isInstanceOf[MockConnector])
     assert(connector.singleObjectEncodingConnectors.forall(_.isInstanceOf[MockConnector]))
   }
 }
