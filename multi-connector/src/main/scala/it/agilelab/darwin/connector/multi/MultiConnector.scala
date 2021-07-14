@@ -11,9 +11,9 @@ import java.io.{ ByteArrayInputStream, InputStream, OutputStream, SequenceInputS
 import java.nio.{ ByteBuffer, ByteOrder }
 
 class MultiConnector(
-  val registrator: Connector,
-  val confluentConnectors: Option[Connector],
-  val singleObjectEncodingConnectors: List[Connector]
+  private[multi] val registrator: Connector,
+  private[multi] val confluentConnector: Option[Connector],
+  private[multi] val singleObjectEncodingConnectors: List[Connector]
 ) extends Connector {
 
   override def createTable(): Unit = registrator.createTable()
@@ -36,7 +36,7 @@ class MultiConnector(
     * @return a sequence of all the pairs (ID, schema) found on the storage
     */
   override def fullLoad(): Seq[(Long, Schema)] =
-    (confluentConnectors.toSeq.flatMap(_.fullLoad()) ++ singleObjectEncodingConnectors.flatMap(_.fullLoad())).distinct
+    (confluentConnector.toSeq.flatMap(_.fullLoad()) ++ singleObjectEncodingConnectors.flatMap(_.fullLoad())).distinct
 
   /**
     * Inserts all the schema passed as parameters in the storage.
@@ -56,7 +56,7 @@ class MultiConnector(
     */
   override def findSchema(id: Long): Option[Schema] =
     headOfIterator(
-      (confluentConnectors.iterator ++ singleObjectEncodingConnectors.iterator)
+      (confluentConnector.iterator ++ singleObjectEncodingConnectors.iterator)
         .flatMap(_.findSchema(id))
     )
 
@@ -72,7 +72,7 @@ class MultiConnector(
     * This API might not be implemented by all connectors, which should return None
     */
   override def retrieveLatestSchema(identifier: String): Option[(Long, Schema)] =
-    headOfIterator(confluentConnectors.iterator.flatMap(_.retrieveLatestSchema(identifier)))
+    headOfIterator(confluentConnector.iterator.flatMap(_.retrieveLatestSchema(identifier)))
 
   /**
     * Generate a fingerprint for a schema, the default implementation is SchemaNormalization.parsingFingerprint64
@@ -162,7 +162,7 @@ class MultiConnector(
   private def connectorInstance(enc: SingleObjectEncoded) = {
     enc match {
       case ConfluentSingleObjectEncoded =>
-        confluentConnectors.getOrElse(
+        confluentConnector.getOrElse(
           throw new DarwinException("Data is confluent encoded but no confluent connectors are configured")
         )
       case AvroSingleObjectEncoded      =>

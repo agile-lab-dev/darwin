@@ -71,7 +71,7 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
     }
   }
 
-  it should "create with the creator" in {
+  it should "be created with a confluent connector and a mock one" in {
     val multiConnectorCreator     = ConnectorFactory.creator("multi").get
     val connector: MultiConnector = multiConnectorCreator
       .create(
@@ -79,8 +79,8 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
           s"""
              |  type = "eager"
              |  connector = "multi"
-             |  registrator = "mock"
-             |  confluent-single-object-encoding: ["confluent"]
+             |  registrator = "confluent"
+             |  confluent-single-object-encoding: "confluent"
              |  standard-single-object-encoding: ["mock"]
              |  confluent {
              |    endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]
@@ -98,8 +98,35 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
         )
       )
       .asInstanceOf[MultiConnector]
-    connector.registrator.isInstanceOf[ConfluentConnector]
-    connector.confluentConnectors.head.isInstanceOf[ConfluentConnector]
-    connector.singleObjectEncodingConnectors.head.isInstanceOf[MockConnector]
+    assert(connector.registrator.isInstanceOf[ConfluentConnector])
+    assert(connector.confluentConnector.exists(_.isInstanceOf[ConfluentConnector]))
+    assert(connector.singleObjectEncodingConnectors.forall(_.isInstanceOf[MockConnector]))
+  }
+
+  it should "be created with only a mock connector" in {
+    val multiConnectorCreator     = ConnectorFactory.creator("multi").get
+    val connector: MultiConnector = multiConnectorCreator
+      .create(
+        ConfigFactory.parseString(
+          s"""
+             |  type = "eager"
+             |  connector = "multi"
+             |  registrator = "mock"
+             |  standard-single-object-encoding: ["mock"]
+             |  mock {
+             |    ${ConfigurationKeys.FILES} = [
+             |      ${p.resolve("DoesNotExists.avsc").toString},
+             |      ${p.resolve("MockClassAlone.avsc").toString},
+             |      ${p.resolve("MockClassParent.avsc").toString}
+             |    ]
+             |    ${ConfigurationKeys.MODE} = "permissive"
+             |  }
+             |""".stripMargin
+        )
+      )
+      .asInstanceOf[MultiConnector]
+    connector.confluentConnector shouldBe empty
+    assert(connector.registrator.isInstanceOf[MockConnector])
+    assert(connector.singleObjectEncodingConnectors.forall(_.isInstanceOf[MockConnector]))
   }
 }
