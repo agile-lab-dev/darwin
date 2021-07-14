@@ -62,7 +62,7 @@ abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) 
   }
 
   "extractId(InputStream)" should "return Left if the input stream has only one byte" in {
-    val stream = new ByteArrayInputStream(Array(Random.nextInt().toByte))
+    val stream = new ByteArrayInputStream(Array((Random.nextInt(2048) + 1).toByte)) // scalastyle:ignore
     val id     = ConfluentSingleObjectEncoding.extractId(stream, endianness)
     id.left.map(_.length == 0) should be(Left(true))
     stream.read() should not be (-1)
