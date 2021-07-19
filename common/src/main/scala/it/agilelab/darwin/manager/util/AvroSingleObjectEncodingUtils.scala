@@ -180,10 +180,13 @@ object AvroSingleObjectEncodingUtils {
       buf.getLong
     } else {
       val lastEndianness = buf.order()
-      buf.order(endianness)
-      val toRet          = buf.getLong
-      buf.order(lastEndianness)
-      toRet
+      try {
+        buf.order(endianness)
+        val toRet = buf.getLong
+        toRet
+      } finally {
+        buf.order(lastEndianness)
+      }
     }
   }
 

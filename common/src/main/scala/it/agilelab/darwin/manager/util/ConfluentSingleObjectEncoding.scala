@@ -182,10 +182,13 @@ object ConfluentSingleObjectEncoding {
       buf.getInt
     } else {
       val lastEndianness = buf.order()
-      buf.order(endianness)
-      val toRet          = buf.getInt()
-      buf.order(lastEndianness)
-      toRet
+      try {
+        buf.order(endianness)
+        val toRet = buf.getInt()
+        toRet
+      } finally {
+        buf.order(lastEndianness)
+      }
     }
   }
 
