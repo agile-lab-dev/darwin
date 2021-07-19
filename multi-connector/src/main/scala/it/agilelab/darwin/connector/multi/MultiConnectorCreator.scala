@@ -28,8 +28,9 @@ class MultiConnectorCreator extends ConnectorCreator {
   }
 
   override def create(config: Config): Connector = {
-    val registrarName        =
+    val registrarName =
       config.getString(MultiConnectorCreator.REGISTRATOR)
+
     val confluentConnectorType =
       if (config.hasPath(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING)) {
         Some(config.getString(MultiConnectorCreator.CONFLUENT_SINGLE_OBJECT_ENCODING))
@@ -41,23 +42,39 @@ class MultiConnectorCreator extends ConnectorCreator {
       .getStringList(MultiConnectorCreator.STANDARD_SINGLE_OBJECT_ENCODING)
       .toScala()
 
-    new MultiConnector(
-      ConnectorFactory
-        .creator(registrarName)
-        .map(creator => creator.create(mergeConf(config, registrarName)))
-        .getOrElse(throw new DarwinException("No connector creator for name " + registrarName)),
+    val registrar = createAndMergeConfigs(config, registrarName)
+
+    val confluentConnector =
       confluentConnectorType.map { cName =>
-        ConnectorFactory
-          .creator(cName)
-          .map(creator => creator.create(mergeConf(config, cName)))
-          .getOrElse(throw new DarwinException("No connector creator for name " + cName))
-      },
-      standardConnectorTypes.map { cName =>
-        ConnectorFactory
-          .creator(cName)
-          .map(creator => creator.create(mergeConf(config, cName)))
-          .getOrElse(throw new DarwinException("No connector creator for name " + cName))
-      }.toList
+        createIfNotRegistrar(registrarName, registrar, cName, config)
+      }
+
+    val singleObjectConnectors = standardConnectorTypes.map { cName =>
+      createIfNotRegistrar(registrarName, registrar, cName, config)
+    }.toList
+
+    new MultiConnector(
+      registrar,
+      confluentConnector,
+      singleObjectConnectors
     )
+  }
+
+  private def createAndMergeConfigs(config: Config, registrarName: String) = {
+    ConnectorFactory
+      .creator(registrarName)
+      .map(creator => creator.create(mergeConf(config, registrarName)))
+      .getOrElse(throw new DarwinException("No connector creator for name " + registrarName))
+  }
+
+  private def createIfNotRegistrar(registrarName: String, registrar: Connector, cName: String, config: Config) = {
+    if (cName == registrarName) {
+      registrar
+    } else {
+      ConnectorFactory
+        .creator(cName)
+        .map(creator => creator.create(mergeConf(config, cName)))
+        .getOrElse(throw new DarwinException("No connector creator for name " + cName))
+    }
   }
 }
