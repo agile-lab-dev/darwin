@@ -563,8 +563,9 @@ darwin {
 }
 ```
 
-When extracting the schemaId, it will check if the single object encoding is "confluent" or "standard" way.
-Given that, it will go down the chain of confluent-single-object-encoding or standard-single-object-encoding **in order**.
+When extracting the schemaId, it will check if the single object encoding is "confluent" or "standard" way and extract the id.
+Given the id, it will go through the chain of connectors to find the schema: first confluent-single-object-encoding then
+standard-single-object-encoding **in order**.
 The first that matches, is the one that will be used.
 
 In order to initialize the single connectors, a configuration will be created merging the specific part

@@ -50,8 +50,8 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
   }
 
   it should "start with mock and confluent-mock connector" in {
-    val confluent = mockConfluentConnector
-    val mock      = mockConnector
+    val confluent = mockConfluentConnector()
+    val mock      = mockConnector()
     val multiC    = new MultiConnector(
       confluent,
       Some(confluent),
@@ -69,8 +69,8 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
   }
 
   it should "register a schema using the registrar" in {
-    val confluent = mockConfluentConnector
-    val mock      = mockConnector
+    val confluent = mockConfluentConnector()
+    val mock      = mockConnector()
     val multiC    = new MultiConnector(
       confluent,
       Some(confluent),
@@ -153,8 +153,8 @@ class MultiConnectorSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAl
   }
 
   it should "extract schema and payload from confluent encoded byte array" in {
-    val confluent      = mockConfluentConnector
-    val mock           = mockConnector
+    val confluent      = mockConfluentConnector()
+    val mock           = mockConnector()
     val multiC         = new MultiConnector(
       confluent,
       Some(confluent),
