@@ -6,6 +6,7 @@ import it.agilelab.darwin.common.Connector
 import it.agilelab.darwin.common.compat._
 import it.agilelab.darwin.manager.SchemaPayloadPair
 import it.agilelab.darwin.manager.exception.DarwinException
+import it.agilelab.darwin.manager.util.ConfluentSingleObjectEncoding
 import org.apache.avro.Schema
 
 import java.io.{ IOException, InputStream, OutputStream }

@@ -1,19 +1,18 @@
-package it.agilelab.darwin.connector.confluent
+package it.agilelab.darwin.manager.util
+
+import it.agilelab.darwin.common.compat._
+import it.agilelab.darwin.manager.util.ByteArrayUtils._
+import org.apache.avro.generic.{ GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord }
+import org.apache.avro.io.{ DecoderFactory, EncoderFactory }
+import org.apache.avro.util.ByteBufferInputStream
+import org.apache.avro.{ Schema, SchemaNormalization }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 import java.nio.{ BufferUnderflowException, ByteBuffer, ByteOrder }
 import java.util
-
-import it.agilelab.darwin.manager.util.ByteArrayUtils._
-import org.apache.avro.{ Schema, SchemaNormalization }
-import org.apache.avro.generic.{ GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord }
-import org.apache.avro.io.{ DecoderFactory, EncoderFactory }
-import org.apache.avro.util.ByteBufferInputStream
-
 import scala.util.Random
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import it.agilelab.darwin.common.compat._
 
 abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) extends AnyFlatSpec with Matchers {
   val sizeOfBuffer = 200
@@ -63,9 +62,9 @@ abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) 
   }
 
   "extractId(InputStream)" should "return Left if the input stream has only one byte" in {
-    val stream = new ByteArrayInputStream(Array(Random.nextInt().toByte))
+    val stream = new ByteArrayInputStream(Array((Random.nextInt(2048) + 1).toByte)) // scalastyle:ignore
     val id     = ConfluentSingleObjectEncoding.extractId(stream, endianness)
-    id.left.map(_.length == 1) should be(Left(true))
+    id.left.map(_.length == 0) should be(Left(true))
     stream.read() should not be (-1)
     stream.read() should be(-1)
   }
@@ -73,7 +72,7 @@ abstract class ConfluentAvroSingleObjectEncodingSpec(val endianness: ByteOrder) 
   "extractId(InputStream)" should "return Left if the input stream does not have the expected header" in {
     val stream = new ByteArrayInputStream(Array(0x01.toByte))
     val id     = ConfluentSingleObjectEncoding.extractId(stream, endianness)
-    id.left.map(_.sameElements(Array(0x01.toByte))) should be(Left(true))
+    id.left.map(_.length == 0) should be(Left(true))
     stream.read().toByte should be(0x01.toByte)
     stream.read() should be(-1)
   }

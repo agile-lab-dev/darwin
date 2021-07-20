@@ -46,7 +46,7 @@ In order to access to Darwin core functionalities add the core dependency to you
 #### sbt
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-core" % "1.2.1-SNAPSHOT"
-``` 
+```
 #### maven
 ```xml
 <dependency>
@@ -63,7 +63,7 @@ Then add the connector of your choice, either HBase:
 #### sbt
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-hbase-connector" % "1.2.1-SNAPSHOT"
-``` 
+```
 #### maven
 ```xml
 <dependency>
@@ -81,7 +81,7 @@ Or PostgreSql:
 
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-postgres-connector" % "1.2.1-SNAPSHOT"
-``` 
+```
 #### maven
 ```xml
 <dependency>
@@ -100,7 +100,7 @@ Or Rest
 
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-rest-connector" % "1.2.1-SNAPSHOT"
-``` 
+```
 #### maven
 ```xml
 <dependency>
@@ -122,7 +122,7 @@ Or Mock (only for test scenarios):
 
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-mock-connector" % "1.2.1-SNAPSHOT"
-``` 
+```
 #### maven
 ```xml
 <dependency>
@@ -141,7 +141,7 @@ Darwin can be used as a *facade* over confluent schema registry.
 
 ```scala
 libraryDependencies += "it.agilelab" %% "darwin-confluent-connector" % "1.2.1-SNAPSHOT"
-``` 
+```
 #### maven
 ```xml
 <dependency>
@@ -384,7 +384,6 @@ timeout = 5000
 ## REST
 
 The configuration keys managed by the `RestConnector` are:
-- 
 - **protocol**: http or https
 - **host**: the hostname where rest-server (or an http proxy) is deployed
 - **port**: the port where rest-server (or an http proxy) is listening
@@ -526,3 +525,50 @@ Here is an example of configuration:
 "resources": ["schemas/Apple.avsc", "schemas/Orange.avsc"]
 "mode": "permissive"
 ```
+
+----
+
+## Multi-Connector
+
+Multi-connector can connect to multiple connectors in a hierarchical order. It is useful when schemas are registered on different datastore (i.e. confluent + hbase).
+
+You configure it in the following way:
+
+```
+darwin {
+  type = "lazy"
+  connector = "multi"
+  registrar = "hbase"
+  confluent-single-object-encoding: "confluent"
+  standard-single-object-encoding: ["hbase", "mongo"]
+  confluent {
+    endpoints: ["http://schema-registry-00:7777", "http://schema-registry-01:7777"]
+    max-cached-schemas: 1000
+  }
+  hbase {
+    isSecure: false
+    namespace: "DARWIN"
+    table: "REPOSITORY"
+    coreSite: "/etc/hadoop/conf/core-site.xml"
+    hbaseSite: "/etc/hadoop/conf/hbase-site.xml"
+  }
+  mongo {
+    username = "mongo"
+    password = "mongo"
+    host = ["localhost:12345"]
+    database = "test"
+    collection = "collection_test"
+    timeout = 5000
+  }
+}
+```
+
+When extracting the schemaId, it will check if the single object encoding is "confluent" or "standard" way and extract the id.
+Given the id, it will go through the chain of connectors to find the schema: first confluent-single-object-encoding then
+standard-single-object-encoding **in order**.
+The first that matches, is the one that will be used.
+
+In order to initialize the single connectors, a configuration will be created merging the specific part
+(i.e. hbase/mongo/confluent) with the outer layer: in case of duplicated entries the more specific one will be used.
+
+Registration of the schema, will work with the connector set as registrar.

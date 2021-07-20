@@ -65,7 +65,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
   "extractId(InputStream)" should "return Left if the input stream has only one byte" in {
     val stream = new ByteArrayInputStream(Array(Random.nextInt().toByte))
     val id     = AvroSingleObjectEncodingUtils.extractId(stream, endianness)
-    id.left.map(_.length == 1) should be(Left(true))
+    id.left.map(_.length == 0) should be(Left(true))
     stream.read() should not be (-1)
     stream.read() should be(-1)
   }
@@ -73,7 +73,7 @@ abstract class AvroSingleObjectEncodingUtilsSpec(val endianness: ByteOrder) exte
   "extractId(InputStream)" should "return Left if the input stream does not have the expected header" in {
     val stream = new ByteArrayInputStream(Array(0xc3.toByte, 0x02.toByte))
     val id     = AvroSingleObjectEncodingUtils.extractId(stream, endianness)
-    id.left.map(_.sameElements(Array(0xc3.toByte, 0x02.toByte))) should be(Left(true))
+    id.left.map(_.length == 0) should be(Left(true))
     stream.read().toByte should be(0xc3.toByte)
     stream.read().toByte should be(0x02.toByte)
     stream.read() should be(-1)
