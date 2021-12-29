@@ -18,7 +18,7 @@ jobs:
           key: ${{ runner.os }}-sbt
       - uses: olafurpg/setup-scala@v13
         with:
-          java-version: zulu@
+          java-version: zulu@8
       - uses: olafurpg/setup-gpg@v3
       - run: ./make.sh
       - run: ./publish.sh
