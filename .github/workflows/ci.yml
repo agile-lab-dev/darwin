@@ -16,7 +16,9 @@ jobs:
             ~/.ivy2/cache
             ~/.sbt
           key: ${{ runner.os }}-sbt
-      - uses: olafurpg/setup-scala@v10
+      - uses: olafurpg/setup-scala@v13
+        with:
+          java-version: zulu@
       - uses: olafurpg/setup-gpg@v3
       - run: ./make.sh
       - run: ./publish.sh
