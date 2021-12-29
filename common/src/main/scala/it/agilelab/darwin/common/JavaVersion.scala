@@ -16,9 +16,13 @@ object JavaVersion {
   def parseJavaVersion(propertyValue: String): Int = {
     val splits = propertyValue.split("\\.")
     if (propertyValue.startsWith("1.")) {
-      splits(1).toInt
+      splits(1).takeWhile(isDigit).toInt
     } else {
-      splits(0).toInt
+      splits(0).takeWhile(isDigit).toInt
     }
+  }
+  private val digits = ('0' to '9').toSet
+  private def isDigit(c: Char): Boolean = {
+    digits.contains(c)
   }
 }
