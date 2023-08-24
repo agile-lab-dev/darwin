@@ -572,3 +572,16 @@ In order to initialize the single connectors, a configuration will be created me
 (i.e. hbase/mongo/confluent) with the outer layer: in case of duplicated entries the more specific one will be used.
 
 Registration of the schema, will work with the connector set as registrar.
+
+### Notes on Avro Single-Object Encoding Specification
+
+#### Canonical form ignores default fields
+
+As specified in the background section, Darwin leverages the Avro Single-Object Encoding specification to allow the schema fingerprint to be stored along the avro data.
+In order to create the fingerprint, the schema is converted into its [parsing-canonical form](https://avro.apache.org/docs/1.8.1/spec.html#Transforming+into+Parsing+Canonical+Form), which strips away all the fields that are not needed for reading/writing, such as doc, alias, comment. However, it will also remove the default field, allowing two schemas that are semantically different due to a default field to have the identical fingerprint.
+The default field is important for compatibility; it is useful to know this tip for debugging purposes in case of a broken compatibility on a subject.
+
+Sources:
+
+- [AVRO-2002](https://issues.apache.org/jira/browse/AVRO-2002)
+- [Adding or removing a default does not register a new schema version](https://github.com/salsify/avro-schema-registry/issues/38)
