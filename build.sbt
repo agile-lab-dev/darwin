@@ -9,7 +9,7 @@ import sbt.Keys.baseDirectory
  */
 ThisBuild / dynverVTagPrefix := false
 
-lazy val root             = Project("darwin", file("."))
+lazy val root = Project("darwin", file("."))
   .settings(Settings.commonSettings: _*)
   .settings(libraryDependencies ++= Dependencies.core_deps)
   .settings(Settings.notPublishSettings)
@@ -67,8 +67,7 @@ lazy val restConnector = Project("darwin-rest-connector", file("rest"))
   .settings(Settings.commonSettings: _*)
   .dependsOn(coreCommon)
   .settings(
-    libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest :+
-      Dependencies.httpClient
+    libraryDependencies ++= Dependencies.core_deps ++ Dependencies.wireMock :+ Dependencies.scalatest
   )
   .settings(crossScalaVersions := Seq(Versions.scala, Versions.scala_211, Versions.scala_213))
 
