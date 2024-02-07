@@ -29,8 +29,8 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import javax.net.ssl.HostnameVerifier
 import java.util.zip.{ GZIPInputStream, InflaterInputStream }
-import scala.collection.JavaConverters._
 import scala.util.matching.Regex
+import it.agilelab.darwin.common.compat._
 
 /** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
@@ -222,7 +222,7 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, IndexedSeq[S
   def contentType: Option[String] = header("Content-Type")
 
   /** Get the parsed cookies from the "Set-Cookie" header * */
-  def cookies: IndexedSeq[HttpCookie] = headerSeq("Set-Cookie").flatMap(HttpCookie.parse(_).asScala)
+  def cookies: IndexedSeq[HttpCookie] = headerSeq("Set-Cookie").flatMap(HttpCookie.parse(_).toScala())
 }
 
 /** Immutable builder for creating an http request
@@ -413,6 +413,8 @@ case class HttpRequest(
         } finally {
           closeStreams(conn)
         }
+      case other =>
+        throw new RuntimeException(s"Unsupported connection type ${other}")
     }
   }
 
@@ -485,15 +487,18 @@ case class HttpRequest(
     // according to javadoc, there can be a headerField value where the HeaderFieldKey is null
     // at the 0th row in some implementations.  In that case it's the http status line
     new TreeMap[String, IndexedSeq[String]]()(Ordering.by(_.toLowerCase)) ++ {
-      Stream
+      Iterator
         .from(0)
         .map(i => i -> conn.getHeaderField(i))
         .takeWhile(_._2 != null)
         .map { case (i, value) =>
           Option(conn.getHeaderFieldKey(i)).getOrElse("Status") -> value
         }
+        .toList
         .groupBy(_._1)
-        .mapValues(_.map(_._2).toIndexedSeq)
+        .map { case (k, v) =>
+          k -> v.map(_._2).toIndexedSeq
+        }
     }
   }
 

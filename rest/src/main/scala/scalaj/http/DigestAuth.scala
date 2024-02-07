@@ -21,7 +21,7 @@ object DigestAuth {
   // need to parse one char at a time rather than split on comma because values can be
   // quoted comma separated strings
   def splitParams(params: String): IndexedSeq[String] = {
-    var builder = new VectorBuilder[String]()
+    val builder = new VectorBuilder[String]()
     var start   = 0
     var i       = 0
     var quotes  = 0
@@ -65,7 +65,7 @@ object DigestAuth {
   val HexArray = "0123456789abcdef".toCharArray()
 
   def hex(bytes: Array[Byte]): String = {
-    var hexChars = new Array[Char](bytes.length * 2)
+    val hexChars = new Array[Char](bytes.length * 2)
     var j        = 0
     while (j < bytes.length) {
       val v = bytes(j) & 0xff
