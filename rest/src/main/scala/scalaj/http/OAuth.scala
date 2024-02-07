@@ -16,7 +16,7 @@ package scalaj.http
   *  limitations under the License.
   */
 
-import java.net.{ HttpURLConnection, URL }
+import java.net.URL
 
 case class Token(key: String, secret: String)
 
@@ -24,7 +24,6 @@ case class Token(key: String, secret: String)
 object OAuth {
   import java.net.URI
   import javax.crypto.Mac
-  import javax.crypto.SecretKey
   import javax.crypto.spec.SecretKeySpec
   val MAC = "HmacSHA1"
 

@@ -19,14 +19,7 @@ package scalaj.http
 import collection.immutable.TreeMap
 import java.lang.reflect.Field
 import java.net.{ HttpCookie, HttpURLConnection, InetSocketAddress, Proxy, URL, URLDecoder, URLEncoder }
-import java.io.{
-  BufferedReader,
-  ByteArrayInputStream,
-  ByteArrayOutputStream,
-  DataOutputStream,
-  InputStream,
-  InputStreamReader
-}
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, InputStream, InputStreamReader }
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -858,7 +851,7 @@ class BaseHttp(
   options: Seq[HttpOptions.HttpOption] = HttpConstants.defaultOptions,
   charset: String = HttpConstants.utf8,
   sendBufferSize: Int = 4096,
-  userAgent: String = s"scalaj-http/${BuildInfo.version}",
+  userAgent: String = s"scalaj-http",
   compress: Boolean = true
 ) {
 
