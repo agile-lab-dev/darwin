@@ -285,13 +285,13 @@ case class HttpRequest(
     cks.map(ck => ck.getName + "=" + ck.getValue).mkString("; ")
   )
 
-  /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
+  /** Entry point for modifying the {@code java.net.HttpURLConnection} before the request is executed */
   def options(o: Seq[HttpOptions.HttpOption]): HttpRequest = copy(options = o ++ options)
 
-  /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
+  /** Entry point for modifying the {@code java.net.HttpURLConnection} before the request is executed */
   def options(o: HttpOptions.HttpOption, rest: HttpOptions.HttpOption*): HttpRequest = options(o +: rest)
 
-  /** Entry point for modifying the [[java.net.HttpURLConnection]] before the request is executed */
+  /** Entry point for modifying the {@code java.net.HttpURLConnection} before the request is executed */
   def option(o: HttpOptions.HttpOption): HttpRequest = options(o)
 
   /** Add a standard basic authorization header */
@@ -413,7 +413,7 @@ case class HttpRequest(
         } finally {
           closeStreams(conn)
         }
-      case other =>
+      case other                   =>
         throw new RuntimeException(s"Unsupported connection type ${other}")
     }
   }
@@ -844,7 +844,7 @@ object Http extends BaseHttp
   *
   * @param proxyConfig http proxy; defaults to the Java default proxy (see http://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html).
   *              You can use [[scalaj.http.HttpConstants.proxy]] to specify an alternate proxy, or specify
-  *              [[java.net.Proxy.NO_PROXY]] to explicitly use not use a proxy.
+  *              {@code java.net.Proxy.NO_PROXY} to explicitly use not use a proxy.
   * @param options set things like timeouts, ssl handling, redirect following
   * @param charset charset to use for encoding request and decoding response
   * @param sendBufferSize buffer size for multipart posts
