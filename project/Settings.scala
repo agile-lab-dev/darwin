@@ -69,6 +69,7 @@ object Settings {
     javacOptions ++= javacOptionsVersion(scalaVersion.value),
     scalacOptions ++= scalacOptionsVersion(scalaVersion.value),
     Compile / doc / scalacOptions ++= scalaDocOptionsVersion(scalaVersion.value),
+    versionScheme := Some("early-semver"),
     useCoursier := false,
     developers := List(
       Developer("amurgia", "Antonio Murgia", "antonio.murgia@agilelab.it", url("https://github.com/tmnd1991")),
