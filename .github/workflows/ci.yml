@@ -17,8 +17,7 @@ jobs:
       - uses: coursier/setup-action@v1
         with:
           jvm: zulu:8.0.402
-      - uses: olafurpg/setup-gpg@v3
-      - run: ./make.sh && ./publish.sh
+      - run: ./publish.sh
         env:
           SBT_NATIVE_CLIENT: false
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
