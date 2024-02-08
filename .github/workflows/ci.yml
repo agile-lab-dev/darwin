@@ -6,23 +6,15 @@ jobs:
   ci:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Cache SBT
-        uses: actions/cache@v2
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1
         with:
-          path: |
-            ~/.cache/coursier/v1
-            ~/.ivy2/cache
-            ~/.sbt
-          key: ${{ runner.os }}-sbt
-      - uses: olafurpg/setup-scala@v14
-        with:
-          java-version: graalvm-ce-java8@21.1.0
+          jvm: zulu:8.0.402
       - uses: olafurpg/setup-gpg@v3
-      - run: ./make.sh
-      - run: ./publish.sh
+      - run: ./make.sh && ./publish.sh
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
