@@ -76,8 +76,6 @@ object Dependencies {
     "org.apache.kafka" % "kafka-clients"                % "2.2.2-cp3" % Provided
   )
 
-  lazy val httpClient = "org.scalaj" %% "scalaj-http" % "2.4.2"
-
   lazy val wireMock          =
     Seq("com.github.tomakehurst" % "wiremock-jre8" % "2.21.0" % Test, "xmlunit" % "xmlunit" % "1.6" % Test)
 
