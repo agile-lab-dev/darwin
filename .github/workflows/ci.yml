@@ -13,10 +13,11 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
+            ~/.cache/coursier/v1
             ~/.ivy2/cache
             ~/.sbt
           key: ${{ runner.os }}-sbt
-      - uses: olafurpg/setup-scala@v13
+      - uses: olafurpg/setup-scala@v14
         with:
           java-version: graalvm-ce-java8@21.1.0
       - uses: olafurpg/setup-gpg@v3
